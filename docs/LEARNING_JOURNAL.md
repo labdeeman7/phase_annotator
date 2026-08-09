@@ -77,3 +77,88 @@ Software engineering classifies tests into a hierarchy known as the **Testing Py
    * Tests the full user workflow through the GUI (e.g. clicking "Play", selecting Phase 2, clicking "Save").
 4. **Property-Based / Fuzz Testing**:
    * Generates thousands of random inputs to find edge-case crashes.
+
+---
+
+## 5. GUI & Video Architecture: PySide6 (Qt 6)
+
+### What is PySide6?
+Python's standard library only has `tkinter`, which lacks modern video rendering capabilities. **PySide6** is the official Python binding for **Qt 6** (a industry-standard C++ framework used by Adobe, Autodesk, and Tesla for desktop UIs).
+
+### PySide6 Multimedia Architecture (`QtMultimedia`)
+PySide6 splits video playback into 3 specialized components:
+
+```
+[ QMediaPlayer ]  ──────▶ Decodes video & tracks state (Play/Pause, Position ms)
+       │
+       ├───▶ [ QVideoWidget ]  ────▶ Paints video frames to the screen canvas
+       │
+       └───▶ [ QAudioOutput ]  ────▶ Routes audio streams to system speakers
+```
+
+1. **`QMediaPlayer`**: The engine/decoder state machine. Manages timeline position in milliseconds, playback state (`PlayingState`, `PausedState`), and seeking.
+2. **`QVideoWidget`**: The visual screen/canvas component.
+3. **`QAudioOutput`**: Audio handler.
+
+---
+
+## 6. Milestone 2 UI Design Highlights & Clever Tricks
+
+### A. Custom Qt Signals (Observer Pattern)
+In `VideoPlayerWidget`, we define custom signals:
+```python
+position_changed = Signal(int)
+```
+Instead of `MainWindow` digging into internal private attributes of `VideoPlayerWidget`, `VideoPlayerWidget` emits a signal whenever time changes. `MainWindow` listens to this signal. This is the **Observer Pattern**, keeping UI components decoupled.
+
+### B. Prevention of UI Slider Jitter
+In `MainWindow._on_position_changed()`:
+```python
+if not self._slider.isSliderDown():
+    self._slider.setValue(position_ms)
+```
+When a user is actively dragging a video scrubber with their mouse (`isSliderDown() == True`), the video playback position update is prevented from fighting the user's mouse drag. This prevents UI jitter!
+
+### C. Native System Icons (`QStyle.StandardPixmap`)
+In `MainWindow`:
+```python
+self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
+```
+Instead of bundling custom `.png` image assets, Qt provides access to the operating system's native play, pause, and open icons.
+
+### D. Headless GUI Testing with `pytest-qt` (`qtbot`)
+In `tests/unit/test_gui.py`:
+```python
+def test_main_window_instantiation(qtbot):
+    window = MainWindow()
+    qtbot.addWidget(window)
+```
+`qtbot` is a special pytest fixture that creates Qt widgets in memory and cleans them up automatically without popping up visible windows during automated testing.
+
+---
+
+## 7. Deep Dive: Qt Signals & Slots (Publisher / Subscriber)
+
+Qt event handling is built on two core concepts: **Signals** and **Slots**.
+
+```
+  [ Publisher / Broadcaster ]                       [ Subscriber / Receiver ]
+           SIGNAL                                             SLOT
+  (e.g., position_changed) ─────── .connect() ──────▶ (e.g., _on_position_changed)
+             │                                                  │
+             ▼                                                  ▼
+     Fires: .emit(5000)                               Executes: _on_position_changed(5000)
+```
+
+1. **Signal (Publisher)**:
+   * Has no body/implementation code.
+   * Shouts: *"Hey, an event just occurred!"* by calling `.emit(data)`.
+2. **Slot (Subscriber / Receiver)**:
+   * A standard Python function or method (e.g., `def _on_position_changed(self, position_ms: int):`).
+   * Receives the emitted data and executes the actual work.
+3. **Signal Forwarding**:
+   In `VideoPlayerWidget`:
+   ```python
+   self._player.positionChanged.connect(self.position_changed.emit)
+   ```
+   This catches internal C++ `QMediaPlayer` events and re-emits them on our custom `position_changed` signal. This hides internal player implementation details from `MainWindow`.

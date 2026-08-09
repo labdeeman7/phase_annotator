@@ -21,6 +21,13 @@ Default provisional laparoscopic appendectomy ontology:
 
 ## Setup & Development
 
+### Linux Prerequisites
+On Ubuntu/Debian Linux, Qt 6 requires `libxcb-cursor0`:
+```bash
+sudo apt update && sudo apt install -y libxcb-cursor0
+```
+
+### Installation
 ```bash
 # Create virtual environment
 python3 -m venv venv
@@ -38,5 +45,6 @@ pytest -v tests/
 * [Architecture](docs/ARCHITECTURE.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
+* [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)
 * [Task Backlog](docs/TASKS.md)
 * [Testing Contract](docs/TESTING.md)

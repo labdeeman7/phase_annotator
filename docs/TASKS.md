@@ -4,17 +4,17 @@
 
 - [x] **Milestone 0: Engineering Foundation** (Repo layout, workspace rules, documentation contracts, Git setup)
 - [x] **Milestone 1: Core Domain & Atomic Storage** (Phase ontology, session models, TDD validation, atomic JSON repo, integration suite)
+- [x] **Milestone 2: Video Playback & PySide6 Shell** (Time/frame utils, PySide6 MainWindow, QMediaPlayer wrapper, GUI pytest-qt suite)
 
-## Active Milestone: Milestone 2 — Video Playback & PySide6 Shell
+## Active Milestone: Milestone 3 — Phase Annotation UI & Interactive Timeline
 
-- [ ] PySide6 `MainWindow` shell
-- [ ] `PlayerWidget` using `QMediaPlayer` / `QVideoWidget`
-- [ ] Timecode-to-frame calculation helpers
-- [ ] Student Hands-on Exercise (M2)
+- [ ] Interactive Timeline QWidget
+- [ ] Keyboard hotkey shortcuts (1-6 for phases, Space, Left/Right)
+- [ ] Real-time interval creation & splitting
+- [ ] Student Hands-on Exercise (M3)
 
 ## Upcoming Milestones
 
-- [ ] Milestone 3: Interactive Phase Timeline & Labeling UX
 - [ ] Milestone 4: Autosave & Crash Recovery
 - [ ] Milestone 5: Research CSV Export
 - [ ] Milestone 6: Cross-Platform Windows Distribution

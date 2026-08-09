@@ -1,14 +1,18 @@
-# Rule 02: Learning & TDD Contract
+# Rule 02: Learning & Collaboration Contract
 
-## Pedagogy & TDD
+## User Collaboration Workflow
 
-1. **Test-Driven Development (TDD)**:
-   * Write failing unit tests first (`Red`).
-   * Write minimal implementation code to pass tests (`Green`).
-   * Refactor cleanly (`Refactor`).
-2. **Interactive Exercises**:
-   * Do NOT build everything while the user watches.
-   * For every major milestone, identify a modular function or test for the researcher to write personally.
-   * Review their implementation and provide constructive code review.
-3. **Git Explanations**:
-   * Explain non-trivial Git operations, branching choices, or rebase decisions briefly before or after executing.
+The user prefers an interactive, guided pair-programming workflow:
+
+1. **Agent Implements Core Increment**: Build modular, clean vertical slices for each milestone.
+2. **Code Inspection**: Allow the user time to read and inspect new files.
+3. **Targeted Hands-On Exercise**: Give the user a small, educational coding exercise per milestone to solidify concepts.
+4. **Architectural & Design Highlights**: Highlight non-obvious design decisions, Qt mechanisms, software patterns, and domain choices.
+5. **Learning Journal Persistence**: Document key takeaways in `docs/LEARNING_JOURNAL.md`.
+6. **Clean Milestone Commits**: Guide clean, atomic Git commits after user verification.
+
+## TDD Principles
+
+* Write failing unit tests first (`Red`).
+* Implement minimal code to pass (`Green`).
+* Refactor cleanly (`Refactor`).
