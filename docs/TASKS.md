@@ -1,18 +1,20 @@
 # Project Task Backlog & State Handover
 
-## Active Milestone: Milestone 0 — Engineering Foundation
+## Completed Milestones
 
-- [x] Initial repository folder structure
-- [x] Configuration files (`pyproject.toml`, `.gitignore`, `README.md`)
-- [x] Agent workspace rules (`.gemini/rules/`)
-- [x] Project documentation (`docs/ARCHITECTURE.md`, `docs/DECISIONS.md`, `docs/TESTING.md`)
-- [ ] Initialize Python `venv` & Git repository (User Hands-on Exercise)
+- [x] **Milestone 0: Engineering Foundation** (Repo layout, workspace rules, documentation contracts, Git setup)
+- [x] **Milestone 1: Core Domain & Atomic Storage** (Phase ontology, session models, TDD validation, atomic JSON repo, integration suite)
+
+## Active Milestone: Milestone 2 — Video Playback & PySide6 Shell
+
+- [ ] PySide6 `MainWindow` shell
+- [ ] `PlayerWidget` using `QMediaPlayer` / `QVideoWidget`
+- [ ] Timecode-to-frame calculation helpers
+- [ ] Student Hands-on Exercise (M2)
 
 ## Upcoming Milestones
 
-- [ ] Milestone 1: Domain Core & Atomic Storage (TDD First Vertical Slice)
-- [ ] Milestone 2: Video Playback & PySide6 Shell
-- [ ] Milestone 3: Phase Annotation UI & Interactive Timeline
+- [ ] Milestone 3: Interactive Phase Timeline & Labeling UX
 - [ ] Milestone 4: Autosave & Crash Recovery
 - [ ] Milestone 5: Research CSV Export
 - [ ] Milestone 6: Cross-Platform Windows Distribution

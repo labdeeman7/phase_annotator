@@ -37,5 +37,6 @@ pytest -v tests/
 
 * [Architecture](docs/ARCHITECTURE.md)
 * [Architecture Decisions](docs/DECISIONS.md)
+* [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Task Backlog](docs/TASKS.md)
 * [Testing Contract](docs/TESTING.md)
