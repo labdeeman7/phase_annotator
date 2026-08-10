@@ -162,3 +162,48 @@ Qt event handling is built on two core concepts: **Signals** and **Slots**.
    self._player.positionChanged.connect(self.position_changed.emit)
    ```
    This catches internal C++ `QMediaPlayer` events and re-emits them on our custom `position_changed` signal. This hides internal player implementation details from `MainWindow`.
+
+---
+
+## 8. Milestone 3 Architecture: LosslessCut-Style Segment Cards
+
+### A. Custom Canvas Painting (`TimelineWidget.paintEvent`)
+Instead of relying on standard buttons or sliders, `TimelineWidget` subclasses `QWidget` and overrides `paintEvent()`. Using Qt's `QPainter` API, it converts timestamp ratios ($\frac{\text{start\_ms}}{\text{duration\_ms}} \times \text{width}$) to draw color-coded rectangles representing each surgical phase in real-time.
+
+### B. Segment Card List (`SegmentCardWidget` & `IntervalTableWidget`)
+Inspired by **LosslessCut**, `IntervalTableWidget` uses `QListWidget` rendering custom `SegmentCardWidget` cards displaying:
+* Colored Phase Number Badge (`①`, `②`) matching `phase.color_hex`.
+* Bold Surgical Phase Name.
+* Monospace Timecode Range (`00:00:00.000  ➔  00:00:15.000`).
+* Duration (seconds), Milliseconds, and Frame Count.
+
+Clicking or double-clicking any segment card emits `seek_requested = Signal(int)`, instantly jumping video playback to that exact timestamp!
+
+### C. Resizable Splitter Layout (`QSplitter`)
+Using `QSplitter(Qt.Orientation.Horizontal)` allows annotators to dynamically drag and resize the boundary between the video player panel and the segment list panel to suit their monitor resolution.
+
+---
+
+## 9. Qt Key Enum Math Trick (`key - Qt.Key.Key_0`)
+
+In `MainWindow.keyPressEvent()`:
+```python
+if Qt.Key.Key_1 <= key <= Qt.Key.Key_6:
+    phase_id = key - Qt.Key.Key_0
+    self.record_phase_transition(phase_id)
+```
+
+### How Enum Subtraction Works:
+In C++ and Python Qt, key enum constants are sequential integers under the hood:
+* `Qt.Key.Key_0` = `48`
+* `Qt.Key.Key_1` = `49`
+* `Qt.Key.Key_2` = `50`
+* ...
+* `Qt.Key.Key_6` = `54`
+
+By subtracting `Qt.Key.Key_0` (48), we extract the exact integer `phase_id` mathematically:
+* `49 - 48 = 1` (Phase 1)
+* `51 - 48 = 3` (Phase 3)
+* `54 - 48 = 6` (Phase 6)
+
+This avoids writing 6 repetitive `if key == Qt.Key.Key_1: phase_id = 1` statements!
