@@ -207,3 +207,51 @@ By subtracting `Qt.Key.Key_0` (48), we extract the exact integer `phase_id` math
 * `54 - 48 = 6` (Phase 6)
 
 This avoids writing 6 repetitive `if key == Qt.Key.Key_1: phase_id = 1` statements!
+
+---
+
+## 10. C0: Transactional Annotation Editing
+
+An annotation edit can involve several related intervals. Mutating the existing interval first and validating later risks leaving the session half-changed if a later operation fails.
+
+`AnnotationEditor` instead follows a transactional pattern:
+
+1. Validate the current timeline and requested phase/timestamp.
+2. Build a candidate interval list without changing the session.
+3. Coalesce adjacent equal phase labels.
+4. Validate complete `[0, duration_ms)` coverage.
+5. Commit the candidate list and update the session timestamp only after every check succeeds.
+
+This is the same core idea used by database transactions: either the complete change succeeds, or the original state remains intact. Keeping this service in the pure-Python domain layer also lets boundary behavior be tested without starting Qt.
+
+---
+
+## 11. Encapsulation, Coupling, and Domain Services
+
+### Encapsulation and information hiding
+
+Encapsulation means an object protects its internal state and exposes intentional operations that preserve its rules. Merely replacing a public assignment with a trivial getter or setter does not add meaningful protection; a useful method should express behavior or enforce an invariant.
+
+For example, `session.replace_intervals(candidate)` would improve encapsulation only if it validated and committed the replacement safely, not if it simply assigned `self.intervals = candidate`.
+
+### Coupling is not automatically bad
+
+Objects must know about some other objects to collaborate. The goal is **loose, appropriate coupling**, not zero coupling. `AnnotationEditor` knowing about `AnnotationSession` and `AnnotationInterval` is appropriate because safely editing them is its domain responsibility. It should not know about Qt buttons, media-player internals, JSON paths, or timeline painting.
+
+### Domain service versus presenter
+
+`AnnotationEditor` is a domain service: it contains pure annotation rules such as splitting, coalescing, and validating intervals. A presenter/controller coordinates application components: it receives a mouse or hotkey action, asks the player for its position, calls the editor, handles errors, and refreshes the timeline and segment list.
+
+```text
+Qt input -> Presenter/controller -> AnnotationEditor -> AnnotationSession
+                |
+                +----------------------> refresh UI views
+```
+
+`MainWindow` currently performs presenter work as well as view construction. The planned architecture gradually removes domain mutation from it.
+
+### Law of Demeter
+
+The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public method such as `player_widget.position_ms()` lets callers depend on the wrapper's contract instead.
+
+Directly assigning `session.intervals` is a conscious tradeoff in the current dataclass/domain-service design. A richer domain model could instead make the session validate and commit replacements, while another approach could have the editor return a new state without mutating the session. We should choose that boundary deliberately as undo/redo and persistence are developed.

@@ -8,9 +8,6 @@ def validate_no_overlaps(intervals: List[AnnotationInterval]) -> List[str]:
     
     Returns a list of human-readable error messages for any detected overlaps.
     """
-    # TODO (Student Exercise): Implement overlap checking logic
-    # Tip: Sort intervals by start_ms, then check if interval[i].start_ms < interval[i-1].end_ms
-
     errors = []
     sorted_intervals = sorted(intervals, key=lambda x: x.start_ms)
     for i in range(1, len(sorted_intervals)):
@@ -22,5 +19,36 @@ def validate_no_overlaps(intervals: List[AnnotationInterval]) -> List[str]:
                 f"[{previous_interval.start_ms}ms–{previous_interval.end_ms}ms] and Phase {current_interval.phase_id} "
                 f"[{current_interval.start_ms}ms–{current_interval.end_ms}ms]."
             )
+
+    return errors
+
+
+def validate_contiguous_coverage(
+    intervals: List[AnnotationInterval], duration_ms: int
+) -> List[str]:
+    """Validates ordered, gap-free coverage of ``[0, duration_ms)``."""
+    if duration_ms <= 0:
+        return ["Video duration must be positive."]
+    if not intervals:
+        return ["At least one interval is required for full coverage."]
+
+    errors = []
+    if intervals[0].start_ms != 0:
+        errors.append("Coverage must start at 0ms.")
+
+    for previous, current in zip(intervals, intervals[1:]):
+        if current.start_ms < previous.start_ms:
+            errors.append("Intervals must be ordered by start time.")
+        if current.start_ms < previous.end_ms:
+            errors.append(
+                f"Intervals overlap at {current.start_ms}ms."
+            )
+        elif current.start_ms > previous.end_ms:
+            errors.append(
+                f"Coverage gap from {previous.end_ms}ms to {current.start_ms}ms."
+            )
+
+    if intervals[-1].end_ms != duration_ms:
+        errors.append(f"Coverage must end at video duration {duration_ms}ms.")
 
     return errors

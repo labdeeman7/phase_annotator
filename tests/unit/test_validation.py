@@ -1,6 +1,9 @@
 import pytest
 from phase_annotator.domain.models import AnnotationInterval
-from phase_annotator.domain.validation import validate_no_overlaps
+from phase_annotator.domain.validation import (
+    validate_contiguous_coverage,
+    validate_no_overlaps,
+)
 
 
 def test_validate_no_overlaps_with_valid_sequence():
@@ -21,3 +24,24 @@ def test_validate_no_overlaps_detects_overlap():
     errors = validate_no_overlaps(intervals)
     assert len(errors) == 1
     assert "overlap" in errors[0].lower()
+
+
+def test_validate_contiguous_coverage_accepts_a_full_partition():
+    intervals = [
+        AnnotationInterval(start_ms=0, end_ms=5000, phase_id=1),
+        AnnotationInterval(start_ms=5000, end_ms=10000, phase_id=2),
+    ]
+
+    assert validate_contiguous_coverage(intervals, duration_ms=10000) == []
+
+
+def test_validate_contiguous_coverage_reports_a_gap():
+    intervals = [
+        AnnotationInterval(start_ms=0, end_ms=4000, phase_id=1),
+        AnnotationInterval(start_ms=5000, end_ms=10000, phase_id=2),
+    ]
+
+    errors = validate_contiguous_coverage(intervals, duration_ms=10000)
+
+    assert len(errors) == 1
+    assert "gap" in errors[0].lower()

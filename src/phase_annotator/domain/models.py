@@ -16,7 +16,7 @@ class VideoInfo:
 
 @dataclass
 class AnnotationInterval:
-    """Represents a continuous temporal phase interval [start_ms, end_ms]."""
+    """Represents a continuous temporal phase interval [start_ms, end_ms)."""
 
     start_ms: int
     end_ms: int

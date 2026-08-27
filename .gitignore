@@ -38,3 +38,7 @@ htmlcov/
 # Project files
 *.session.json.tmp
 *.bak
+
+# Keep the local test-media directory in Git without committing its contents.
+test_dataset/*
+!test_dataset/.gitkeep

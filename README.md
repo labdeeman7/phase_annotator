@@ -28,6 +28,9 @@ sudo apt update && sudo apt install -y libxcb-cursor0
 ```
 
 ### Installation
+
+Linux/macOS:
+
 ```bash
 # Create virtual environment
 python3 -m venv venv
@@ -40,9 +43,31 @@ pip install -e ".[dev]"
 pytest -v tests/
 ```
 
+Windows PowerShell:
+
+```powershell
+py -3.10 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+$env:QT_QPA_PLATFORM = "offscreen"
+python -m pytest -v tests
+```
+
+The application entry point is:
+
+```bash
+python -m phase_annotator
+```
+
+This is currently an early prototype: playback and in-memory phase marking exist, but GUI-integrated save/recovery and CSV export are planned rather than implemented.
+
 ## Documentation
 
 * [Architecture](docs/ARCHITECTURE.md)
+* [Current State and Handover](docs/CURRENT_STATE.md)
+* [Project Roadmap](docs/ROADMAP.md)
+* [Annotation and Video Workflow](docs/ANNOTATION_WORKFLOW.md)
+* [Annotation Data Model](docs/DATA_MODEL.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)
