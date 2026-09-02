@@ -14,19 +14,28 @@ class AnnotationEditor:
 
     valid_phase_ids: frozenset[int]
     undefined_phase_id: int
+    initial_phase_id: int
 
-    def __init__(self, valid_phase_ids: Iterable[int], undefined_phase_id: int):
+    def __init__(
+        self,
+        valid_phase_ids: Iterable[int],
+        undefined_phase_id: int,
+        initial_phase_id: int,
+    ):
         phase_ids = frozenset(valid_phase_ids)
         if not phase_ids:
             raise ValueError("valid_phase_ids cannot be empty.")
         if undefined_phase_id not in phase_ids:
             raise ValueError("undefined_phase_id must be included in valid_phase_ids.")
+        if initial_phase_id not in phase_ids:
+            raise ValueError("initial_phase_id must be included in valid_phase_ids.")
 
         object.__setattr__(self, "valid_phase_ids", phase_ids)
         object.__setattr__(self, "undefined_phase_id", undefined_phase_id)
+        object.__setattr__(self, "initial_phase_id", initial_phase_id)
 
     def initialize_coverage(self, session: AnnotationSession) -> bool:
-        """Covers an empty session with one Undefined interval."""
+        """Covers an empty session with its configured initial phase."""
         duration_ms = session.video_info.duration_ms
         if duration_ms <= 0:
             raise ValueError("Video duration must be positive before coverage is initialized.")
@@ -37,7 +46,7 @@ class AnnotationEditor:
             AnnotationInterval(
                 start_ms=0,
                 end_ms=duration_ms,
-                phase_id=self.undefined_phase_id,
+                phase_id=self.initial_phase_id,
             )
         ]
         self._commit(session, candidate)

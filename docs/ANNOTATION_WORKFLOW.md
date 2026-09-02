@@ -4,21 +4,21 @@
 
 1. `python -m phase_annotator` creates `QApplication` and `MainWindow`.
 2. **Open Video** selects a local MP4/AVI/MKV/MOV file. `QMediaPlayer.setSource()` receives its local URL.
-3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, a hard-coded `surgeon_01` annotator, duration 0, and the player's default 30 FPS.
-4. Qt's duration signal updates the slider, timeline duration, and `VideoInfo.duration_ms`.
-5. Play/pause is available through the button or Space. Left/Right seek by `int(1000 / fps)` milliseconds. The slider and painted timeline seek in milliseconds.
-6. Keys `1`-`6` call `record_phase_transition()`. The prior interval's end becomes the current position and a new interval begins there, provisionally ending at media duration.
-7. Timeline blocks and segment cards are rebuilt from the session list. Clicking a card seeks to that interval's start.
+3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, a hard-coded `surgeon_01` annotator, duration 0, and the player's default 30 FPS. The status bar shows **Loading**.
+4. A positive Qt duration signal updates the slider/timeline/session, initializes one interval using the ontology's configured `initial_phase_id` (Phase 1 for appendectomy) over `[0, duration_ms)`, refreshes both annotation views, and changes status to **Loaded**.
+5. Play/pause is available through the state-aware Play/Pause button or Space. Left/Right seek by `int(1000 / fps)` milliseconds. The slider and painted timeline seek in milliseconds.
+6. The always-visible phase palette is built from the configured ontology. Clicking a phase or pressing its configured hotkey (including `U`) calls the same `record_phase_transition()` method, which delegates interval changes to the transactional `AnnotationEditor`. Annotation hotkeys are ignored while a text-entry control has focus.
+7. The palette highlights the phase under the playhead. The timeline and segment cards are rebuilt from the same validated session interval sequence. Backward transitions split only the containing segment and do not leave stale segment cards. Clicking a card seeks to that interval's start.
 
-There is currently no onscreen phase palette, selected-phase state, editing/deleting/notes UI, undo/redo, save/load, dirty-state indicator, error display, or export action.
+There is currently no selected-segment editing/deleting/notes UI, undo/redo, save/load, dirty-state indicator, persistent error display, or export action.
 
 ## Qt ownership and signal flow
 
-- `MainWindow` owns `VideoPlayerWidget`, `TimelineWidget`, and `SegmentListWidget`.
-- `VideoPlayerWidget` wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`, forwarding position and duration signals.
+- `MainWindow` owns `VideoPlayerWidget`, `TimelineWidget`, `PhasePaletteWidget`, and `SegmentListWidget`.
+- `VideoPlayerWidget` wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`, forwarding position, duration, and simplified playing/not-playing signals. It exposes public `position_ms`, `duration_ms`, and `is_playing` properties.
 - Player position updates the slider (unless it is being dragged), timeline playhead, and time label.
 - Timeline and segment-list `seek_requested(int)` signals connect directly to `VideoPlayerWidget.seek_ms()`.
-- `MainWindow` currently accesses the player's private `_player` for position and duration. Prefer a public wrapper or controller boundary when this behavior is revised.
+- `MainWindow` still performs presenter/controller coordination, but annotation mutation belongs to the pure-Python `AnnotationEditor`; it no longer reaches into the private Qt player for position or duration.
 
 ## Video accuracy limitations
 

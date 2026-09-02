@@ -42,6 +42,8 @@ class AnnotationSession:
 
     video_info: VideoInfo
     annotator_id: str
+    ontology_id: str = ""
+    ontology_version: str = ""
     intervals: List[AnnotationInterval] = field(default_factory=list)
     schema_version: str = "1.0"
     created_at: float = field(default_factory=time.time)

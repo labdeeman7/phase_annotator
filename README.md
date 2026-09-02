@@ -68,6 +68,7 @@ This is currently an early prototype: playback and in-memory phase marking exist
 * [Project Roadmap](docs/ROADMAP.md)
 * [Annotation and Video Workflow](docs/ANNOTATION_WORKFLOW.md)
 * [Annotation Data Model](docs/DATA_MODEL.md)
+* [Ontology Configuration](docs/ONTOLOGY_CONFIGURATION.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)

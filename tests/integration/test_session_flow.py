@@ -1,14 +1,14 @@
 from pathlib import Path
+from phase_annotator.config import load_default_ontology
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
-from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.validation import validate_no_overlaps
 from phase_annotator.storage.json_repo import JsonSessionRepository
 
 
 def test_full_session_lifecycle(tmp_path: Path):
     # 1. Load appendectomy ontology
-    ontology = PhaseOntology.default_appendectomy()
-    assert len(ontology.phases) == 6
+    ontology = load_default_ontology()
+    assert len(ontology.phases) == 7  # Undefined plus six surgical phases
 
     # 2. Create session for a video case
     video = VideoInfo(video_id="appendectomy_case_101.mp4", duration_ms=300000, fps=30.0)

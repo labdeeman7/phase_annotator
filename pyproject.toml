@@ -22,3 +22,6 @@ dev = [
 testpaths = ["tests"]
 pythonpath = ["src"]
 python_files = "test_*.py"
+
+[tool.setuptools.package-data]
+"phase_annotator.config" = ["*.json"]

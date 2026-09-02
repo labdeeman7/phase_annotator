@@ -10,6 +10,7 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 
 - `src/phase_annotator/__main__.py`: `python -m phase_annotator` entry point.
 - `src/phase_annotator/domain/`: pure-Python dataclasses, ontology, time conversion, and validation.
+- `src/phase_annotator/config/`: packaged JSON ontology resources and resource-loading adapter.
 - `src/phase_annotator/storage/`: JSON serialization and atomic replacement. It is not wired into the GUI yet.
 - `src/phase_annotator/ui/`: PySide6 main window, Qt Multimedia player, timeline, and segment cards.
 - `tests/unit/`, `tests/integration/`: domain/storage tests plus lightweight Qt widget tests.
@@ -56,3 +57,7 @@ Codex owns and completes the core implementation as the senior engineering partn
 Validate data at boundaries rather than trusting UI state. At minimum, future work should enforce known phase IDs, non-negative ordered timestamps, video-duration bounds, non-overlap, and an explicit gap policy before saving/exporting. Avoid mutating an existing valid interval until a proposed transition has been validated. Saving, autosaving, loading, crash recovery, and CSV export require tests covering round trips and failure behavior.
 
 Do not redesign the ontology or persisted schema casually. The six-phase ontology is provisional and phase 2 is optional; schema or ontology changes need a documented decision and migration/compatibility plan.
+
+Treat phase IDs, expected order, hotkeys, `initial_phase_id`, and `undefined_phase_id` as distinct configured concepts. See `docs/ONTOLOGY_CONFIGURATION.md`; do not reintroduce hard-coded phase metadata into UI handlers.
+
+Keep procedure/resource selection at the application composition root (`__main__.py` or a future startup/settings controller). Inject `PhaseOntology` into `MainWindow` and annotation views; reusable UI/domain components must not call appendectomy-specific loaders.

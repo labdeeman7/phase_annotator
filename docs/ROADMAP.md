@@ -51,18 +51,19 @@ These milestones are not considered production-ready. Known gaps are tracked in 
 
 Goal: make phase transitions a well-defined, testable domain/application operation before expanding the UI.
 
+Status: **Completed on 2026-09-02.**
+
 Accepted product rules:
 
 - `Undefined` is a real configured label selected by `U`.
 - The timeline has full coverage; gaps and overlaps are invalid.
 - Phase labels may repeat and appear out of nominal surgical order.
-- Delete converts a segment to Undefined.
-- Merge Left/Right explicitly absorbs it into a neighbor.
+- Delete asks whether to convert to Undefined, merge into the previous/next segment, or cancel.
 - Adjacent equal labels are automatically merged.
 
 Settled transition semantics:
 
-- Once duration is known, an empty session begins as one Undefined interval covering `[0, duration_ms)`.
+- Once duration is known, an empty session begins as one interval using the ontology's explicit `initial_phase_id` over `[0, duration_ms)`; the appendectomy default is Phase 1.
 - Selecting the phase already active at the playhead is a no-op.
 - Selecting a different phase inside a segment splits it at the playhead and relabels only the remainder of that segment; later established segments remain intact.
 - Selecting at an existing boundary relabels the segment beginning at that boundary.
@@ -72,8 +73,11 @@ Settled transition semantics:
 C0 implementation status:
 
 - The pure-Python transactional `AnnotationEditor` and contiguous-coverage validation are implemented and tested.
-- The editor is not wired to `MainWindow` yet.
-- Public player position/duration APIs and UI integration remain for the next C0 slice.
+- `MainWindow` delegates phase transitions to the editor and refreshes both annotation views from the resulting session state.
+- `VideoPlayerWidget` exposes public position, duration, and playback-state APIs/signals instead of requiring access to its private Qt player.
+- Positive media duration initializes one full-video interval using the ontology's configured initial phase (Phase 1 for the appendectomy default).
+- Play/Pause text and icons follow actual Qt playback state, and the status bar distinguishes Loading from Loaded.
+- A regression test covers backward correction and verifies that stale segment cards are not retained.
 
 Implementation:
 
@@ -82,7 +86,7 @@ Implementation:
 - Expose player position and duration through public APIs.
 - Add focused unit tests for boundary, same-time, backward, repeated, and end-of-video cases.
 
-Exit gate: transition semantics are documented; invalid commands leave the session unchanged; domain tests cover the agreed cases.
+Exit gate: **Passed.** Transition semantics are documented; invalid commands leave the session unchanged; domain and GUI integration tests cover the agreed cases.
 
 Learning focus: invariants, transactional state changes, and why UI event handlers should not own domain rules.
 
@@ -90,21 +94,26 @@ Learning focus: invariants, transactional state changes, and why UI event handle
 
 Goal: make appendectomy the default data-driven phase set rather than hard-coded UI behavior.
 
+Status: **Completed on 2026-09-02.**
+
 Implementation:
 
 - Define a versioned JSON configuration schema containing stable ID, display name, hotkey, color, optional flag, description, and ordering.
+- Include explicit ontology identity/version, expected display order, `initial_phase_id`, and `undefined_phase_id`; never infer these roles from numeric ordering.
 - Add the default appendectomy configuration as a packaged resource, including `Undefined` with hotkey `U`.
 - Validate duplicate IDs/hotkeys, missing labels, malformed colors, and unsupported schema versions with useful errors.
 - Keep a programmatic fallback only if it serves a deliberate recovery/testing purpose.
 - Record the configuration identity/version in each session so annotations remain interpretable later.
 
-Exit gate: valid configuration round trips into an ontology; invalid files fail clearly; the default configuration is covered by tests.
+Exit gate: **Passed.** Valid configuration constructs an ordered ontology; invalid files fail clearly; the packaged default and session ontology identity/version round trips are covered by tests.
 
 Learning focus: configuration versus code, schema validation, and stable identifiers.
 
 ### C2 — Visible mouse-and-keyboard phase palette
 
 Goal: make phase selection discoverable and equally usable by mouse or hotkey.
+
+Status: **Completed on 2026-09-02.**
 
 Implementation:
 
@@ -181,6 +190,7 @@ Implementation:
 - Implement Save, Save As, Open Session, `Ctrl+S`, recent path handling, and meaningful errors.
 - Prompt before replacing/closing dirty work.
 - Validate loaded schema, configuration identity, source-video identity, and intervals.
+- Persist draft/completed lifecycle metadata plus distinct resume and contiguous-review progress fields.
 - Decide backup and stale-temporary-file behavior; test write failures and round trips.
 
 Exit gate: save-close-reopen preserves all data; destructive navigation is guarded; simulated persistence failures do not corrupt the last valid session.
@@ -198,6 +208,7 @@ Implementation:
 - Startup/reopen prompt comparing recovery and saved timestamps.
 - Restore, discard, and stale-recovery cleanup paths.
 - Logging that contains no sensitive annotation content or patient identifiers.
+- Restore resume position without treating a forward seek as reviewed footage.
 
 Exit gate: forced termination loses at most the documented autosave interval; recovery choices are tested and understandable.
 
@@ -211,6 +222,8 @@ Implementation:
 
 - Add a validation summary for gaps, overlaps, unknown phases, invalid bounds, and incomplete coverage according to the annotation contract.
 - Distinguish draft save from completed/finalized session.
+- Require an explicit completion action, validate review progress, and summarize Undefined duration/segments for informed confirmation.
+- Confirm that editing a completed session reopens it as draft.
 - Define a deterministic CSV schema with video identity, annotator, phase identity/name, timestamps, and configuration/schema versions.
 - Ensure locale-independent ordering and formatting.
 - Add golden-file and JSON-to-CSV integration tests.
@@ -279,4 +292,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Finish C0 by exposing public player position/duration APIs and replacing `MainWindow`'s unsafe interval mutation with the tested `AnnotationEditor`. C1 and C2 then form the first visible feature increment: data-driven appendectomy phases, `U` for Undefined, and an always-visible clickable phase palette sharing behavior with hotkeys. C3 and C4 deliver the core correction workflow before persistence work begins.
+Begin C3 by adding an explicit selected-segment editing context and synchronized timeline/list navigation. C3 and C4 deliver the core correction workflow before persistence work begins.

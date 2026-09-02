@@ -19,10 +19,20 @@ JsonSessionRepository ────────── domain models (not connecte
 
 - `models.py`: `VideoInfo`, `AnnotationInterval`, and `AnnotationSession` dataclasses.
 - `ontology.py`: `Phase` and the code-defined provisional six-phase ontology.
-- `validation.py`: opt-in overlap detection only; it does not enforce gaps, bounds, or phase IDs.
+- `validation.py`: overlap detection and ordered, contiguous full-coverage validation. `AnnotationEditor` additionally enforces configured phase IDs and playhead bounds.
 - `time_utils.py`: constant-FPS timestamp/frame arithmetic and timecode formatting.
+- `annotation_editor.py`: transactional full-coverage initialization and phase-transition editing, including validation and adjacent-label coalescing.
 
 The domain package currently has no Qt or IO imports. Preserve that boundary.
+
+### Configuration (`src/phase_annotator/config/`)
+
+- `default_appendectomy.json`: versioned default ontology, expected order, hotkeys, colors, and explicit initial/Undefined roles.
+- `__init__.py`: generic packaged-resource/path JSON adapters that pass decoded data to the pure `PhaseOntology.from_config()` validator.
+
+`__main__.py` is the composition root: it selects the current default ontology and injects one instance into `MainWindow`, which passes that same instance to the annotation views and phase palette. UI components depend on `PhaseOntology`, not on appendectomy-specific loader names or resources.
+
+The `PhasePaletteWidget` renders the configured phase order, names, colors, hotkeys, and optional flags. It emits only a phase ID. `MainWindow` routes that signal and configured key presses through the same `record_phase_transition()` command, then derives the active palette selection from the interval under the playhead.
 
 ### Storage (`src/phase_annotator/storage/`)
 
@@ -32,7 +42,7 @@ There is no repository interface, GUI integration, CSV exporter, autosave, backu
 
 ### UI (`src/phase_annotator/ui/`)
 
-- `main_window.py`: constructs the window and controls, owns session state, connects signals, and performs phase-transition mutation.
+- `main_window.py`: constructs the window and controls, owns session state, connects signals, delegates phase-transition mutation to `AnnotationEditor`, and refreshes both annotation views.
 - `player_widget.py`: wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`.
 - `timeline_widget.py`: paints phase intervals and a playhead; mouse clicks emit seek timestamps.
 - `segment_list_widget.py`: active `QListWidget`-based custom segment cards.

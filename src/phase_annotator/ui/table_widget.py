@@ -1,10 +1,8 @@
 from typing import List, Optional
-from PySide6.QtCore import Signal, Qt
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QFrame
 )
-from PySide6.QtGui import QColor
-
 from phase_annotator.domain.models import AnnotationInterval
 from phase_annotator.domain.ontology import PhaseOntology, Phase
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
@@ -85,7 +83,7 @@ class IntervalTableWidget(QWidget):
     # Emitted when annotator clicks a segment card (carries start_ms)
     seek_requested = Signal(int)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, *, ontology: PhaseOntology):
         super().__init__(parent)
 
         layout = QVBoxLayout(self)
@@ -117,7 +115,7 @@ class IntervalTableWidget(QWidget):
         self._list_widget.itemDoubleClicked.connect(self._on_item_clicked)
         layout.addWidget(self._list_widget)
 
-        self._ontology = PhaseOntology.default_appendectomy()
+        self._ontology = ontology
         self._intervals: List[AnnotationInterval] = []
         self._fps: float = 30.0
 

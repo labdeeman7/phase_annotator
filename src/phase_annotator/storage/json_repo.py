@@ -45,6 +45,8 @@ class JsonSessionRepository:
         session = AnnotationSession(
             video_info=video_info,
             annotator_id=data["annotator_id"],
+            ontology_id=data.get("ontology_id", ""),
+            ontology_version=data.get("ontology_version", ""),
             intervals=intervals,
             schema_version=data.get("schema_version", "1.0"),
             created_at=data.get("created_at", 0.0),

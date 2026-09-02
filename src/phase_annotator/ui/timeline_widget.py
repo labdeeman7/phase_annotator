@@ -1,6 +1,6 @@
 from typing import List
-from PySide6.QtCore import Signal, Qt, QRect
-from PySide6.QtGui import QPainter, QColor, QPen, QBrush
+from PySide6.QtCore import Signal, Qt
+from PySide6.QtGui import QPainter, QColor, QPen
 from PySide6.QtWidgets import QWidget
 
 from phase_annotator.domain.models import AnnotationInterval
@@ -12,7 +12,12 @@ class TimelineWidget(QWidget):
 
     seek_requested = Signal(int)
 
-    def __init__(self, parent=None):
+    def __init__(
+        self,
+        parent=None,
+        *,
+        ontology: PhaseOntology,
+    ):
         super().__init__(parent)
         self.setFixedHeight(48)
         self.setMinimumWidth(300)
@@ -21,7 +26,7 @@ class TimelineWidget(QWidget):
         self._duration_ms: int = 0
         self._current_position_ms: int = 0
         self._intervals: List[AnnotationInterval] = []
-        self._ontology = PhaseOntology.default_appendectomy()
+        self._ontology = ontology
 
     def set_duration(self, duration_ms: int) -> None:
         self._duration_ms = max(0, duration_ms)

@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "ontology_id": "laparoscopic_appendectomy.default",
+  "ontology_version": "1.0",
+  "name": "Laparoscopic Appendectomy Ontology",
+  "initial_phase_id": 1,
+  "undefined_phase_id": 0,
+  "phases": [
+    {
+      "id": 1,
+      "name": "Identification of the appendix",
+      "hotkey": "1",
+      "color_hex": "#3B82F6",
+      "order": 1,
+      "is_optional": false,
+      "description": "Identification and initial assessment of the appendix."
+    },
+    {
+      "id": 2,
+      "name": "Dissection of adhesions of the appendix",
+      "hotkey": "2",
+      "color_hex": "#10B981",
+      "order": 2,
+      "is_optional": true,
+      "description": "Optional dissection of adhesions restricting the appendix."
+    },
+    {
+      "id": 3,
+      "name": "Coagulation/release of mesoappendix",
+      "hotkey": "3",
+      "color_hex": "#F59E0B",
+      "order": 3,
+      "is_optional": false,
+      "description": "Coagulation and release of the mesoappendix."
+    },
+    {
+      "id": 4,
+      "name": "Ligation of the base of the appendix",
+      "hotkey": "4",
+      "color_hex": "#EF4444",
+      "order": 4,
+      "is_optional": false,
+      "description": "Ligation or closure of the appendix base."
+    },
+    {
+      "id": 5,
+      "name": "Resection/cutting of the appendix",
+      "hotkey": "5",
+      "color_hex": "#8B5CF6",
+      "order": 5,
+      "is_optional": false,
+      "description": "Resection or cutting of the appendix."
+    },
+    {
+      "id": 6,
+      "name": "Retrieval of the appendix specimen",
+      "hotkey": "6",
+      "color_hex": "#EC4899",
+      "order": 6,
+      "is_optional": false,
+      "description": "Retrieval of the resected appendix specimen."
+    },
+    {
+      "id": 0,
+      "name": "Undefined",
+      "hotkey": "U",
+      "color_hex": "#6B7280",
+      "order": 7,
+      "is_optional": false,
+      "description": "No confident surgical phase label has been assigned."
+    }
+  ]
+}

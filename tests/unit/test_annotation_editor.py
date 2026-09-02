@@ -8,7 +8,11 @@ from phase_annotator.domain.models import AnnotationInterval, AnnotationSession,
 
 @pytest.fixture
 def editor() -> AnnotationEditor:
-    return AnnotationEditor(valid_phase_ids={0, 1, 2, 3}, undefined_phase_id=0)
+    return AnnotationEditor(
+        valid_phase_ids={0, 1, 2, 3},
+        undefined_phase_id=0,
+        initial_phase_id=1,
+    )
 
 
 def make_session(duration_ms: int = 10_000) -> AnnotationSession:
@@ -18,14 +22,14 @@ def make_session(duration_ms: int = 10_000) -> AnnotationSession:
     )
 
 
-def test_initialize_coverage_creates_one_undefined_interval(editor: AnnotationEditor):
+def test_initialize_coverage_uses_configured_initial_phase(editor: AnnotationEditor):
     session = make_session()
 
     changed = editor.initialize_coverage(session)
 
     assert changed is True
     assert session.intervals == [
-        AnnotationInterval(start_ms=0, end_ms=10_000, phase_id=0)
+        AnnotationInterval(start_ms=0, end_ms=10_000, phase_id=1)
     ]
 
 
@@ -45,12 +49,12 @@ def test_transition_splits_the_segment_at_the_playhead(editor: AnnotationEditor)
     session = make_session()
     editor.initialize_coverage(session)
 
-    changed = editor.apply_transition(session, phase_id=1, position_ms=2_000)
+    changed = editor.apply_transition(session, phase_id=2, position_ms=2_000)
 
     assert changed is True
     assert session.intervals == [
-        AnnotationInterval(start_ms=0, end_ms=2_000, phase_id=0),
-        AnnotationInterval(start_ms=2_000, end_ms=10_000, phase_id=1),
+        AnnotationInterval(start_ms=0, end_ms=2_000, phase_id=1),
+        AnnotationInterval(start_ms=2_000, end_ms=10_000, phase_id=2),
     ]
 
 

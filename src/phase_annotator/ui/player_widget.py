@@ -1,11 +1,9 @@
 from pathlib import Path
 from typing import Optional
-from PySide6.QtCore import Qt, Signal, QUrl
+from PySide6.QtCore import Signal, QUrl
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import QWidget, QVBoxLayout
-
-from phase_annotator.domain.time_utils import ms_to_frame, format_timecode
 
 
 class VideoPlayerWidget(QWidget):
@@ -14,6 +12,7 @@ class VideoPlayerWidget(QWidget):
     # Custom signals
     position_changed = Signal(int)  # Emits current position in ms
     duration_changed = Signal(int)  # Emits video duration in ms
+    playback_state_changed = Signal(bool)  # True while actively playing
 
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
@@ -35,6 +34,7 @@ class VideoPlayerWidget(QWidget):
         # Connect signals
         self._player.positionChanged.connect(self.position_changed.emit)
         self._player.durationChanged.connect(self.duration_changed.emit)
+        self._player.playbackStateChanged.connect(self._forward_playback_state)
 
     @property
     def fps(self) -> float:
@@ -44,6 +44,20 @@ class VideoPlayerWidget(QWidget):
     def fps(self, value: float) -> None:
         if value > 0:
             self._fps = value
+
+    @property
+    def position_ms(self) -> int:
+        """Current playback position without exposing the internal Qt player."""
+        return self._player.position()
+
+    @property
+    def duration_ms(self) -> int:
+        """Loaded media duration without exposing the internal Qt player."""
+        return self._player.duration()
+
+    @property
+    def is_playing(self) -> bool:
+        return self._player.playbackState() == QMediaPlayer.PlaybackState.PlayingState
 
     def load_video(self, video_path: Path) -> None:
         """Loads a video file into the media player."""
@@ -57,7 +71,7 @@ class VideoPlayerWidget(QWidget):
         self._player.pause()
 
     def toggle_play(self) -> None:
-        if self._player.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+        if self.is_playing:
             self.pause()
         else:
             self.play()
@@ -68,8 +82,14 @@ class VideoPlayerWidget(QWidget):
 
     def step_frames(self, frame_count: int) -> None:
         """Steps forward or backward by N frames based on current FPS setting."""
-        current_ms = self._player.position()
         ms_per_frame = 1000.0 / self._fps
-        target_ms = int(current_ms + (frame_count * ms_per_frame))
-        target_ms = max(0, min(self._player.duration(), target_ms))
+        target_ms = int(self.position_ms + (frame_count * ms_per_frame))
+        target_ms = max(0, min(self.duration_ms, target_ms))
         self.seek_ms(target_ms)
+
+    def _forward_playback_state(
+        self, state: QMediaPlayer.PlaybackState
+    ) -> None:
+        self.playback_state_changed.emit(
+            state == QMediaPlayer.PlaybackState.PlayingState
+        )
