@@ -32,7 +32,7 @@ The domain package currently has no Qt or IO imports. Preserve that boundary.
 
 `__main__.py` is the composition root: it selects the current default ontology and injects one instance into `MainWindow`, which passes that same instance to the annotation views and phase palette. UI components depend on `PhaseOntology`, not on appendectomy-specific loader names or resources.
 
-The `PhasePaletteWidget` renders the configured phase order, names, colors, hotkeys, and optional flags. It emits only a phase ID. `MainWindow` routes that signal and configured key presses through the same `record_phase_transition()` command, then derives the active palette selection from the interval under the playhead.
+The `PhasePaletteWidget` renders the configured phase order, names, colors, hotkeys, and optional flags. It emits only a phase ID. `MainWindow` routes that signal and configured window-scoped `QShortcut` objects through the same `record_phase_transition()` command, then derives the active palette selection from the interval under the playhead. Shortcut availability follows keyboard focus: text inputs and the segment list reserve their keys, while clicking the focusable timeline returns to annotation mode.
 
 ### Storage (`src/phase_annotator/storage/`)
 

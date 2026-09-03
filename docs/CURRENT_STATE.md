@@ -21,7 +21,7 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 - FPS remains the hard-coded 30.0 default unless code sets it manually. No media metadata is extracted. Frame stepping is millisecond seeking, not decoder-accurate frame navigation.
 - Only the video basename is stored as `video_id`; there is no path, hash, size, or other identity check for reconnecting sessions to source media.
 - JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, but does not fsync, clean stale temp files, lock concurrent writers, validate schema, or create the `.bak` backup claimed by historical rules.
-- GUI tests cover editor-backed forward/backward transitions, synchronized views, configured initial coverage, public player state, Play/Pause/Loading/Loaded feedback, mouse/hotkey equivalence, `U`, active-phase feedback, and text-entry focus protection. They do not yet cover correction tools, save/recovery, or a complete GUI workflow.
+- GUI tests cover editor-backed forward/backward transitions, synchronized views, configured initial coverage, public player state, Play/Pause/Loading/Loaded feedback, mouse/hotkey equivalence, `U`, active-phase feedback, and focus protection for text entry and the segment list. They also verify that clicking the timeline restores annotation shortcuts. They do not yet cover correction tools, save/recovery, or a complete GUI workflow.
 
 ## Planned but absent
 
@@ -54,7 +54,7 @@ The stated next milestone was M4: manual saving, periodic autosave, crash recove
 
 ## Validation baseline
 
-On 2026-09-02, the repository-local Python 3.11.5 environment passed all 51 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-03, the repository-local Python 3.11.5 environment passed all 53 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 

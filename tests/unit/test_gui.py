@@ -15,6 +15,13 @@ def make_window() -> MainWindow:
     return MainWindow(ontology=load_default_ontology())
 
 
+def show_window(qtbot, window: MainWindow) -> None:
+    window.show()
+    qtbot.waitExposed(window)
+    window.activateWindow()
+    qtbot.wait(10)
+
+
 def test_main_window_instantiation(qtbot):
     window = make_window()
     qtbot.addWidget(window)
@@ -129,10 +136,9 @@ def test_mouse_and_hotkey_phase_selection_use_same_command(qtbot, monkeypatch):
     )
 
     qtbot.mouseClick(mouse_window._phase_palette.button_for_phase(3), Qt.LeftButton)
-    keyboard_window.show()
-    keyboard_window.activateWindow()
-    keyboard_window.setFocus()
-    qtbot.keyClick(keyboard_window, Qt.Key_3)
+    show_window(qtbot, keyboard_window)
+    qtbot.mouseClick(keyboard_window._timeline_widget, Qt.LeftButton)
+    qtbot.keyClick(keyboard_window._timeline_widget, Qt.Key_3)
 
     assert mouse_window._session.intervals == keyboard_window._session.intervals
     assert mouse_window._session.intervals == [
@@ -156,8 +162,10 @@ def test_undefined_hotkey_uses_configured_mapping(qtbot, monkeypatch):
         "position_ms",
         property(lambda self: 2_500),
     )
+    show_window(qtbot, window)
+    qtbot.mouseClick(window._timeline_widget, Qt.LeftButton)
 
-    qtbot.keyClick(window, Qt.Key_U)
+    qtbot.keyClick(window._timeline_widget, Qt.Key_U)
 
     assert window._session.intervals == [
         AnnotationInterval(0, 2_500, 1),
@@ -175,6 +183,7 @@ def test_undefined_hotkey_uses_configured_mapping(qtbot, monkeypatch):
 def test_phase_hotkey_is_ignored_while_typing(qtbot, monkeypatch):
     window = make_window()
     qtbot.addWidget(window)
+    show_window(qtbot, window)
     window._session = AnnotationSession(
         video_info=VideoInfo("synthetic_case.mp4", duration_ms=0),
         annotator_id="annotator_01",
@@ -187,12 +196,70 @@ def test_phase_hotkey_is_ignored_while_typing(qtbot, monkeypatch):
     )
     text_entry = QLineEdit(window)
     text_entry.show()
-    text_entry.setFocus()
+    text_entry.setFocus(Qt.OtherFocusReason)
+    qtbot.waitUntil(text_entry.hasFocus)
 
     qtbot.keyClick(text_entry, Qt.Key_U)
 
     assert text_entry.text() == "u"
     assert window._session.intervals == [AnnotationInterval(0, 10_000, 1)]
+
+
+def test_phase_hotkey_is_reserved_while_segment_list_has_focus(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    show_window(qtbot, window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=0),
+        annotator_id="annotator_01",
+    )
+    window._on_duration_changed(10_000)
+    monkeypatch.setattr(
+        VideoPlayerWidget,
+        "position_ms",
+        property(lambda self: 4_000),
+    )
+    window.activateWindow()
+    window._segment_list_widget._list_widget.setCurrentRow(0)
+    window._segment_list_widget._list_widget.setFocus(Qt.OtherFocusReason)
+    qtbot.waitUntil(
+        lambda: window._segment_list_widget._list_widget.hasFocus()
+    )
+
+    qtbot.keyClick(window._segment_list_widget._list_widget, Qt.Key_3)
+
+    assert window._session.intervals == [AnnotationInterval(0, 10_000, 1)]
+
+
+def test_clicking_timeline_restores_annotation_hotkeys(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    show_window(qtbot, window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=0),
+        annotator_id="annotator_01",
+    )
+    window._on_duration_changed(10_000)
+    monkeypatch.setattr(
+        VideoPlayerWidget,
+        "position_ms",
+        property(lambda self: 4_000),
+    )
+    window.activateWindow()
+    window._segment_list_widget._list_widget.setCurrentRow(0)
+    window._segment_list_widget._list_widget.setFocus(Qt.OtherFocusReason)
+    qtbot.waitUntil(
+        lambda: window._segment_list_widget._list_widget.hasFocus()
+    )
+
+    qtbot.mouseClick(window._timeline_widget, Qt.LeftButton)
+    assert window._timeline_widget.hasFocus()
+    qtbot.keyClick(window._timeline_widget, Qt.Key_3)
+
+    assert window._session.intervals == [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 3),
+    ]
 
 
 def test_gui_transition_uses_editor_and_refreshes_both_views(qtbot, monkeypatch):

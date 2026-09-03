@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Optional
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
             self, ontology=self._ontology
         )
         self._phase_palette = PhasePaletteWidget(self, ontology=self._ontology)
+        self._phase_shortcuts = []
 
         # Central Splitter Layout (Left: Video + Controls + Timeline, Right: Segment List Cards)
         central_widget = QWidget(self)
@@ -118,6 +120,10 @@ class MainWindow(QMainWindow):
         self._timeline_widget.seek_requested.connect(self._player_widget.seek_ms)
         self._segment_list_widget.seek_requested.connect(self._player_widget.seek_ms)
         self._phase_palette.phase_selected.connect(self.record_phase_transition)
+        self._create_phase_shortcuts()
+        QApplication.instance().focusChanged.connect(
+            self._update_phase_shortcut_state
+        )
         self.statusBar().showMessage("No video loaded")
 
     def keyPressEvent(self, event) -> None:
@@ -128,14 +134,7 @@ class MainWindow(QMainWindow):
             super().keyPressEvent(event)
             return
 
-        hotkey = event.text().upper()
-        phase_by_hotkey = {
-            phase.hotkey.upper(): phase.id for phase in self._ontology.ordered_phases
-        }
-
-        if hotkey in phase_by_hotkey:
-            self.record_phase_transition(phase_by_hotkey[hotkey])
-        elif key == Qt.Key.Key_Space and self._btn_play.isEnabled():
+        if key == Qt.Key.Key_Space and self._btn_play.isEnabled():
             self._player_widget.toggle_play()
         elif key == Qt.Key.Key_Left:
             self._player_widget.step_frames(-1)
@@ -150,6 +149,32 @@ class MainWindow(QMainWindow):
         if isinstance(focused, (QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox)):
             return True
         return isinstance(focused, QComboBox) and focused.isEditable()
+
+    def _create_phase_shortcuts(self) -> None:
+        for phase in self._ontology.ordered_phases:
+            shortcut = QShortcut(QKeySequence(phase.hotkey), self)
+            shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
+            shortcut.setAutoRepeat(False)
+            shortcut.activated.connect(
+                lambda phase_id=phase.id: self.record_phase_transition(phase_id)
+            )
+            shortcut.setEnabled(False)
+            self._phase_shortcuts.append(shortcut)
+
+    def _update_phase_shortcut_state(self, *_) -> None:
+        focused = QApplication.focusWidget()
+        segment_list_has_focus = focused is not None and (
+            focused is self._segment_list_widget
+            or self._segment_list_widget.isAncestorOf(focused)
+        )
+        enabled = (
+            self._session is not None
+            and bool(self._session.intervals)
+            and not self._text_entry_has_focus()
+            and not segment_list_has_focus
+        )
+        for shortcut in self._phase_shortcuts:
+            shortcut.setEnabled(enabled)
 
     def record_phase_transition(self, phase_id: int) -> None:
         """Records a phase transition at the current video position timestamp."""
@@ -209,6 +234,7 @@ class MainWindow(QMainWindow):
         )
         self._phase_palette.set_annotation_enabled(False)
         self._phase_palette.set_active_phase(None)
+        self._update_phase_shortcut_state()
         self._refresh_annotation_views()
         self._on_playback_state_changed(False)
         self._btn_play.setEnabled(True)
@@ -233,6 +259,7 @@ class MainWindow(QMainWindow):
                 self._editor.initialize_coverage(self._session)
                 self._refresh_annotation_views()
             self._phase_palette.set_annotation_enabled(bool(self._session.intervals))
+            self._update_phase_shortcut_state()
             self._update_active_phase(self._player_widget.position_ms)
             if self._video_path:
                 self.statusBar().showMessage(f"Loaded: {self._video_path.name}")

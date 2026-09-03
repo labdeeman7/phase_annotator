@@ -256,6 +256,12 @@ A mouse button and a keyboard hotkey are two ways to express the same user inten
 
 The palette's checked button is derived from the interval under the playhead rather than treated as an independent source of truth. This prevents the palette, timeline, and session from disagreeing after a seek or edit.
 
+### Keyboard focus is an interaction context
+
+Qt sends ordinary key events to the widget that currently owns keyboard focus. A `QListWidget` may consume a phase key after the user selects a segment, so relying only on `MainWindow.keyPressEvent()` makes application hotkeys intermittent. Window-scoped `QShortcut` objects make configured annotation keys available across ordinary child widgets.
+
+Global availability is not always desirable. The application disables phase shortcuts while a text field or the segment list has focus: text must remain text, and list keys are reserved for explicit segment editing. The timeline accepts click focus, so clicking it deliberately restores the normal playhead-annotation context. This treats focus as meaningful UI state rather than forcing focus back to the main window after every action.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.

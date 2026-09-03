@@ -22,6 +22,7 @@ class TimelineWidget(QWidget):
         self.setFixedHeight(48)
         self.setMinimumWidth(300)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
 
         self._duration_ms: int = 0
         self._current_position_ms: int = 0
@@ -77,6 +78,7 @@ class TimelineWidget(QWidget):
 
     def mousePressEvent(self, event) -> None:
         if self._duration_ms > 0 and event.button() == Qt.MouseButton.LeftButton:
+            self.setFocus(Qt.FocusReason.MouseFocusReason)
             click_x = event.position().x()
             ratio = max(0.0, min(1.0, click_x / self.width()))
             target_ms = int(ratio * self._duration_ms)
