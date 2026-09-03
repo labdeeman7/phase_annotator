@@ -41,6 +41,8 @@ class PhasePaletteWidget(QWidget):
                 + (", optional phase" if phase.is_optional else "")
             )
             button.setStyleSheet(self._button_style(phase.color_hex))
+            # Bind the current ID now; closing over ``phase`` directly would
+            # make every button use the final phase after the loop completes.
             button.clicked.connect(
                 lambda checked=False, phase_id=phase.id: self.phase_selected.emit(
                     phase_id

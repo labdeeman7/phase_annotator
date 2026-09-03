@@ -155,6 +155,7 @@ class MainWindow(QMainWindow):
         return isinstance(focused, QComboBox) and focused.isEditable()
 
     def _create_phase_shortcuts(self) -> None:
+        """Create ontology-driven shortcuts that work across child widgets."""
         for phase in self._ontology.ordered_phases:
             shortcut = QShortcut(QKeySequence(phase.hotkey), self)
             shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
@@ -166,6 +167,7 @@ class MainWindow(QMainWindow):
             self._phase_shortcuts.append(shortcut)
 
     def _update_phase_shortcut_state(self, *_) -> None:
+        """Reserve phase keys while focus belongs to editing/list contexts."""
         focused = QApplication.focusWidget()
         segment_list_has_focus = focused is not None and (
             focused is self._segment_list_widget

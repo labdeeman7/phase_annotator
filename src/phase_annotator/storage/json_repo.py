@@ -18,16 +18,15 @@ class JsonSessionRepository:
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
         
-        # Convert session to dictionary
         data = asdict(session)
 
-        # Temporary file path in same directory for atomic rename
+        # Keep the temporary file beside the target: os.replace is only
+        # reliably atomic when both paths are on the same filesystem.
         tmp_filepath = filepath.with_name(f".{filepath.name}.tmp")
 
         with open(tmp_filepath, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
 
-        # Atomic replacement
         os.replace(tmp_filepath, filepath)
 
     def load(self, filepath: Path) -> AnnotationSession:

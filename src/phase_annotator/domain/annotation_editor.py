@@ -30,6 +30,8 @@ class AnnotationEditor:
         if initial_phase_id not in phase_ids:
             raise ValueError("initial_phase_id must be included in valid_phase_ids.")
 
+        # A frozen dataclass blocks normal assignment, including inside a custom
+        # __init__. object.__setattr__ is the supported one-time initialization.
         object.__setattr__(self, "valid_phase_ids", phase_ids)
         object.__setattr__(self, "undefined_phase_id", undefined_phase_id)
         object.__setattr__(self, "initial_phase_id", initial_phase_id)
@@ -90,6 +92,8 @@ class AnnotationEditor:
         if containing.phase_id == phase_id:
             return False
 
+        # Build and validate a replacement before touching the session, so an
+        # invalid edit leaves the previously valid annotation unchanged.
         candidate = list(session.intervals[:containing_index])
         if position_ms > containing.start_ms:
             candidate.append(
@@ -123,6 +127,7 @@ class AnnotationEditor:
         for interval in intervals:
             if coalesced and coalesced[-1].phase_id == interval.phase_id:
                 previous = coalesced[-1]
+                # Coalescing must not silently discard notes from either side.
                 notes = "\n".join(
                     note for note in (previous.notes, interval.notes) if note
                 )
@@ -152,5 +157,6 @@ class AnnotationEditor:
     def _commit(
         session: AnnotationSession, candidate: List[AnnotationInterval]
     ) -> None:
+        """Publish an already-validated candidate as one state change."""
         session.intervals = candidate
         session.updated_at = time.time()

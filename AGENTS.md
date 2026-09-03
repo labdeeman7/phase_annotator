@@ -2,7 +2,7 @@
 
 ## Purpose and current maturity
 
-This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype (milestones M0-M3), not yet a production annotation system: playback and in-memory annotation UI exist, while UI-integrated saving, recovery, export, and distribution do not.
+This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype currently progressing through Codex milestone C3, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, and synchronized segment navigation exist, while correction tools, UI-integrated saving, recovery, export, and distribution do not.
 
 Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
@@ -51,6 +51,14 @@ Before changing behavior:
 Keep changes small and explain non-obvious Qt signal flow or domain decisions. This is also a learning project: whenever the user learns or asks about an important reusable software-engineering concept, help capture the explanation concisely in `docs/LEARNING_JOURNAL.md`; do not wait only for milestone completion. Leave the code understandable for a developer to inspect, and avoid filling the journal with routine or project-specific trivia.
 
 Codex owns and completes the core implementation as the senior engineering partner. At each milestone, explain the design, give the user time to inspect it, and offer one small focused exercise that reinforces the concept without transferring responsibility for core delivery. Follow the milestone loop and quality gates in `docs/ROADMAP.md`.
+
+## Collaboration style
+
+Default to **learning mode** for architecture, annotation semantics, data integrity, and important UI behavior. Work in small vertical slices: agree on observable behavior, implement with tests, run full validation, give the user a focused manual check and short reading map, answer their questions, then commit/push after acceptance. Identify the one central concept and at most a few important functions; explicitly say which styling, boilerplate, or repetitive test code can be skimmed. Prefer teach-back on real project code over assigning artificial coding exercises.
+
+Use **delivery mode** when the user says the outcome matters more than studying the implementation. In that mode Codex may complete a broader coherent scope autonomously, but must still surface product decisions, data-integrity risks, validation evidence, and user-visible acceptance checks. Use deep review only when requested or when a high-risk design needs joint attention. Review effort should be risk-based: spend more time on domain mutations, validation, persistence, recovery, undo/redo, completion, and export than on layouts or mechanical code.
+
+Keep product semantics, architecture, and implementation questions distinct and resolve them in that order. Do not make a commit merely because tests pass: for user-visible slices, allow manual review first unless the user explicitly asks to commit immediately.
 
 ## Annotation-data expectations
 
