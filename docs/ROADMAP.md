@@ -131,6 +131,8 @@ Learning focus: Qt signals/slots and one-command/multiple-input design.
 
 Goal: enable realistic annotation, not only append-at-playhead transitions.
 
+Status: **In progress; C3.1 selection/navigation implemented on 2026-09-03.**
+
 Implementation:
 
 - Keep the phase palette visible above the segment list in the right sidebar.

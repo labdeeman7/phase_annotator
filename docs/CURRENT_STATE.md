@@ -1,10 +1,10 @@
 # Current State and Handover
 
-Last verified on 2026-09-02 against `main` at `ee06e96` plus the current C0-C2 worktree.
+Last verified on 2026-09-03 against `main` at `b4fbc8a` plus the current C3.1 worktree.
 
 ## What the application currently does
 
-The application starts a PySide6 desktop window, lets the user choose a local video, and delegates playback to Qt Multimedia. The user can play/pause with a state-aware button, seek with a slider or timeline, click a segment card to seek, and step by an approximate frame duration. The status bar reports Loading/Loaded state. An always-visible configured phase palette shows each color, name, hotkey, and optional status. Clicking a phase or pressing its configured hotkey, including `U`, records the same validated transition and refreshes the palette, colored timeline, and segment-card list.
+The application starts a PySide6 desktop window, lets the user choose a local video, and delegates playback to Qt Multimedia. The user can play/pause with a state-aware button, seek with a slider or timeline, click a segment card to select it and seek to its start, and step by an approximate frame duration. Timeline and list selection are synchronized. Selected segments use a cyan outline, while the independently playhead-active segment uses white; slider seeking preserves selection. The status bar reports Loading/Loaded state. An always-visible configured phase palette shows each color, name, hotkey, and optional status. Clicking a phase or pressing its configured hotkey, including `U`, records the same validated transition and refreshes the palette, colored timeline, and segment-card list.
 
 The pure-Python layer provides Undefined plus the six provisional appendectomy phases, session/video/interval dataclasses, millisecond/frame formatting helpers, coverage/overlap validation, and JSON round-trip persistence through a stateless repository.
 
@@ -54,8 +54,8 @@ The stated next milestone was M4: manual saving, periodic autosave, crash recove
 
 ## Validation baseline
 
-On 2026-09-03, the repository-local Python 3.11.5 environment passed all 53 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-03, the repository-local Python 3.11.5 environment passed all 56 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Begin C3: add an explicit selected-segment editing context and synchronize selection/navigation across the timeline and segment list before adding precise correction operations.
+Continue C3 with a selected-segment inspector and explicit correction commands. C3.1 selection/navigation is implemented and awaits manual acceptance.

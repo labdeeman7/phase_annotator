@@ -34,6 +34,8 @@ The domain package currently has no Qt or IO imports. Preserve that boundary.
 
 The `PhasePaletteWidget` renders the configured phase order, names, colors, hotkeys, and optional flags. It emits only a phase ID. `MainWindow` routes that signal and configured window-scoped `QShortcut` objects through the same `record_phase_transition()` command, then derives the active palette selection from the interval under the playhead. Shortcut availability follows keyboard focus: text inputs and the segment list reserve their keys, while clicking the focusable timeline returns to annotation mode.
 
+`MainWindow` also owns transient selected-segment state as an interval index and synchronizes it into `TimelineWidget` and `SegmentListWidget`. Playhead-active state is independently derived from session intervals and the current position. Because indexes can change meaning when an edit splits or coalesces intervals, playhead transitions clear selection rather than risking selection of the wrong segment.
+
 ### Storage (`src/phase_annotator/storage/`)
 
 - `json_repo.py`: direct dataclass-to-JSON serialization and loading. Save writes a same-directory temporary file and atomically replaces the destination.

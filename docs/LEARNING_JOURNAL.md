@@ -262,6 +262,18 @@ Qt sends ordinary key events to the widget that currently owns keyboard focus. A
 
 Global availability is not always desirable. The application disables phase shortcuts while a text field or the segment list has focus: text must remain text, and list keys are reserved for explicit segment editing. The timeline accepts click focus, so clicking it deliberately restores the normal playhead-annotation context. This treats focus as meaningful UI state rather than forcing focus back to the main window after every action.
 
+### Selected state is not active state
+
+The segment selected for editing and the segment beneath the video playhead answer different questions. `MainWindow` owns the transient selected interval index and sends it to both views; it separately derives the active interval from the current timestamp. This permits an annotator to select one segment and move the playhead for comparison or boundary work without silently changing the edit target.
+
+An interval index is safe only while the interval list keeps the same structure. Splitting or coalescing can make index 2 refer to a different segment, so current structural transitions clear selection. A later editing command can deliberately reselect the resulting segment once its outcome is defined.
+
+### Comments should explain why, not narrate what
+
+Useful comments preserve information that the code cannot express clearly by itself: an invariant, a design tradeoff, a framework quirk, or why an apparently unnecessary guard exists. For example, the selection bounds check is not merely “checking the index”; it protects future session-replacement paths from displaying an old index as a different segment.
+
+Comments such as `# increment count` above `count += 1` add no information. They make a file longer and can become false when code changes. Prefer clear names and small functions for explaining *what* code does, docstrings for a function's contract or role, and a short inline comment for a surprising *why*. Detailed architectural reasoning belongs in project documentation or a decision record rather than inside every call site.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.

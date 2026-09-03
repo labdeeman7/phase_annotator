@@ -46,6 +46,17 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 
 Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/redo. See `ROADMAP.md` for the complete C0-C10 sequence.
 
+## Active Codex milestone: C3 — Selection and precise correction
+
+- [x] C3.1: synchronize segment selection between timeline and segment list
+- [x] C3.1: distinguish selected (cyan) from playhead-active (white) segments
+- [x] C3.1: preserve selection during slider seeking and clear it after structural edits
+- [x] C3.1: remove the duplicate double-click seek connection
+- [ ] Add the selected-segment inspector and notes editing
+- [ ] Add explicit whole-segment relabeling
+- [ ] Add set-start/set-end-to-playhead correction commands
+- [ ] Add the Undefined/merge-left/merge-right/cancel removal flow
+
 ## Planned Milestone 4 — Session Saving, Loading, Autosave & Crash Recovery
 
 - [ ] Manual Save (`Ctrl+S`) session action to atomic JSON repository

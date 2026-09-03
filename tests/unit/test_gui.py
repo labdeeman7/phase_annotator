@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QLineEdit
 
 from phase_annotator.config import load_default_ontology
@@ -96,6 +96,89 @@ def test_segment_list_widget_population(qtbot):
     ]
     segment_list.set_intervals(intervals)
     assert segment_list._list_widget.count() == 2
+
+    selected = []
+    seeks = []
+    segment_list.segment_selected.connect(selected.append)
+    segment_list.seek_requested.connect(seeks.append)
+    segment_list._list_widget.itemClicked.emit(segment_list._list_widget.item(1))
+
+    assert selected == [1]
+    assert seeks == [5_000]
+
+
+def test_timeline_click_selects_interval_and_requests_seek(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    timeline.set_intervals(
+        [
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ]
+    )
+    selected = []
+    seeks = []
+    timeline.segment_selected.connect(selected.append)
+    timeline.seek_requested.connect(seeks.append)
+    timeline.show()
+
+    qtbot.mouseClick(timeline, Qt.LeftButton, pos=QPoint(750, 24))
+
+    assert selected == [1]
+    assert seeks == [7_500]
+
+
+def test_segment_selection_is_synchronized_across_views(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 3_000, 1),
+            AnnotationInterval(3_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+
+    window._segment_list_widget.segment_selected.emit(1)
+
+    assert window._selected_segment_index == 1
+    assert window._segment_list_widget.selected_index == 1
+    assert window._segment_list_widget._list_widget.currentRow() == 1
+    assert window._timeline_widget.selected_index == 1
+    assert window._segment_list_widget._cards[1]._is_selected
+
+
+def test_selected_and_playhead_active_segments_are_independent(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 3_000, 1),
+            AnnotationInterval(3_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    window._select_segment(0)
+
+    window._on_slider_moved(8_000)
+
+    assert window._selected_segment_index == 0
+    assert window._timeline_widget.selected_index == 0
+    assert window._timeline_widget.active_index == 2
+    assert window._segment_list_widget.selected_index == 0
+    assert window._segment_list_widget.active_index == 2
+    assert window._segment_list_widget._cards[0]._is_selected
+    assert window._segment_list_widget._cards[2]._is_active
 
 
 def test_duration_initializes_full_configured_phase_coverage(qtbot):
@@ -270,20 +353,25 @@ def test_gui_transition_uses_editor_and_refreshes_both_views(qtbot, monkeypatch)
         annotator_id="annotator_01",
     )
     window._on_duration_changed(10_000)
+    window._select_segment(0)
     monkeypatch.setattr(
         VideoPlayerWidget,
         "position_ms",
         property(lambda self: 4_000),
     )
 
-    window.record_phase_transition(phase_id=1)
+    window.record_phase_transition(phase_id=2)
 
     assert window._session.intervals == [
-        AnnotationInterval(0, 10_000, 1),
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2),
     ]
+    assert window._selected_segment_index is None
+    assert window._timeline_widget.selected_index is None
+    assert window._segment_list_widget.selected_index is None
     assert window._timeline_widget._intervals == window._session.intervals
     assert window._segment_list_widget._intervals == window._session.intervals
-    assert window._segment_list_widget._list_widget.count() == 1
+    assert window._segment_list_widget._list_widget.count() == 2
 
 
 def test_backward_gui_transition_replaces_stale_segment_cards(qtbot, monkeypatch):
