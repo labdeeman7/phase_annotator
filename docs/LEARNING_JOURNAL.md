@@ -304,6 +304,10 @@ C3.4 represents the boundary between adjacent intervals by the index of the inte
 
 The editor returns `False` for a no-op rather than treating it as an error. “The command was valid but changed nothing” is different from “the command was invalid”; callers can avoid unnecessary refreshes and present accurate feedback when that distinction matters.
 
+### Delete is a domain decision, not merely list removal
+
+C3.5 does not remove an interval from the list and leave a temporal hole. It asks how the interval's time should be represented: Undefined, absorbed left, or absorbed right. The UI disables impossible directions, while the domain independently rejects them so correctness does not depend on button state. Destructive-looking UI commands should be translated into explicit domain operations that preserve the aggregate's invariants.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.

@@ -48,6 +48,8 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 
 ## Active Codex milestone: C3 — Selection and precise correction
 
+**Status: completed and manually accepted on 2026-09-05.**
+
 - [x] C3.1: synchronize segment selection between timeline and segment list
 - [x] C3.1: distinguish selected (cyan) from playhead-active (white) segments
 - [x] C3.1: preserve selection during slider seeking and clear it after structural edits
@@ -55,7 +57,7 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C3.2: replace the unaccepted permanent inspector prototype with a segment context menu, visible **⋮** action, modal note editor, and compact note indicator
 - [x] C3.3: add explicit whole-segment relabeling
 - [x] C3.4: add set-start/set-end-to-playhead correction commands
-- [ ] C3.5: add the Undefined/merge-left/merge-right/cancel removal flow
+- [x] C3.5: add the Undefined/merge-left/merge-right/cancel removal flow
 
 ## Planned Milestone 4 — Session Saving, Loading, Autosave & Crash Recovery
 

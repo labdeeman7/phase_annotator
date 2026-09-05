@@ -12,8 +12,9 @@
 8. The annotator can right-click a segment or use its visible **⋮** button and choose **Edit note...**. A modal dialog owns the temporary draft; Save invokes `AnnotationEditor.update_notes()`, while Cancel leaves committed annotation data unchanged. A compact indicator identifies segments with notes.
 9. **Change phase** in the same menu relabels the complete selected interval, unlike palette/hotkey transitions at the playhead. Equal neighbouring phases coalesce, their notes are combined in order, and the resulting interval remains selected.
 10. **Set start to playhead** moves the boundary shared with the previous segment; **Set end to playhead** moves the boundary shared with the next segment. The unavailable external-video boundary action is disabled, and an invalid playhead position leaves both intervals unchanged.
+11. **Remove / merge** never creates an uncovered hole. Convert to Undefined relabels the selected interval; Merge left/right adopts the chosen neighbour's phase and coalesces. Edge directions are disabled, and closing the menu is Cancel.
 
-There is currently no deletion/merge UI, draggable boundary correction, undo/redo, save/load, session-level dirty-state indicator, prominent error notification, or export action. Whole-segment relabeling and button-based set-start/set-end-to-playhead correction are available from the segment action menu.
+There is currently no draggable boundary correction, undo/redo, save/load, session-level dirty-state indicator, prominent error notification, or export action. Whole-segment relabeling, button-based boundary correction, and explicit Convert to Undefined/Merge left/Merge right resolution are available from the segment action menu.
 
 ## Qt ownership and signal flow
 

@@ -205,6 +205,53 @@ class AnnotationEditor:
         self._commit(session, candidate)
         return True
 
+    def convert_to_undefined(
+        self, session: AnnotationSession, interval_index: int
+    ) -> bool:
+        """Relabel one interval as the configured Undefined phase."""
+        return self.relabel_interval(
+            session, interval_index, self.undefined_phase_id
+        )
+
+    def merge_left(
+        self, session: AnnotationSession, interval_index: int
+    ) -> bool:
+        """Absorb an interval into its left neighbour."""
+        return self._merge_with_neighbour(session, interval_index, offset=-1)
+
+    def merge_right(
+        self, session: AnnotationSession, interval_index: int
+    ) -> bool:
+        """Absorb an interval into its right neighbour."""
+        return self._merge_with_neighbour(session, interval_index, offset=1)
+
+    def _merge_with_neighbour(
+        self,
+        session: AnnotationSession,
+        interval_index: int,
+        *,
+        offset: int,
+    ) -> bool:
+        if not 0 <= interval_index < len(session.intervals):
+            raise ValueError(f"Interval index {interval_index} is out of range.")
+
+        duration_ms = session.video_info.duration_ms
+        self._require_valid_coverage(session.intervals, duration_ms)
+        neighbour_index = interval_index + offset
+        direction = "left" if offset < 0 else "right"
+        if not 0 <= neighbour_index < len(session.intervals):
+            raise ValueError(f"Interval {interval_index} cannot merge {direction}.")
+
+        neighbour_phase_id = session.intervals[neighbour_index].phase_id
+        candidate = list(session.intervals)
+        candidate[interval_index] = replace(
+            candidate[interval_index], phase_id=neighbour_phase_id
+        )
+        candidate = self._coalesce_adjacent(candidate)
+        self._require_valid_coverage(candidate, duration_ms)
+        self._commit(session, candidate)
+        return True
+
     @staticmethod
     def _coalesce_adjacent(
         intervals: List[AnnotationInterval],

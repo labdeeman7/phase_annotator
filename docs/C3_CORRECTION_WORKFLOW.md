@@ -73,12 +73,14 @@ Status: **Completed and manually accepted on 2026-09-05.** The current status-ba
 
 ## C3.5 — Remove, Undefined, and merge
 
+Status: **Completed and manually accepted on 2026-09-05.**
+
 An explicit removal action asks the annotator to choose:
 
 - **Convert to Undefined:** relabel the selected interval with the configured `undefined_phase_id`, then coalesce equal neighbors.
 - **Merge left:** absorb the selected interval into the previous segment by adopting the previous phase, preserving/combining notes, then coalescing.
 - **Merge right:** equivalent using the following segment.
-- **Cancel:** make no change.
+- **Cancel:** close the menu without choosing an action; no change is made.
 
 Unavailable directions must be disabled: the first segment cannot merge left, the last cannot merge right, and a single full-video segment has neither merge direction. Conversion to Undefined remains available, including for the only segment.
 

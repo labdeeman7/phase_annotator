@@ -341,3 +341,75 @@ def test_move_boundary_rejects_invalid_request_without_mutation(
         editor.move_boundary(session, boundary_index, position_ms)
 
     assert session == original
+
+
+def test_convert_to_undefined_relabels_and_coalesces(editor: AnnotationEditor):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 3_000, 0, notes="left"),
+        AnnotationInterval(3_000, 7_000, 2, notes="selected"),
+        AnnotationInterval(7_000, 10_000, 0, notes="right"),
+    ]
+
+    changed = editor.convert_to_undefined(session, interval_index=1)
+
+    assert changed is True
+    assert session.intervals == [
+        AnnotationInterval(0, 10_000, 0, notes="left\nselected\nright")
+    ]
+
+
+def test_merge_left_adopts_left_phase_and_preserves_notes(editor: AnnotationEditor):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1, notes="left"),
+        AnnotationInterval(4_000, 10_000, 2, notes="selected"),
+    ]
+
+    editor.merge_left(session, interval_index=1)
+
+    assert session.intervals == [
+        AnnotationInterval(0, 10_000, 1, notes="left\nselected")
+    ]
+
+
+def test_merge_right_adopts_right_phase_and_preserves_notes(editor: AnnotationEditor):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1, notes="selected"),
+        AnnotationInterval(4_000, 10_000, 2, notes="right"),
+    ]
+
+    editor.merge_right(session, interval_index=0)
+
+    assert session.intervals == [
+        AnnotationInterval(0, 10_000, 2, notes="selected\nright")
+    ]
+
+
+@pytest.mark.parametrize(
+    ("operation_name", "interval_index", "message"),
+    [
+        ("merge_left", 0, "cannot merge left"),
+        ("merge_right", 1, "cannot merge right"),
+        ("merge_left", -1, "out of range"),
+        ("merge_right", 2, "out of range"),
+    ],
+)
+def test_merge_rejects_unavailable_direction_without_mutation(
+    editor: AnnotationEditor,
+    operation_name: str,
+    interval_index: int,
+    message: str,
+):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2),
+    ]
+    original = copy.deepcopy(session)
+
+    with pytest.raises(ValueError, match=message):
+        getattr(editor, operation_name)(session, interval_index)
+
+    assert session == original

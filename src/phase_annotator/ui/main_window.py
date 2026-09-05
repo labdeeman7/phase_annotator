@@ -343,6 +343,17 @@ class MainWindow(QMainWindow):
         set_start_action.setEnabled(index > 0)
         set_end_action = menu.addAction("Set end to playhead")
         set_end_action.setEnabled(index < len(self._session.intervals) - 1)
+        resolve_menu = menu.addMenu("Remove / merge")
+        undefined_phase = self._ontology.get_phase_by_id(
+            self._ontology.undefined_phase_id
+        )
+        undefined_action = resolve_menu.addAction(
+            f"Convert to {undefined_phase.name}"
+        )
+        merge_left_action = resolve_menu.addAction("Merge left")
+        merge_left_action.setEnabled(index > 0)
+        merge_right_action = resolve_menu.addAction("Merge right")
+        merge_right_action.setEnabled(index < len(self._session.intervals) - 1)
         chosen_action = menu.exec(screen_position)
         if chosen_action is edit_note_action:
             self._edit_segment_note(index)
@@ -359,6 +370,12 @@ class MainWindow(QMainWindow):
             self._move_segment_boundary(
                 index, boundary_index=index + 1, boundary_name="end"
             )
+        elif chosen_action is undefined_action:
+            self._resolve_segment(index, resolution="undefined")
+        elif chosen_action is merge_left_action:
+            self._resolve_segment(index, resolution="left")
+        elif chosen_action is merge_right_action:
+            self._resolve_segment(index, resolution="right")
 
     def _edit_segment_note(self, index: int) -> None:
         """Edit one segment note without exposing a persistent UI draft."""
@@ -404,18 +421,25 @@ class MainWindow(QMainWindow):
             )
             return False
 
-        self._selected_segment_index = next(
-            (
-                candidate_index
-                for candidate_index, interval in enumerate(self._session.intervals)
-                if interval.start_ms <= anchor_ms < interval.end_ms
-            ),
-            None,
-        )
+        self._select_interval_containing(anchor_ms)
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self.statusBar().showMessage(f"Segment changed to {phase.name}", 3000)
         return True
+
+    def _select_interval_containing(self, position_ms: int) -> None:
+        """Relocate selection after an edit may have coalesced intervals."""
+        if not self._session:
+            self._selected_segment_index = None
+            return
+        self._selected_segment_index = next(
+            (
+                candidate_index
+                for candidate_index, interval in enumerate(self._session.intervals)
+                if interval.start_ms <= position_ms < interval.end_ms
+            ),
+            None,
+        )
 
     def _move_segment_boundary(
         self,
@@ -451,6 +475,39 @@ class MainWindow(QMainWindow):
             f"Segment {boundary_name} set to {format_timecode(position_ms)}",
             3000,
         )
+        return True
+
+    def _resolve_segment(self, index: int, *, resolution: str) -> bool:
+        """Apply one explicit no-gap resolution for a selected segment."""
+        if not self._session or not 0 <= index < len(self._session.intervals):
+            return False
+        anchor_ms = self._session.intervals[index].start_ms
+        operations = {
+            "undefined": self._editor.convert_to_undefined,
+            "left": self._editor.merge_left,
+            "right": self._editor.merge_right,
+        }
+        operation = operations.get(resolution)
+        if operation is None:
+            raise ValueError(f"Unknown segment resolution '{resolution}'.")
+        try:
+            changed = operation(self._session, index)
+        except ValueError as error:
+            self.statusBar().showMessage(f"Segment not changed: {error}", 5000)
+            return False
+        if not changed:
+            self.statusBar().showMessage("Segment is already Undefined", 3000)
+            return False
+
+        self._select_interval_containing(anchor_ms)
+        self._refresh_annotation_views()
+        self._update_active_phase(self._player_widget.position_ms)
+        labels = {
+            "undefined": "Segment converted to Undefined",
+            "left": "Segment merged left",
+            "right": "Segment merged right",
+        }
+        self.statusBar().showMessage(labels[resolution], 3000)
         return True
 
     def _update_active_phase(self, position_ms: int) -> None:

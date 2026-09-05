@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QDialog, QLineEdit
 
@@ -359,6 +360,43 @@ def test_invalid_boundary_move_leaves_gui_state_unchanged(qtbot, monkeypatch):
         AnnotationInterval(7_000, 10_000, 3),
     ]
     assert window.statusBar().currentMessage().startswith("Boundary not changed")
+
+
+@pytest.mark.parametrize(
+    ("resolution", "expected_phase", "expected_status"),
+    [
+        ("undefined", 0, "converted to Undefined"),
+        ("left", 1, "merged left"),
+        ("right", 3, "merged right"),
+    ],
+)
+def test_resolve_segment_uses_explicit_no_gap_strategy(
+    qtbot, resolution, expected_phase, expected_status
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 3_000, 1),
+            AnnotationInterval(3_000, 7_000, 2, notes="keep"),
+            AnnotationInterval(7_000, 10_000, 3),
+        ],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    window._select_segment(1)
+
+    changed = window._resolve_segment(1, resolution=resolution)
+
+    assert changed is True
+    resulting = window._session.intervals[window._selected_segment_index]
+    assert resulting.phase_id == expected_phase
+    assert resulting.notes == "keep"
+    assert expected_status in window.statusBar().currentMessage()
+    assert window._timeline_widget._intervals == window._session.intervals
+    assert window._segment_list_widget._intervals == window._session.intervals
 
 
 def test_selected_and_playhead_active_segments_are_independent(qtbot):

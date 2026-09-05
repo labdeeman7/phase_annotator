@@ -31,6 +31,8 @@ AnnotationSession
 
 `AnnotationEditor.move_boundary()` identifies an internal boundary by the index of the interval on its right. It replaces the left interval's end and right interval's start in one validated candidate, preserving their phases and notes. The strict bounds `left.start_ms < position_ms < right.end_ms` guarantee both resulting intervals have positive duration.
 
+Removal is modeled as resolution rather than physical deletion: `convert_to_undefined()` relabels the interval, while `merge_left()` and `merge_right()` adopt the selected neighbour's phase and coalesce. All three preserve full coverage and combine notes chronologically instead of dropping them.
+
 `AnnotationInterval` rejects negative starts and requires `start_ms < end_ms`. Its duration is `end_ms - start_ms`. Intervals are treated as half-open `[start_ms, end_ms)`, with adjacent intervals sharing a boundary.
 
 The packaged default ontology contains IDs 1-6 plus Undefined (ID 0). Phase 2 (adhesion dissection) is optional. Names, colors, hotkeys, expected order, initial phase, and Undefined role come from the validated packaged JSON described in `ONTOLOGY_CONFIGURATION.md`. Sessions store ontology identity/version so interval IDs remain interpretable.

@@ -131,7 +131,7 @@ Learning focus: Qt signals/slots and one-command/multiple-input design.
 
 Goal: enable realistic annotation, not only append-at-playhead transitions.
 
-Status: **In progress; C3.1-C3.4 accepted.**
+Status: **Completed and manually accepted on 2026-09-05.**
 
 The agreed C3.1-C3.5 interaction and data-integrity contract is detailed in `C3_CORRECTION_WORKFLOW.md`.
 
@@ -297,4 +297,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Implement C3.5 removal choices. C3 and C4 deliver the core correction workflow before persistence work begins.
+Plan and implement C4 draggable boundaries and undo/redo before persistence work begins.
