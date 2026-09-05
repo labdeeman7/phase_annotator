@@ -142,6 +142,32 @@ class AnnotationEditor:
         self._commit(session, candidate)
         return True
 
+    def relabel_interval(
+        self,
+        session: AnnotationSession,
+        interval_index: int,
+        phase_id: int,
+    ) -> bool:
+        """Relabel one complete interval and coalesce equal neighbours."""
+        if phase_id not in self.valid_phase_ids:
+            raise ValueError(f"Phase ID {phase_id} is not valid for this annotation.")
+        if not 0 <= interval_index < len(session.intervals):
+            raise ValueError(f"Interval index {interval_index} is out of range.")
+
+        duration_ms = session.video_info.duration_ms
+        self._require_valid_coverage(session.intervals, duration_ms)
+        if session.intervals[interval_index].phase_id == phase_id:
+            return False
+
+        candidate = list(session.intervals)
+        candidate[interval_index] = replace(
+            candidate[interval_index], phase_id=phase_id
+        )
+        candidate = self._coalesce_adjacent(candidate)
+        self._require_valid_coverage(candidate, duration_ms)
+        self._commit(session, candidate)
+        return True
+
     @staticmethod
     def _coalesce_adjacent(
         intervals: List[AnnotationInterval],

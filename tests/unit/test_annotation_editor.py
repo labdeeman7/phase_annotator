@@ -215,3 +215,69 @@ def test_update_notes_validates_existing_coverage_before_mutation(
         editor.update_notes(session, interval_index=0, notes="note")
 
     assert session == original
+
+
+def test_relabel_interval_changes_complete_segment_and_preserves_note(
+    editor: AnnotationEditor,
+):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2, notes="important"),
+    ]
+
+    changed = editor.relabel_interval(session, interval_index=1, phase_id=3)
+
+    assert changed is True
+    assert session.intervals == [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 3, notes="important"),
+    ]
+
+
+def test_relabel_interval_coalesces_both_neighbours_and_combines_notes(
+    editor: AnnotationEditor,
+):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 3_000, 1, notes="left"),
+        AnnotationInterval(3_000, 7_000, 2, notes="middle"),
+        AnnotationInterval(7_000, 10_000, 1, notes="right"),
+    ]
+
+    editor.relabel_interval(session, interval_index=1, phase_id=1)
+
+    assert session.intervals == [
+        AnnotationInterval(0, 10_000, 1, notes="left\nmiddle\nright")
+    ]
+
+
+def test_relabel_interval_with_current_phase_is_no_op(editor: AnnotationEditor):
+    session = make_session()
+    editor.initialize_coverage(session)
+    original = copy.deepcopy(session)
+
+    changed = editor.relabel_interval(session, interval_index=0, phase_id=1)
+
+    assert changed is False
+    assert session == original
+
+
+@pytest.mark.parametrize(
+    ("interval_index", "phase_id", "message"),
+    [(-1, 1, "index"), (1, 1, "index"), (0, 99, "Phase ID")],
+)
+def test_relabel_interval_rejects_invalid_request_without_mutation(
+    editor: AnnotationEditor,
+    interval_index: int,
+    phase_id: int,
+    message: str,
+):
+    session = make_session()
+    editor.initialize_coverage(session)
+    original = copy.deepcopy(session)
+
+    with pytest.raises(ValueError, match=message):
+        editor.relabel_interval(session, interval_index, phase_id)
+
+    assert session == original

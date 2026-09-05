@@ -6,7 +6,7 @@ Last verified on 2026-09-05 against `main` at `15b3892`.
 
 The application starts a PySide6 desktop window, lets the user choose a local video, and delegates playback to Qt Multimedia. The user can play/pause with a state-aware button, seek with a slider or timeline, click a segment card to select it and seek to its start, and step by an approximate frame duration. Timeline and list selection are synchronized. Selected segments use a cyan outline, while the independently playhead-active segment uses white; slider seeking preserves selection. The status bar reports Loading/Loaded state. An always-visible configured phase palette shows each color, name, hotkey, and optional status. Clicking a phase or pressing its configured hotkey, including `U`, records the same validated transition and refreshes the palette, colored timeline, and segment-card list.
 
-The uncommitted C3.2 worktree contains a transactional domain operation for updating notes and the revised compact UI. Each segment card exposes the same action menu through right-click and a discoverable **...** button. **Edit note...** opens a modal Save/Cancel dialog, and cards with notes show a compact indicator and full-note tooltip. The earlier permanent inspector prototype was rejected and removed because notes are infrequent and should not consume persistent sidebar space.
+The segment-card action menu is available through right-click and a discoverable **⋮** button. **Edit note...** opens a modal Save/Cancel dialog, and cards with notes show a compact indicator and full-note tooltip. **Change phase** exposes every configured ontology phase and relabels the complete selected segment. Relabeling preserves notes, coalesces equal neighbours, and keeps the resulting interval selected. The earlier permanent inspector prototype was rejected and removed because notes are infrequent and should not consume persistent sidebar space.
 
 The pure-Python layer provides Undefined plus the six provisional appendectomy phases, session/video/interval dataclasses, millisecond/frame formatting helpers, coverage/overlap validation, and JSON round-trip persistence through a stateless repository.
 
@@ -19,7 +19,7 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 - Annotation state exists only in `MainWindow._session`; opening another video replaces it without a dirty-state warning.
 - The UI never calls `JsonSessionRepository`. There is no manual save, session-open flow, autosave, crash recovery, or close protection.
 - `MainWindow` still combines view construction and presenter/controller coordination; a dedicated presenter has not been extracted.
-- Selected-segment phase relabeling, delete/merge choices, boundary editing, and undo/redo are not implemented yet. The revised C3.2 compact notes interaction is implemented but awaits manual acceptance.
+- Delete/merge choices, boundary editing, and undo/redo are not implemented yet. C3.2 compact notes and C3.3 whole-segment relabeling are implemented and manually accepted.
 - FPS remains the hard-coded 30.0 default unless code sets it manually. No media metadata is extracted. Frame stepping is millisecond seeking, not decoder-accurate frame navigation.
 - Only the video basename is stored as `video_id`; there is no path, hash, size, or other identity check for reconnecting sessions to source media.
 - JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, but does not fsync, clean stale temp files, lock concurrent writers, validate schema, or create the `.bak` backup claimed by historical rules.
@@ -56,8 +56,8 @@ The stated next milestone was M4: manual saving, periodic autosave, crash recove
 
 ## Validation baseline
 
-On 2026-09-05, the repository-local Python 3.11.5 environment passed all 66 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-05, the repository-local Python 3.11.5 environment passed all tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Manually review the C3.2 segment context menu, visible **...** affordance, modal note editor, and compact note indicator. After acceptance, begin C3.3 whole-segment relabeling using the same action menu.
+Implement C3.4 precise shared-boundary correction through set-start/set-end-to-playhead actions.

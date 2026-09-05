@@ -330,9 +330,22 @@ class MainWindow(QMainWindow):
         self._select_segment(index)
         menu = QMenu(self)
         edit_note_action = menu.addAction("Edit note...")
+        phase_menu = menu.addMenu("Change phase")
+        phase_actions = []
+        current_phase_id = self._session.intervals[index].phase_id
+        for phase in self._ontology.ordered_phases:
+            action = phase_menu.addAction(f"{phase.hotkey}  {phase.name}")
+            action.setCheckable(True)
+            action.setChecked(phase.id == current_phase_id)
+            phase_actions.append((action, phase.id))
         chosen_action = menu.exec(screen_position)
         if chosen_action is edit_note_action:
             self._edit_segment_note(index)
+            return
+        for action, phase_id in phase_actions:
+            if chosen_action is action:
+                self._relabel_segment(index, phase_id)
+                return
 
     def _edit_segment_note(self, index: int) -> None:
         """Edit one segment note without exposing a persistent UI draft."""
@@ -356,6 +369,39 @@ class MainWindow(QMainWindow):
             return False
         self._refresh_annotation_views()
         self.statusBar().showMessage("Segment note saved", 3000)
+        return True
+
+    def _relabel_segment(self, index: int, phase_id: int) -> bool:
+        """Relabel a complete segment and keep its resulting interval selected."""
+        if not self._session or not 0 <= index < len(self._session.intervals):
+            return False
+        anchor_ms = self._session.intervals[index].start_ms
+        try:
+            changed = self._editor.relabel_interval(
+                self._session, interval_index=index, phase_id=phase_id
+            )
+        except ValueError as error:
+            self.statusBar().showMessage(f"Segment not relabeled: {error}", 5000)
+            return False
+
+        phase = self._ontology.get_phase_by_id(phase_id)
+        if not changed:
+            self.statusBar().showMessage(
+                f"Segment is already {phase.name}", 3000
+            )
+            return False
+
+        self._selected_segment_index = next(
+            (
+                candidate_index
+                for candidate_index, interval in enumerate(self._session.intervals)
+                if interval.start_ms <= anchor_ms < interval.end_ms
+            ),
+            None,
+        )
+        self._refresh_annotation_views()
+        self._update_active_phase(self._player_widget.position_ms)
+        self.statusBar().showMessage(f"Segment changed to {phase.name}", 3000)
         return True
 
     def _update_active_phase(self, position_ms: int) -> None:

@@ -33,20 +33,22 @@ Status: **Revised interaction implemented on 2026-09-05; awaiting manual accepta
 
 Notes are occasional supporting information, so they must not permanently consume right-sidebar space needed by the segment list. Keep phase, start/end, and duration visible on each segment card. A card with a non-empty note displays a compact note indicator and may expose the note in a tooltip.
 
-Right-clicking a segment card, or clicking its visible **...** action button, opens the same context menu. The first action is **Edit note...**. This visible button makes the otherwise hidden right-click interaction discoverable. The menu becomes the shared home for later selected-segment actions such as relabeling, boundary correction, conversion to Undefined, and merging.
+Right-clicking a segment card, or clicking its visible **⋮** action button, opens the same context menu. The first action is **Edit note...**. This visible button makes the otherwise hidden right-click interaction discoverable. The menu becomes the shared home for later selected-segment actions such as relabeling, boundary correction, conversion to Undefined, and merging.
 
 **Edit note...** opens a small modal dialog with a multiline editor and explicit Save/Cancel actions. Save invokes the tested `AnnotationEditor.update_notes()` operation, updates `session.updated_at`, refreshes the segment card, and preserves selection because interval structure did not change. Cancel closes the dialog without modifying the session. Empty notes are valid. Because the draft is modal, ordinary seeking and selection do not need global unsaved-inspector handling.
 
 Interaction vocabulary:
 
 - Single-click a segment: select it and navigate to it.
-- Right-click or click **...**: show actions that modify that segment.
+- Right-click or click **⋮**: show actions that modify that segment.
 - Palette click or phase hotkey: record a phase transition at the playhead.
 - Double-click remains unassigned until a frequent primary action justifies it.
 
 ## C3.3 — Whole-segment relabeling
 
-Add **Change phase...** to the shared segment context menu. It opens an explicit configured phase-selection interaction before applying the whole-segment change.
+Status: **Completed and manually accepted on 2026-09-05.**
+
+**Change phase** is a submenu in the shared segment context menu. It is populated from the active ontology and marks the current phase before applying the whole-segment change.
 
 - Palette/hotkey input continues to mean **transition at playhead**.
 - Context-menu phase input means **relabel the complete selected segment**.

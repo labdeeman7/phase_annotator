@@ -131,7 +131,7 @@ Learning focus: Qt signals/slots and one-command/multiple-input design.
 
 Goal: enable realistic annotation, not only append-at-playhead transitions.
 
-Status: **In progress; C3.1 accepted and revised C3.2 implemented for manual review.**
+Status: **In progress; C3.1-C3.3 accepted.**
 
 The agreed C3.1-C3.5 interaction and data-integrity contract is detailed in `C3_CORRECTION_WORKFLOW.md`.
 
@@ -142,7 +142,7 @@ Implementation:
 - Visually distinguish the selected segment from the segment under the playhead.
 - Relabel a selected segment only through an explicit editing interaction, avoiding ambiguous hotkey behavior.
 - Provide precise start/end controls and set-boundary-to-playhead actions.
-- Add compact notes editing through a shared segment context menu, visible **...** affordance, and modal Save/Cancel dialog; do not reserve permanent sidebar space for notes.
+- Add compact notes editing through a shared segment context menu, visible **⋮** affordance, and modal Save/Cancel dialog; do not reserve permanent sidebar space for notes.
 - Implement Delete as conversion to Undefined and explicit Merge Left/Merge Right.
 - Highlight the active segment and keep palette, list, timeline, and playhead synchronized.
 - Remove or consolidate the unused duplicate segment widget once behavior is covered.
@@ -296,4 +296,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Manually accept the revised compact C3.2 note interaction, then begin C3.3 explicit whole-segment relabeling. C3 and C4 deliver the core correction workflow before persistence work begins.
+Implement C3.4 precise shared-boundary correction. C3 and C4 deliver the core correction workflow before persistence work begins.

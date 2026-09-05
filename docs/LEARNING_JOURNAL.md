@@ -294,6 +294,10 @@ The first C3.2 prototype placed note editing permanently in the sidebar. Review 
 
 This change also reduces state complexity. A permanent editable draft requires every navigation and structural action to negotiate Save/Discard/Cancel. A modal dialog contains the draft within one interaction, so the rest of the application does not need to coordinate partially edited note text. Good interaction design can remove state and error cases rather than merely rearranging widgets.
 
+### Relabel by command, relocate selection by domain identity
+
+C3.3 relabels and coalesces transactionally, so the selected interval's numeric list index may disappear or change. The UI records a timestamp inside the original interval and, after a successful commit, selects whichever normalized interval contains that timestamp. This avoids pretending that a mutable list position is a durable segment identity. A future persisted segment identifier could replace this temporal anchor if annotation operations require stronger identity semantics.
+
 The editor returns `False` for a no-op rather than treating it as an error. “The command was valid but changed nothing” is different from “the command was invalid”; callers can avoid unnecessary refreshes and present accurate feedback when that distinction matters.
 
 ### Law of Demeter

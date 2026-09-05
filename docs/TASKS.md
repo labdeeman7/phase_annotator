@@ -52,8 +52,8 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C3.1: distinguish selected (cyan) from playhead-active (white) segments
 - [x] C3.1: preserve selection during slider seeking and clear it after structural edits
 - [x] C3.1: remove the duplicate double-click seek connection
-- [x] C3.2: replace the unaccepted permanent inspector prototype with a segment context menu, visible **...** action, modal note editor, and compact note indicator (awaiting manual acceptance)
-- [ ] C3.3: add explicit whole-segment relabeling
+- [x] C3.2: replace the unaccepted permanent inspector prototype with a segment context menu, visible **⋮** action, modal note editor, and compact note indicator
+- [x] C3.3: add explicit whole-segment relabeling
 - [ ] C3.4: add set-start/set-end-to-playhead correction commands
 - [ ] C3.5: add the Undefined/merge-left/merge-right/cancel removal flow
 

@@ -266,6 +266,34 @@ def test_edit_note_dialog_acceptance_saves_note(qtbot, monkeypatch):
     assert window._session.intervals[0].notes == "Unexpected anatomy"
 
 
+def test_relabel_segment_coalesces_and_selects_result(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 3_000, 1),
+            AnnotationInterval(3_000, 7_000, 2, notes="reviewed"),
+            AnnotationInterval(7_000, 10_000, 1),
+        ],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    window._select_segment(1)
+
+    changed = window._relabel_segment(1, 1)
+
+    assert changed is True
+    assert window._session.intervals == [
+        AnnotationInterval(0, 10_000, 1, notes="reviewed")
+    ]
+    assert window._selected_segment_index == 0
+    assert window._timeline_widget.selected_index == 0
+    assert window._segment_list_widget.selected_index == 0
+    assert window.statusBar().currentMessage().startswith("Segment changed to")
+
+
 def test_selected_and_playhead_active_segments_are_independent(qtbot):
     window = make_window()
     qtbot.addWidget(window)

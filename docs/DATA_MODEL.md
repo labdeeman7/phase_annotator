@@ -27,6 +27,8 @@ AnnotationSession
 
 `notes` is committed annotation data, while text being typed in the modal note dialog is transient UI state. `AnnotationEditor.update_notes()` replaces the selected interval with an otherwise identical interval only after validating the existing and candidate coverage; it then commits once and updates the session timestamp.
 
+`AnnotationEditor.relabel_interval()` changes the phase of one complete interval, preserves its note, and coalesces adjacent intervals that now share a phase. Coalescing combines non-empty notes from left to right with newline separators so correction never silently drops annotation context.
+
 `AnnotationInterval` rejects negative starts and requires `start_ms < end_ms`. Its duration is `end_ms - start_ms`. Intervals are treated as half-open `[start_ms, end_ms)`, with adjacent intervals sharing a boundary.
 
 The packaged default ontology contains IDs 1-6 plus Undefined (ID 0). Phase 2 (adhesion dissection) is optional. Names, colors, hotkeys, expected order, initial phase, and Undefined role come from the validated packaged JSON described in `ONTOLOGY_CONFIGURATION.md`. Sessions store ontology identity/version so interval IDs remain interpretable.
