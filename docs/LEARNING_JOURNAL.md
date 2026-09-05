@@ -274,6 +274,28 @@ Useful comments preserve information that the code cannot express clearly by its
 
 Comments such as `# increment count` above `count += 1` add no information. They make a file longer and can become false when code changes. Prefer clear names and small functions for explaining *what* code does, docstrings for a function's contract or role, and a short inline comment for a surprising *why*. Detailed architectural reasoning belongs in project documentation or a decision record rather than inside every call site.
 
+### A UI draft is not committed domain data
+
+The discarded permanent-inspector prototype demonstrated that text in an editor can differ from committed `AnnotationInterval.notes`. The final modal design narrows that temporary draft to the lifetime of one dialog: `AnnotationSession` remains the source of truth, Save commits through the editor, and Cancel simply closes the draft.
+
+A navigation action originally used separate “select” and “seek” signals. C3.2 combines them into one selection request containing the index and timestamp, so `MainWindow` receives the complete user intention before performing its consequences. The modal note design no longer needs to cancel navigation, but the combined signal still prevents ordering ambiguity and represents the interaction more clearly.
+
+### C3.2 Python and engineering idioms
+
+`dataclasses.replace(interval, notes=new_notes)` constructs a new dataclass instance while copying every field not explicitly replaced. It expresses “the same interval except for its notes” more safely than repeating every constructor argument, and avoids mutating the existing object before validation succeeds.
+
+`SegmentInspectorWidget.is_dirty` is a derived `@property`: it compares current editor text with the last committed text whenever asked. Keeping the source values and deriving the answer avoids a second Boolean flag that could become inconsistent with them.
+
+Qt signals carry intent across ownership boundaries. `save_note_requested = Signal(str)` lets the inspector announce “the user wants to save this text” without knowing about `AnnotationSession` or `AnnotationEditor`. Likewise, the combined `(interval_index, seek_ms)` selection request allows `MainWindow` to approve or cancel the whole interaction before applying either consequence.
+
+### Match persistent UI space to task frequency
+
+The first C3.2 prototype placed note editing permanently in the sidebar. Review showed that notes are exceptional supporting data, while video, timeline, and segment navigation are the frequent core workflow. The accepted direction moves note editing behind a right-click context menu and a visible **...** affordance, then uses a modal Save/Cancel dialog. Persistent screen space should generally serve frequent tasks; uncommon actions can use progressive disclosure, provided there is a discoverable path.
+
+This change also reduces state complexity. A permanent editable draft requires every navigation and structural action to negotiate Save/Discard/Cancel. A modal dialog contains the draft within one interaction, so the rest of the application does not need to coordinate partially edited note text. Good interaction design can remove state and error cases rather than merely rearranging widgets.
+
+The editor returns `False` for a no-op rather than treating it as an error. “The command was valid but changed nothing” is different from “the command was invalid”; callers can avoid unnecessary refreshes and present accurate feedback when that distinction matters.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.

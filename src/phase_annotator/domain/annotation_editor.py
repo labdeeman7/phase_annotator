@@ -1,7 +1,7 @@
 """Transactional operations for editing a continuously covered annotation timeline."""
 
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Iterable, List
 
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession
@@ -115,6 +115,29 @@ class AnnotationEditor:
         candidate.extend(session.intervals[containing_index + 1 :])
         candidate = self._coalesce_adjacent(candidate)
 
+        self._require_valid_coverage(candidate, duration_ms)
+        self._commit(session, candidate)
+        return True
+
+    def update_notes(
+        self,
+        session: AnnotationSession,
+        interval_index: int,
+        notes: str,
+    ) -> bool:
+        """Replace one interval's notes without changing timeline structure."""
+        if not isinstance(notes, str):
+            raise ValueError("Notes must be text.")
+        if not 0 <= interval_index < len(session.intervals):
+            raise ValueError(f"Interval index {interval_index} is out of range.")
+
+        duration_ms = session.video_info.duration_ms
+        self._require_valid_coverage(session.intervals, duration_ms)
+        if session.intervals[interval_index].notes == notes:
+            return False
+
+        candidate = list(session.intervals)
+        candidate[interval_index] = replace(candidate[interval_index], notes=notes)
         self._require_valid_coverage(candidate, duration_ms)
         self._commit(session, candidate)
         return True

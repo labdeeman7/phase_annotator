@@ -9,15 +9,16 @@
 5. Play/pause is available through the state-aware Play/Pause button or Space. Left/Right seek by `int(1000 / fps)` milliseconds. The slider and painted timeline seek in milliseconds.
 6. The always-visible phase palette is built from the configured ontology. Clicking a phase or pressing its configured window shortcut (including `U`) calls the same `record_phase_transition()` method, which delegates interval changes to the transactional `AnnotationEditor`. Phase shortcuts are disabled while a text-entry control or the segment list has keyboard focus; clicking the timeline restores the normal annotation context.
 7. The palette highlights the phase under the playhead. The timeline and segment cards are rebuilt from the same validated session interval sequence. A white outline identifies the segment under the playhead; a cyan outline identifies the explicitly selected segment. Single-clicking a card selects it and seeks to its start. Clicking within a timeline interval selects it and seeks to that position. Selection persists while the playback slider moves, but is cleared when a phase transition changes the interval structure.
+8. The annotator can right-click a segment or use its visible **...** button and choose **Edit note...**. A modal dialog owns the temporary draft; Save invokes `AnnotationEditor.update_notes()`, while Cancel leaves committed annotation data unchanged. A compact indicator identifies segments with notes.
 
-There is currently no selected-segment editing/deleting/notes UI, undo/redo, save/load, dirty-state indicator, persistent error display, or export action.
+There is currently no selected-segment phase relabeling, boundary correction, deletion/merge UI, undo/redo, save/load, session-level dirty-state indicator, persistent error display, or export action.
 
 ## Qt ownership and signal flow
 
 - `MainWindow` owns `VideoPlayerWidget`, `TimelineWidget`, `PhasePaletteWidget`, and `SegmentListWidget`.
 - `VideoPlayerWidget` wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`, forwarding position, duration, and simplified playing/not-playing signals. It exposes public `position_ms`, `duration_ms`, and `is_playing` properties.
 - Player position updates the slider (unless it is being dragged), timeline playhead, and time label.
-- Timeline and segment-list `seek_requested(int)` signals connect directly to `VideoPlayerWidget.seek_ms()`.
+- Timeline and segment-list selection requests carry segment intent to `MainWindow`, which synchronizes selection and seeking. Modal note editing does not leave a draft behind for navigation actions to resolve.
 - `MainWindow` still performs presenter/controller coordination, but annotation mutation belongs to the pure-Python `AnnotationEditor`; it no longer reaches into the private Qt player for position or duration.
 
 ## Video accuracy limitations

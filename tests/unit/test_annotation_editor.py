@@ -158,3 +158,60 @@ def test_transition_rejects_existing_unknown_phase_without_mutation(
         editor.apply_transition(session, phase_id=1, position_ms=2_000)
 
     assert session == original
+
+
+def test_update_notes_changes_only_selected_interval(editor: AnnotationEditor):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1, notes="first"),
+        AnnotationInterval(4_000, 10_000, 2),
+    ]
+
+    changed = editor.update_notes(session, interval_index=1, notes="reviewed")
+
+    assert changed is True
+    assert session.intervals == [
+        AnnotationInterval(0, 4_000, 1, notes="first"),
+        AnnotationInterval(4_000, 10_000, 2, notes="reviewed"),
+    ]
+
+
+def test_update_notes_with_same_text_is_no_op(editor: AnnotationEditor):
+    session = make_session()
+    session.intervals = [AnnotationInterval(0, 10_000, 1, notes="unchanged")]
+    original = copy.deepcopy(session)
+
+    changed = editor.update_notes(session, interval_index=0, notes="unchanged")
+
+    assert changed is False
+    assert session == original
+
+
+@pytest.mark.parametrize("interval_index", [-1, 1])
+def test_update_notes_rejects_invalid_index_without_mutation(
+    editor: AnnotationEditor, interval_index: int
+):
+    session = make_session()
+    editor.initialize_coverage(session)
+    original = copy.deepcopy(session)
+
+    with pytest.raises(ValueError, match="index"):
+        editor.update_notes(session, interval_index=interval_index, notes="note")
+
+    assert session == original
+
+
+def test_update_notes_validates_existing_coverage_before_mutation(
+    editor: AnnotationEditor,
+):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(5_000, 10_000, 2),
+    ]
+    original = copy.deepcopy(session)
+
+    with pytest.raises(ValueError, match="coverage"):
+        editor.update_notes(session, interval_index=0, notes="note")
+
+    assert session == original

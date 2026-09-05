@@ -1,13 +1,14 @@
 from pathlib import Path
 
 from PySide6.QtCore import QPoint, Qt
-from PySide6.QtWidgets import QLineEdit
+from PySide6.QtWidgets import QDialog, QLineEdit
 
 from phase_annotator.config import load_default_ontology
 from phase_annotator.ui.main_window import MainWindow
 from phase_annotator.ui.player_widget import VideoPlayerWidget
 from phase_annotator.ui.timeline_widget import TimelineWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
+from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
 
 
@@ -42,6 +43,7 @@ def test_main_window_instantiation(qtbot):
         "U  Undefined",
     ]
     assert not window._phase_palette.is_annotation_enabled
+    assert not hasattr(window, "_segment_inspector")
 
 
 def test_player_widget_exposes_public_playback_state(qtbot):
@@ -97,14 +99,13 @@ def test_segment_list_widget_population(qtbot):
     segment_list.set_intervals(intervals)
     assert segment_list._list_widget.count() == 2
 
-    selected = []
-    seeks = []
-    segment_list.segment_selected.connect(selected.append)
-    segment_list.seek_requested.connect(seeks.append)
+    requests = []
+    segment_list.segment_selection_requested.connect(
+        lambda index, seek_ms: requests.append((index, seek_ms))
+    )
     segment_list._list_widget.itemClicked.emit(segment_list._list_widget.item(1))
 
-    assert selected == [1]
-    assert seeks == [5_000]
+    assert requests == [(1, 5_000)]
 
 
 def test_timeline_click_selects_interval_and_requests_seek(qtbot):
@@ -118,16 +119,15 @@ def test_timeline_click_selects_interval_and_requests_seek(qtbot):
             AnnotationInterval(4_000, 10_000, 2),
         ]
     )
-    selected = []
-    seeks = []
-    timeline.segment_selected.connect(selected.append)
-    timeline.seek_requested.connect(seeks.append)
+    requests = []
+    timeline.segment_selection_requested.connect(
+        lambda index, seek_ms: requests.append((index, seek_ms))
+    )
     timeline.show()
 
     qtbot.mouseClick(timeline, Qt.LeftButton, pos=QPoint(750, 24))
 
-    assert selected == [1]
-    assert seeks == [7_500]
+    assert requests == [(1, 7_500)]
 
 
 def test_segment_selection_is_synchronized_across_views(qtbot):
@@ -145,13 +145,125 @@ def test_segment_selection_is_synchronized_across_views(qtbot):
     window._timeline_widget.set_duration(10_000)
     window._refresh_annotation_views()
 
-    window._segment_list_widget.segment_selected.emit(1)
+    window._segment_list_widget.segment_selection_requested.emit(1, 3_000)
 
     assert window._selected_segment_index == 1
     assert window._segment_list_widget.selected_index == 1
     assert window._segment_list_widget._list_widget.currentRow() == 1
     assert window._timeline_widget.selected_index == 1
     assert window._segment_list_widget._cards[1]._is_selected
+
+
+def test_card_right_click_and_actions_button_request_same_segment(qtbot):
+    segment_list = SegmentListWidget(ontology=load_default_ontology())
+    qtbot.addWidget(segment_list)
+    segment_list.set_intervals([AnnotationInterval(0, 10_000, 1)])
+    card = segment_list._cards[0]
+    assert card._actions_button.text() == "⋮"
+    assert card._actions_button.size().width() == 32
+    assert card._actions_button.size().height() == 32
+    requests = []
+    segment_list.segment_actions_requested.connect(
+        lambda index, position: requests.append(index)
+    )
+
+    card.customContextMenuRequested.emit(QPoint(5, 5))
+    qtbot.mouseClick(card._actions_button, Qt.LeftButton)
+
+    assert requests == [0, 0]
+
+
+def test_note_dialog_exposes_text_only_after_explicit_acceptance(qtbot):
+    dialog = SegmentNoteDialog("original")
+    qtbot.addWidget(dialog)
+    dialog._notes_edit.setPlainText("edited")
+
+    dialog.reject()
+
+    assert dialog.result() == QDialog.DialogCode.Rejected
+    assert dialog.notes == "edited"
+
+
+def test_save_segment_note_uses_editor_and_preserves_selection(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ],
+    )
+    window._refresh_annotation_views()
+    window._select_segment(1)
+
+    changed = window._save_segment_note(1, "Difficult dissection")
+
+    assert changed is True
+    assert window._session.intervals[1].notes == "Difficult dissection"
+    assert window._selected_segment_index == 1
+    note_indicator = window._segment_list_widget._cards[1]._note_indicator
+    assert not note_indicator.isHidden()
+    assert note_indicator.toolTip() == "Difficult dissection"
+    assert window.statusBar().currentMessage() == "Segment note saved"
+
+
+def test_edit_note_dialog_cancel_does_not_change_session(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ],
+    )
+    window._refresh_annotation_views()
+    window._select_segment(0)
+
+    class CancelledDialog:
+        def __init__(self, notes, parent):
+            self.notes = "discard me"
+
+        def exec(self):
+            return QDialog.DialogCode.Rejected
+
+    monkeypatch.setattr(
+        "phase_annotator.ui.main_window.SegmentNoteDialog", CancelledDialog
+    )
+
+    window._edit_segment_note(0)
+
+    assert window._session.intervals[0].notes == ""
+
+
+def test_edit_note_dialog_acceptance_saves_note(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[AnnotationInterval(0, 10_000, 1)],
+    )
+    window._refresh_annotation_views()
+
+    class AcceptedDialog:
+        def __init__(self, notes, parent):
+            assert notes == ""
+            self.notes = "Unexpected anatomy"
+
+        def exec(self):
+            return QDialog.DialogCode.Accepted
+
+    monkeypatch.setattr(
+        "phase_annotator.ui.main_window.SegmentNoteDialog", AcceptedDialog
+    )
+
+    window._edit_segment_note(0)
+
+    assert window._session.intervals[0].notes == "Unexpected anatomy"
 
 
 def test_selected_and_playhead_active_segments_are_independent(qtbot):

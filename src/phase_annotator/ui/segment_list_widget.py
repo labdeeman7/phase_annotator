@@ -1,12 +1,13 @@
 from typing import List, Optional
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QPoint, Qt, Signal
 from PySide6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
     QListWidget,
     QListWidgetItem,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -18,6 +19,8 @@ from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
 
 class SegmentCardWidget(QFrame):
     """Card showing one annotated interval and its navigation state."""
+
+    actions_requested = Signal(QPoint)
 
     def __init__(
         self,
@@ -47,8 +50,43 @@ class SegmentCardWidget(QFrame):
         title_label.setStyleSheet(
             "color: #FFFFFF; font-weight: bold; font-size: 13px;"
         )
+        self._actions_button = QToolButton(self)
+        self._actions_button.setText("⋮")
+        self._actions_button.setToolTip("Segment actions")
+        self._actions_button.setAccessibleName("Segment actions")
+        self._actions_button.setFixedSize(32, 32)
+        self._actions_button.setStyleSheet(
+            """
+            QToolButton {
+                background-color: #454545;
+                color: #FFFFFF;
+                border: 1px solid #777777;
+                border-radius: 5px;
+                font-size: 20px;
+                font-weight: bold;
+            }
+            QToolButton:hover {
+                background-color: #5A5A5A;
+                border-color: #00D1FF;
+            }
+            QToolButton:pressed {
+                background-color: #202F38;
+                border-color: #00D1FF;
+            }
+            """
+        )
+        self._actions_button.clicked.connect(self._request_actions_from_button)
+        self._note_indicator = QLabel("Note", self)
+        self._note_indicator.setAccessibleName("Segment has a note")
+        self._note_indicator.setToolTip(interval.notes)
+        self._note_indicator.setStyleSheet(
+            "color: #F59E0B; font-size: 10px; font-weight: bold;"
+        )
+        self._note_indicator.setVisible(bool(interval.notes))
         header_layout.addWidget(badge_label)
         header_layout.addWidget(title_label, stretch=1)
+        header_layout.addWidget(self._note_indicator)
+        header_layout.addWidget(self._actions_button)
         layout.addLayout(header_layout)
 
         start_code = format_timecode(interval.start_ms)
@@ -72,14 +110,18 @@ class SegmentCardWidget(QFrame):
         subtext_label.setStyleSheet("color: #AAAAAA; font-size: 11px;")
         layout.addWidget(subtext_label)
 
-        if interval.notes:
-            notes_label = QLabel(f"Note: {interval.notes}", self)
-            notes_label.setStyleSheet(
-                "color: #F59E0B; font-size: 11px; font-style: italic;"
-            )
-            layout.addWidget(notes_label)
-
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._request_actions_from_card)
         self._update_style()
+
+    def _request_actions_from_button(self) -> None:
+        menu_position = self._actions_button.mapToGlobal(
+            self._actions_button.rect().bottomLeft()
+        )
+        self.actions_requested.emit(menu_position)
+
+    def _request_actions_from_card(self, local_position: QPoint) -> None:
+        self.actions_requested.emit(self.mapToGlobal(local_position))
 
     def set_selection_state(self, *, selected: bool, active: bool) -> None:
         self._is_selected = selected
@@ -114,8 +156,8 @@ class SegmentCardWidget(QFrame):
 class SegmentListWidget(QWidget):
     """Segment cards with synchronized selected and playhead-active states."""
 
-    seek_requested = Signal(int)
-    segment_selected = Signal(int)
+    segment_selection_requested = Signal(int, int)  # interval index, seek time
+    segment_actions_requested = Signal(int, QPoint)  # interval index, screen point
 
     def __init__(self, parent=None, *, ontology: PhaseOntology):
         super().__init__(parent)
@@ -172,12 +214,19 @@ class SegmentListWidget(QWidget):
         self._intervals = intervals
         self._list_widget.clear()
         self._cards = []
-        for interval in intervals:
+        for index, interval in enumerate(intervals):
             try:
                 phase = self._ontology.get_phase_by_id(interval.phase_id)
             except KeyError:
                 phase = None
             card = SegmentCardWidget(interval, phase, fps=self._fps, parent=self)
+            # Bind the current index now; otherwise every callback would observe
+            # the loop's final value when it eventually runs.
+            card.actions_requested.connect(
+                lambda position, row=index: self.segment_actions_requested.emit(
+                    row, position
+                )
+            )
             item = QListWidgetItem(self._list_widget)
             item.setSizeHint(card.sizeHint())
             self._list_widget.addItem(item)
@@ -214,5 +263,6 @@ class SegmentListWidget(QWidget):
         """Publish user intent; MainWindow owns the resulting selection."""
         row = self._list_widget.row(item)
         if 0 <= row < len(self._intervals):
-            self.segment_selected.emit(row)
-            self.seek_requested.emit(self._intervals[row].start_ms)
+            self.segment_selection_requested.emit(
+                row, self._intervals[row].start_ms
+            )

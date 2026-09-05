@@ -5,13 +5,15 @@ from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
-    QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox, QComboBox
+    QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox, QComboBox,
+    QDialog, QMenu
 )
 
 from phase_annotator.ui.player_widget import VideoPlayerWidget
 from phase_annotator.ui.timeline_widget import TimelineWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
+from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.models import AnnotationSession, VideoInfo
 from phase_annotator.domain.ontology import PhaseOntology
@@ -119,10 +121,15 @@ class MainWindow(QMainWindow):
         self._player_widget.playback_state_changed.connect(
             self._on_playback_state_changed
         )
-        self._timeline_widget.seek_requested.connect(self._player_widget.seek_ms)
-        self._segment_list_widget.seek_requested.connect(self._player_widget.seek_ms)
-        self._timeline_widget.segment_selected.connect(self._select_segment)
-        self._segment_list_widget.segment_selected.connect(self._select_segment)
+        self._timeline_widget.segment_selection_requested.connect(
+            self._request_segment_selection
+        )
+        self._segment_list_widget.segment_selection_requested.connect(
+            self._request_segment_selection
+        )
+        self._segment_list_widget.segment_actions_requested.connect(
+            self._show_segment_actions
+        )
         self._phase_palette.phase_selected.connect(self.record_phase_transition)
         self._create_phase_shortcuts()
         QApplication.instance().focusChanged.connect(
@@ -186,7 +193,6 @@ class MainWindow(QMainWindow):
         """Records a phase transition at the current video position timestamp."""
         if not self._session or not self._session.intervals:
             return
-
         try:
             changed = self._editor.apply_transition(
                 self._session,
@@ -299,6 +305,11 @@ class MainWindow(QMainWindow):
         self._timeline_widget.set_selected_index(self._selected_segment_index)
         self._segment_list_widget.set_selected_index(self._selected_segment_index)
 
+    def _request_segment_selection(self, index: int, seek_ms: int) -> None:
+        """Select one segment and perform its associated navigation request."""
+        self._select_segment(index)
+        self._player_widget.seek_ms(seek_ms)
+
     def _select_segment(self, index: Optional[int]) -> None:
         """Own one selection centrally and project it into both UI views."""
         if (
@@ -311,6 +322,41 @@ class MainWindow(QMainWindow):
             self._selected_segment_index = None
         self._timeline_widget.set_selected_index(self._selected_segment_index)
         self._segment_list_widget.set_selected_index(self._selected_segment_index)
+
+    def _show_segment_actions(self, index: int, screen_position) -> None:
+        """Show the shared action menu for a segment card."""
+        if not self._session or not 0 <= index < len(self._session.intervals):
+            return
+        self._select_segment(index)
+        menu = QMenu(self)
+        edit_note_action = menu.addAction("Edit note...")
+        chosen_action = menu.exec(screen_position)
+        if chosen_action is edit_note_action:
+            self._edit_segment_note(index)
+
+    def _edit_segment_note(self, index: int) -> None:
+        """Edit one segment note without exposing a persistent UI draft."""
+        if not self._session or not 0 <= index < len(self._session.intervals):
+            return
+        dialog = SegmentNoteDialog(self._session.intervals[index].notes, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self._save_segment_note(index, dialog.notes)
+
+    def _save_segment_note(self, index: int, notes: str) -> bool:
+        """Commit one dialog result while preserving segment selection."""
+        if not self._session or not 0 <= index < len(self._session.intervals):
+            return False
+        try:
+            changed = self._editor.update_notes(self._session, index, notes)
+        except ValueError as error:
+            self.statusBar().showMessage(f"Note not saved: {error}", 5000)
+            return False
+        if not changed:
+            self.statusBar().showMessage("Segment note unchanged", 3000)
+            return False
+        self._refresh_annotation_views()
+        self.statusBar().showMessage("Segment note saved", 3000)
+        return True
 
     def _update_active_phase(self, position_ms: int) -> None:
         """Derive playhead-active state independently from edit selection."""

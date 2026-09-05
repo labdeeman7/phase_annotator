@@ -10,8 +10,7 @@ from phase_annotator.domain.ontology import PhaseOntology
 class TimelineWidget(QWidget):
     """Custom Qt canvas widget rendering surgical phase intervals & interactive playhead needle."""
 
-    seek_requested = Signal(int)
-    segment_selected = Signal(int)
+    segment_selection_requested = Signal(int, int)  # interval index, seek time
 
     def __init__(
         self,
@@ -123,6 +122,5 @@ class TimelineWidget(QWidget):
             selection_ms = min(target_ms, self._duration_ms - 1)
             for index, interval in enumerate(self._intervals):
                 if interval.start_ms <= selection_ms < interval.end_ms:
-                    self.segment_selected.emit(index)
+                    self.segment_selection_requested.emit(index, target_ms)
                     break
-            self.seek_requested.emit(target_ms)

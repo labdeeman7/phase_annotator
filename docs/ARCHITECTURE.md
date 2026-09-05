@@ -34,7 +34,7 @@ The domain package currently has no Qt or IO imports. Preserve that boundary.
 
 The `PhasePaletteWidget` renders the configured phase order, names, colors, hotkeys, and optional flags. It emits only a phase ID. `MainWindow` routes that signal and configured window-scoped `QShortcut` objects through the same `record_phase_transition()` command, then derives the active palette selection from the interval under the playhead. Shortcut availability follows keyboard focus: text inputs and the segment list reserve their keys, while clicking the focusable timeline returns to annotation mode.
 
-`MainWindow` also owns transient selected-segment state as an interval index and synchronizes it into `TimelineWidget` and `SegmentListWidget`. Playhead-active state is independently derived from session intervals and the current position. Because indexes can change meaning when an edit splits or coalesces intervals, playhead transitions clear selection rather than risking selection of the wrong segment.
+`MainWindow` also owns transient selected-segment state as an interval index and synchronizes it into `TimelineWidget` and `SegmentListWidget`. Playhead-active state is independently derived from session intervals and the current position. Because indexes can change meaning when an edit splits or coalesces intervals, playhead transitions clear selection rather than risking selection of the wrong segment. Segment-card context-menu actions route through `MainWindow`, while the modal note dialog owns its temporary draft until Save or Cancel.
 
 ### Storage (`src/phase_annotator/storage/`)
 
@@ -44,10 +44,11 @@ There is no repository interface, GUI integration, CSV exporter, autosave, backu
 
 ### UI (`src/phase_annotator/ui/`)
 
-- `main_window.py`: constructs the window and controls, owns session state, connects signals, delegates phase-transition mutation to `AnnotationEditor`, and refreshes both annotation views.
+- `main_window.py`: constructs the window and controls, owns session/selection state, delegates annotation mutation to `AnnotationEditor`, and refreshes the synchronized views.
 - `player_widget.py`: wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`.
-- `timeline_widget.py`: paints phase intervals and a playhead; mouse clicks emit seek timestamps.
-- `segment_list_widget.py`: active `QListWidget`-based custom segment cards.
+- `timeline_widget.py`: paints phase intervals, selection, and playhead; mouse clicks request a combined selection and seek.
+- `segment_list_widget.py`: active `QListWidget`-based custom segment cards and combined selection/seek requests.
+- `segment_note_dialog.py`: modal editor for one optional segment note; it exposes the accepted text but does not mutate the session.
 - `table_widget.py`: unused duplicate/experimental M3 implementation; despite its name, it also uses a list rather than a table.
 
 See `ANNOTATION_WORKFLOW.md`, `DATA_MODEL.md`, and `CURRENT_STATE.md` for behavior and limitations.
