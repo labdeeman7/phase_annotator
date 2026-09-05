@@ -294,6 +294,73 @@ def test_relabel_segment_coalesces_and_selects_result(qtbot):
     assert window.statusBar().currentMessage().startswith("Segment changed to")
 
 
+def test_move_selected_segment_start_to_playhead_updates_shared_boundary(
+    qtbot, monkeypatch
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 3_000, 1),
+            AnnotationInterval(3_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    window._select_segment(1)
+    monkeypatch.setattr(
+        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
+    )
+
+    changed = window._move_segment_boundary(
+        1, boundary_index=1, boundary_name="start"
+    )
+
+    assert changed is True
+    assert window._session.intervals == [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 7_000, 2),
+        AnnotationInterval(7_000, 10_000, 3),
+    ]
+    assert window._selected_segment_index == 1
+    assert window._timeline_widget._intervals == window._session.intervals
+    assert window._segment_list_widget._intervals == window._session.intervals
+
+
+def test_invalid_boundary_move_leaves_gui_state_unchanged(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 3_000, 1),
+            AnnotationInterval(3_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ],
+    )
+    window._refresh_annotation_views()
+    window._select_segment(1)
+    monkeypatch.setattr(
+        VideoPlayerWidget, "position_ms", property(lambda self: 8_000)
+    )
+
+    changed = window._move_segment_boundary(
+        1, boundary_index=1, boundary_name="start"
+    )
+
+    assert changed is False
+    assert window._session.intervals == [
+        AnnotationInterval(0, 3_000, 1),
+        AnnotationInterval(3_000, 7_000, 2),
+        AnnotationInterval(7_000, 10_000, 3),
+    ]
+    assert window.statusBar().currentMessage().startswith("Boundary not changed")
+
+
 def test_selected_and_playhead_active_segments_are_independent(qtbot):
     window = make_window()
     qtbot.addWidget(window)

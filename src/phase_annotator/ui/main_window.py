@@ -338,6 +338,11 @@ class MainWindow(QMainWindow):
             action.setCheckable(True)
             action.setChecked(phase.id == current_phase_id)
             phase_actions.append((action, phase.id))
+        menu.addSeparator()
+        set_start_action = menu.addAction("Set start to playhead")
+        set_start_action.setEnabled(index > 0)
+        set_end_action = menu.addAction("Set end to playhead")
+        set_end_action.setEnabled(index < len(self._session.intervals) - 1)
         chosen_action = menu.exec(screen_position)
         if chosen_action is edit_note_action:
             self._edit_segment_note(index)
@@ -346,6 +351,14 @@ class MainWindow(QMainWindow):
             if chosen_action is action:
                 self._relabel_segment(index, phase_id)
                 return
+        if chosen_action is set_start_action:
+            self._move_segment_boundary(
+                index, boundary_index=index, boundary_name="start"
+            )
+        elif chosen_action is set_end_action:
+            self._move_segment_boundary(
+                index, boundary_index=index + 1, boundary_name="end"
+            )
 
     def _edit_segment_note(self, index: int) -> None:
         """Edit one segment note without exposing a persistent UI draft."""
@@ -402,6 +415,42 @@ class MainWindow(QMainWindow):
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self.statusBar().showMessage(f"Segment changed to {phase.name}", 3000)
+        return True
+
+    def _move_segment_boundary(
+        self,
+        segment_index: int,
+        *,
+        boundary_index: int,
+        boundary_name: str,
+    ) -> bool:
+        """Move a selected segment boundary to the current playhead."""
+        if (
+            not self._session
+            or not 0 <= segment_index < len(self._session.intervals)
+        ):
+            return False
+        position_ms = self._player_widget.position_ms
+        try:
+            changed = self._editor.move_boundary(
+                self._session,
+                boundary_index=boundary_index,
+                position_ms=position_ms,
+            )
+        except ValueError as error:
+            self.statusBar().showMessage(f"Boundary not changed: {error}", 5000)
+            return False
+        if not changed:
+            self.statusBar().showMessage("Boundary is already at the playhead", 3000)
+            return False
+
+        self._selected_segment_index = segment_index
+        self._refresh_annotation_views()
+        self._update_active_phase(position_ms)
+        self.statusBar().showMessage(
+            f"Segment {boundary_name} set to {format_timecode(position_ms)}",
+            3000,
+        )
         return True
 
     def _update_active_phase(self, position_ms: int) -> None:

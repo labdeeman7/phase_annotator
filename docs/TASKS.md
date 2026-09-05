@@ -54,7 +54,7 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C3.1: remove the duplicate double-click seek connection
 - [x] C3.2: replace the unaccepted permanent inspector prototype with a segment context menu, visible **⋮** action, modal note editor, and compact note indicator
 - [x] C3.3: add explicit whole-segment relabeling
-- [ ] C3.4: add set-start/set-end-to-playhead correction commands
+- [x] C3.4: add set-start/set-end-to-playhead correction commands
 - [ ] C3.5: add the Undefined/merge-left/merge-right/cancel removal flow
 
 ## Planned Milestone 4 — Session Saving, Loading, Autosave & Crash Recovery
@@ -78,3 +78,9 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [ ] Unify package/window version reporting
 - [ ] Remove stale TODO and unused imports after confirming intended behavior
 - [ ] Add a configured lint/format/type-check toolchain
+
+## Beautification and UI polish (later)
+
+- [ ] Replace status-bar-only error messages with a prominent, non-blocking notification/banner near the top of the window, similar to a web toast/alert.
+- [ ] Keep routine playback, loading, save, and successful-action feedback in the status bar rather than treating every message as an error.
+- [ ] Define consistent error, warning, success, and informational colors, duration, dismissal, and accessibility behavior before implementing the notification component.

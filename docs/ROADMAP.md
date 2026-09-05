@@ -131,7 +131,7 @@ Learning focus: Qt signals/slots and one-command/multiple-input design.
 
 Goal: enable realistic annotation, not only append-at-playhead transitions.
 
-Status: **In progress; C3.1-C3.3 accepted.**
+Status: **In progress; C3.1-C3.4 accepted.**
 
 The agreed C3.1-C3.5 interaction and data-integrity contract is detailed in `C3_CORRECTION_WORKFLOW.md`.
 
@@ -246,6 +246,7 @@ Candidate work, validated with actual use rather than assumed upfront:
 - Keyboard shortcut reference and onboarding hints.
 - Better timeline zoom/navigation for long procedures.
 - Status bar for save/autosave/media state.
+- Prominent, non-blocking top-of-window notifications for errors; keep routine state and success feedback in the status bar.
 - Layout persistence and high-DPI/accessibility review.
 - Performance checks with long videos and many intervals.
 
@@ -296,4 +297,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Implement C3.4 precise shared-boundary correction. C3 and C4 deliver the core correction workflow before persistence work begins.
+Implement C3.5 removal choices. C3 and C4 deliver the core correction workflow before persistence work begins.

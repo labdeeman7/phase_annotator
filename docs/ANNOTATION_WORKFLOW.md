@@ -11,8 +11,9 @@
 7. The palette highlights the phase under the playhead. The timeline and segment cards are rebuilt from the same validated session interval sequence. A white outline identifies the segment under the playhead; a cyan outline identifies the explicitly selected segment. Single-clicking a card selects it and seeks to its start. Clicking within a timeline interval selects it and seeks to that position. Selection persists while the playback slider moves, but is cleared when a phase transition changes the interval structure.
 8. The annotator can right-click a segment or use its visible **⋮** button and choose **Edit note...**. A modal dialog owns the temporary draft; Save invokes `AnnotationEditor.update_notes()`, while Cancel leaves committed annotation data unchanged. A compact indicator identifies segments with notes.
 9. **Change phase** in the same menu relabels the complete selected interval, unlike palette/hotkey transitions at the playhead. Equal neighbouring phases coalesce, their notes are combined in order, and the resulting interval remains selected.
+10. **Set start to playhead** moves the boundary shared with the previous segment; **Set end to playhead** moves the boundary shared with the next segment. The unavailable external-video boundary action is disabled, and an invalid playhead position leaves both intervals unchanged.
 
-There is currently no selected-segment phase relabeling, boundary correction, deletion/merge UI, undo/redo, save/load, session-level dirty-state indicator, persistent error display, or export action.
+There is currently no deletion/merge UI, draggable boundary correction, undo/redo, save/load, session-level dirty-state indicator, prominent error notification, or export action. Whole-segment relabeling and button-based set-start/set-end-to-playhead correction are available from the segment action menu.
 
 ## Qt ownership and signal flow
 

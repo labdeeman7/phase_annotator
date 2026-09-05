@@ -59,7 +59,9 @@ Status: **Completed and manually accepted on 2026-09-05.**
 
 ## C3.4 — Precise shared-boundary correction
 
-Add **Set start to playhead** and **Set end to playhead** actions. These move a shared boundary; they must never create gaps or overlaps.
+Status: **Completed and manually accepted on 2026-09-05.** The current status-bar error feedback is adequate for this milestone; a more prominent notification treatment is deferred to UI beautification.
+
+**Set start to playhead** and **Set end to playhead** actions move a shared boundary; they never create gaps or overlaps.
 
 - Setting a selected segment's start also changes the previous segment's end.
 - Setting its end also changes the next segment's start.

@@ -168,6 +168,43 @@ class AnnotationEditor:
         self._commit(session, candidate)
         return True
 
+    def move_boundary(
+        self,
+        session: AnnotationSession,
+        boundary_index: int,
+        position_ms: int,
+    ) -> bool:
+        """Move the shared boundary before ``boundary_index`` atomically.
+
+        ``boundary_index`` identifies the interval on the right, so valid
+        values are 1 through ``len(intervals) - 1``. Both neighbouring
+        intervals must retain positive duration.
+        """
+        if not 1 <= boundary_index < len(session.intervals):
+            raise ValueError(
+                f"Boundary index {boundary_index} does not identify an "
+                "internal shared boundary."
+            )
+
+        duration_ms = session.video_info.duration_ms
+        self._require_valid_coverage(session.intervals, duration_ms)
+        left = session.intervals[boundary_index - 1]
+        right = session.intervals[boundary_index]
+        if position_ms == right.start_ms:
+            return False
+        if not left.start_ms < position_ms < right.end_ms:
+            raise ValueError(
+                f"Boundary position ({position_ms}) must be greater than "
+                f"{left.start_ms} and less than {right.end_ms}."
+            )
+
+        candidate = list(session.intervals)
+        candidate[boundary_index - 1] = replace(left, end_ms=position_ms)
+        candidate[boundary_index] = replace(right, start_ms=position_ms)
+        self._require_valid_coverage(candidate, duration_ms)
+        self._commit(session, candidate)
+        return True
+
     @staticmethod
     def _coalesce_adjacent(
         intervals: List[AnnotationInterval],

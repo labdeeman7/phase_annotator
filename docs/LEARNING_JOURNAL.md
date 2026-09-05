@@ -298,6 +298,10 @@ This change also reduces state complexity. A permanent editable draft requires e
 
 C3.3 relabels and coalesces transactionally, so the selected interval's numeric list index may disappear or change. The UI records a timestamp inside the original interval and, after a successful commit, selects whichever normalized interval contains that timestamp. This avoids pretending that a mutable list position is a durable segment identity. A future persisted segment identifier could replace this temporal anchor if annotation operations require stronger identity semantics.
 
+### Model one shared boundary, not two independent endpoints
+
+C3.4 represents the boundary between adjacent intervals by the index of the interval on its right. Moving it replaces the left interval's end and the right interval's start together, then validates and commits once. This models the real invariant directly: adjacent segments share one boundary. Exposing unrelated setters for both timestamps would make gaps and overlaps representable during an edit.
+
 The editor returns `False` for a no-op rather than treating it as an error. “The command was valid but changed nothing” is different from “the command was invalid”; callers can avoid unnecessary refreshes and present accurate feedback when that distinction matters.
 
 ### Law of Demeter

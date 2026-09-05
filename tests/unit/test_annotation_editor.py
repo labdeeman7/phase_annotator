@@ -281,3 +281,63 @@ def test_relabel_interval_rejects_invalid_request_without_mutation(
         editor.relabel_interval(session, interval_index, phase_id)
 
     assert session == original
+
+
+def test_move_boundary_updates_both_neighbours_and_preserves_notes(
+    editor: AnnotationEditor,
+):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1, notes="left"),
+        AnnotationInterval(4_000, 10_000, 2, notes="right"),
+    ]
+
+    changed = editor.move_boundary(session, boundary_index=1, position_ms=6_000)
+
+    assert changed is True
+    assert session.intervals == [
+        AnnotationInterval(0, 6_000, 1, notes="left"),
+        AnnotationInterval(6_000, 10_000, 2, notes="right"),
+    ]
+
+
+def test_move_boundary_at_existing_position_is_no_op(editor: AnnotationEditor):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2),
+    ]
+    original = copy.deepcopy(session)
+
+    changed = editor.move_boundary(session, boundary_index=1, position_ms=4_000)
+
+    assert changed is False
+    assert session == original
+
+
+@pytest.mark.parametrize(
+    ("boundary_index", "position_ms", "message"),
+    [
+        (0, 2_000, "internal shared boundary"),
+        (2, 8_000, "internal shared boundary"),
+        (1, 0, "greater than"),
+        (1, 10_000, "less than"),
+    ],
+)
+def test_move_boundary_rejects_invalid_request_without_mutation(
+    editor: AnnotationEditor,
+    boundary_index: int,
+    position_ms: int,
+    message: str,
+):
+    session = make_session()
+    session.intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2),
+    ]
+    original = copy.deepcopy(session)
+
+    with pytest.raises(ValueError, match=message):
+        editor.move_boundary(session, boundary_index, position_ms)
+
+    assert session == original
