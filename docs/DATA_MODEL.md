@@ -33,6 +33,8 @@ AnnotationSession
 
 Removal is modeled as resolution rather than physical deletion: `convert_to_undefined()` relabels the interval, while `merge_left()` and `merge_right()` adopt the selected neighbour's phase and coalesce. All three preserve full coverage and combine notes chronologically instead of dropping them.
 
+`AnnotationHistory` stores copied before/after interval tuples for up to 100 successful annotation commands. Entries also retain a description and temporal anchor for UI feedback and safe selection relocation. Snapshots are not serialized. Undo/redo verifies that the current intervals match the expected side of the entry, then calls `AnnotationEditor.restore_intervals()` so restored phase IDs and coverage are validated before the session is committed.
+
 `AnnotationInterval` rejects negative starts and requires `start_ms < end_ms`. Its duration is `end_ms - start_ms`. Intervals are treated as half-open `[start_ms, end_ms)`, with adjacent intervals sharing a boundary.
 
 The packaged default ontology contains IDs 1-6 plus Undefined (ID 0). Phase 2 (adhesion dissection) is optional. Names, colors, hotkeys, expected order, initial phase, and Undefined role come from the validated packaged JSON described in `ONTOLOGY_CONFIGURATION.md`. Sessions store ontology identity/version so interval IDs remain interpretable.

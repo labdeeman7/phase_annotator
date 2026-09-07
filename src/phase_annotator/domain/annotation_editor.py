@@ -225,6 +225,19 @@ class AnnotationEditor:
         """Absorb an interval into its right neighbour."""
         return self._merge_with_neighbour(session, interval_index, offset=1)
 
+    def restore_intervals(
+        self,
+        session: AnnotationSession,
+        intervals: Iterable[AnnotationInterval],
+    ) -> bool:
+        """Restore a validated interval snapshot as a new session revision."""
+        candidate = [replace(interval) for interval in intervals]
+        self._require_valid_coverage(candidate, session.video_info.duration_ms)
+        if candidate == session.intervals:
+            return False
+        self._commit(session, candidate)
+        return True
+
     def _merge_with_neighbour(
         self,
         session: AnnotationSession,

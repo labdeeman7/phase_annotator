@@ -2,7 +2,7 @@
 
 ## Purpose and current maturity
 
-This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype currently progressing through Codex milestone C3, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, and synchronized segment navigation exist, while correction tools, UI-integrated saving, recovery, export, and distribution do not.
+This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype currently progressing through Codex milestone C4, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, and in-memory undo/redo exist, while UI-integrated saving, recovery, export, and distribution do not.
 
 Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. While C3 is active, use `docs/C3_CORRECTION_WORKFLOW.md` as its detailed interaction and data-integrity contract. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 

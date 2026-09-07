@@ -13,8 +13,9 @@
 9. **Change phase** in the same menu relabels the complete selected interval, unlike palette/hotkey transitions at the playhead. Equal neighbouring phases coalesce, their notes are combined in order, and the resulting interval remains selected.
 10. **Set start to playhead** moves the boundary shared with the previous segment; **Set end to playhead** moves the boundary shared with the next segment. The unavailable external-video boundary action is disabled, and an invalid playhead position leaves both intervals unchanged.
 11. **Remove / merge** never creates an uncovered hole. Convert to Undefined relabels the selected interval; Merge left/right adopts the chosen neighbour's phase and coalesces. Edge directions are disabled, and closing the menu is Cancel.
+12. Every successful annotation mutation enters a 100-command in-memory history. Undo/Redo buttons and `Ctrl+Z`, `Ctrl+Shift+Z`, or `Ctrl+Y` restore exact validated snapshots. Failed operations, no-ops, playback, seeking, and selection are not recorded; loading another video clears history.
 
-There is currently no draggable boundary correction, undo/redo, save/load, session-level dirty-state indicator, prominent error notification, or export action. Whole-segment relabeling, button-based boundary correction, and explicit Convert to Undefined/Merge left/Merge right resolution are available from the segment action menu.
+There is currently no draggable boundary correction, persistent undo history, save/load, session-level dirty-state indicator, prominent error notification, or export action. Whole-segment relabeling, button-based boundary correction, explicit Convert to Undefined/Merge left/Merge right resolution, and in-memory undo/redo are available.
 
 ## Qt ownership and signal flow
 

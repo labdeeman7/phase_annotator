@@ -45,6 +45,8 @@ def test_main_window_instantiation(qtbot):
     ]
     assert not window._phase_palette.is_annotation_enabled
     assert not hasattr(window, "_segment_inspector")
+    assert not window._btn_undo.isEnabled()
+    assert not window._btn_redo.isEnabled()
 
 
 def test_player_widget_exposes_public_playback_state(qtbot):
@@ -397,6 +399,99 @@ def test_resolve_segment_uses_explicit_no_gap_strategy(
     assert expected_status in window.statusBar().currentMessage()
     assert window._timeline_widget._intervals == window._session.intervals
     assert window._segment_list_widget._intervals == window._session.intervals
+
+
+def test_annotation_command_undo_and_redo_restore_exact_state(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[AnnotationInterval(0, 10_000, 1)],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    monkeypatch.setattr(
+        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
+    )
+
+    window.record_phase_transition(2)
+    changed_state = list(window._session.intervals)
+    assert window._btn_undo.isEnabled()
+    assert not window._btn_redo.isEnabled()
+
+    window._undo_annotation()
+    assert window._session.intervals == [AnnotationInterval(0, 10_000, 1)]
+    assert not window._btn_undo.isEnabled()
+    assert window._btn_redo.isEnabled()
+    assert window.statusBar().currentMessage() == "Undid assign phase 2"
+
+    window._redo_annotation()
+    assert window._session.intervals == changed_state
+    assert window._btn_undo.isEnabled()
+    assert not window._btn_redo.isEnabled()
+    assert window.statusBar().currentMessage() == "Redid assign phase 2"
+
+
+def test_note_edit_is_undoable_and_new_edit_after_undo_clears_redo(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[AnnotationInterval(0, 10_000, 1)],
+    )
+    window._refresh_annotation_views()
+
+    window._save_segment_note(0, "first")
+    window._undo_annotation()
+    assert window._session.intervals[0].notes == ""
+    assert window._history.can_redo
+
+    window._save_segment_note(0, "replacement")
+    assert window._session.intervals[0].notes == "replacement"
+    assert not window._history.can_redo
+
+
+def test_loading_video_clears_annotation_history(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("first.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[AnnotationInterval(0, 10_000, 1)],
+    )
+    window._save_segment_note(0, "history entry")
+    assert window._history.can_undo
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+
+    window._load_video(Path("second.mp4"))
+
+    assert not window._history.can_undo
+    assert not window._history.can_redo
+    assert not window._btn_undo.isEnabled()
+    assert not window._btn_redo.isEnabled()
+
+
+def test_text_focus_reserves_undo_shortcut_for_text_widget(qtbot):
+    window = make_window()
+    line_edit = QLineEdit(window)
+    qtbot.addWidget(window)
+    show_window(qtbot, window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[AnnotationInterval(0, 10_000, 1)],
+    )
+    window._save_segment_note(0, "history entry")
+    line_edit.show()
+    line_edit.setFocus(Qt.OtherFocusReason)
+    qtbot.waitUntil(line_edit.hasFocus)
+    window._update_history_controls()
+
+    assert window._history.can_undo
+    assert not window._undo_shortcut.isEnabled()
+    assert window._btn_undo.isEnabled()
 
 
 def test_selected_and_playhead_active_segments_are_independent(qtbot):

@@ -45,6 +45,7 @@ There is no repository interface, GUI integration, CSV exporter, autosave, backu
 ### UI (`src/phase_annotator/ui/`)
 
 - `main_window.py`: constructs the window and controls, owns session/selection state, delegates annotation mutation to `AnnotationEditor`, and refreshes the synchronized views.
+- `domain/annotation_history.py`: Qt-free bounded command history. It captures isolated before/after interval snapshots around successful mutations and restores them through `AnnotationEditor` validation.
 - `player_widget.py`: wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`.
 - `timeline_widget.py`: paints phase intervals, selection, and playhead; mouse clicks request a combined selection and seek.
 - `segment_list_widget.py`: active `QListWidget`-based custom segment cards and combined selection/seek requests.

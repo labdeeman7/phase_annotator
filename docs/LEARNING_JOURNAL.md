@@ -308,6 +308,20 @@ The editor returns `False` for a no-op rather than treating it as an error. “T
 
 C3.5 does not remove an interval from the list and leave a temporal hole. It asks how the interval's time should be represented: Undefined, absorbed left, or absorbed right. The UI disables impossible directions, while the domain independently rejects them so correctness does not depend on button state. Destructive-looking UI commands should be translated into explicit domain operations that preserve the aggregate's invariants.
 
+## C4.1 — Undo/redo as a state machine
+
+Undo/redo uses two stacks. A successful new command stores its before/after snapshots on the Undo stack and clears Redo. Undo restores the newest before-state, moves that entry to Redo, and Redo restores its after-state and moves it back to Undo. This is not a loop in the Python-control-flow sense; it is a small state machine driven by commands from the user.
+
+Snapshot history was chosen over custom inverse commands. Inverses are attractive when operations are simple, but this editor splits and coalesces intervals and combines notes. Reconstructing the exact prior state from an inverse would be harder to reason about than retaining a copied valid state. The tradeoff is memory, so history is bounded to 100 commands.
+
+Copies are essential because `AnnotationInterval` is mutable. Storing references to `session.intervals` would not preserve history: later note or boundary changes could modify objects supposedly representing the past. `_snapshot()` creates replacement interval objects both when recording and restoring.
+
+`AnnotationHistory.execute()` accepts the mutation as a callable. It captures Before, invokes the transactional editor operation, and captures After only when that operation returns `True`. A no-op or exception therefore creates no entry. It also detects a broken command that reports a change without changing intervals, or reports no change after mutating them.
+
+Undo checks that the current annotation equals the entry's expected After snapshot; Redo checks for Before. This optimistic consistency check prevents a stale history stack from silently overwriting intervals changed outside the command pipeline. Restoration then goes through `AnnotationEditor.restore_intervals()` instead of assigning the list directly.
+
+The temporal anchor is separate from the snapshot. Interval indexes are unstable after splitting and coalescing, so the UI selects the restored interval containing the command's anchor rather than reusing an old index. Text-entry focus disables application history shortcuts so `Ctrl+Z` remains available to the active text editor.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.

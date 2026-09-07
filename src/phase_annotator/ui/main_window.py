@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Optional
+from typing import Callable, Optional
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
@@ -15,6 +15,7 @@ from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.annotation_editor import AnnotationEditor
+from phase_annotator.domain.annotation_history import AnnotationHistory
 from phase_annotator.domain.models import AnnotationSession, VideoInfo
 from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
@@ -35,6 +36,7 @@ class MainWindow(QMainWindow):
             undefined_phase_id=self._ontology.undefined_phase_id,
             initial_phase_id=self._ontology.initial_phase_id,
         )
+        self._history = AnnotationHistory(max_entries=100)
         self._session: Optional[AnnotationSession] = None
         self._video_path: Optional[Path] = None
         # Transient UI selection; valid only for the current interval sequence.
@@ -93,10 +95,22 @@ class MainWindow(QMainWindow):
         self._btn_step_forward.clicked.connect(lambda: self._player_widget.step_frames(1))
         self._btn_step_forward.setEnabled(False)
 
+        self._btn_undo = QPushButton("Undo", self)
+        self._btn_undo.setToolTip("Nothing to undo (Ctrl+Z)")
+        self._btn_undo.clicked.connect(self._undo_annotation)
+        self._btn_undo.setEnabled(False)
+
+        self._btn_redo = QPushButton("Redo", self)
+        self._btn_redo.setToolTip("Nothing to redo (Ctrl+Shift+Z or Ctrl+Y)")
+        self._btn_redo.clicked.connect(self._redo_annotation)
+        self._btn_redo.setEnabled(False)
+
         btn_layout.addWidget(self._btn_open)
         btn_layout.addWidget(self._btn_play)
         btn_layout.addWidget(self._btn_step_back)
         btn_layout.addWidget(self._btn_step_forward)
+        btn_layout.addWidget(self._btn_undo)
+        btn_layout.addWidget(self._btn_redo)
         btn_layout.addStretch()
 
         control_layout.addLayout(btn_layout)
@@ -132,9 +146,11 @@ class MainWindow(QMainWindow):
         )
         self._phase_palette.phase_selected.connect(self.record_phase_transition)
         self._create_phase_shortcuts()
+        self._create_history_shortcuts()
         QApplication.instance().focusChanged.connect(
             self._update_phase_shortcut_state
         )
+        QApplication.instance().focusChanged.connect(self._update_history_controls)
         self.statusBar().showMessage("No video loaded")
 
     def keyPressEvent(self, event) -> None:
@@ -189,15 +205,78 @@ class MainWindow(QMainWindow):
         for shortcut in self._phase_shortcuts:
             shortcut.setEnabled(enabled)
 
+    def _create_history_shortcuts(self) -> None:
+        """Create application history shortcuts without stealing text undo."""
+        self._undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self._undo_shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
+        self._undo_shortcut.activated.connect(self._undo_annotation)
+
+        self._redo_shortcuts = []
+        for sequence in ("Ctrl+Shift+Z", "Ctrl+Y"):
+            shortcut = QShortcut(QKeySequence(sequence), self)
+            shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
+            shortcut.activated.connect(self._redo_annotation)
+            self._redo_shortcuts.append(shortcut)
+        self._update_history_controls()
+
+    def _update_history_controls(self, *_) -> None:
+        """Project stack availability into buttons, tooltips, and shortcuts."""
+        can_undo = self._session is not None and self._history.can_undo
+        can_redo = self._session is not None and self._history.can_redo
+        self._btn_undo.setEnabled(can_undo)
+        self._btn_redo.setEnabled(can_redo)
+
+        undo_description = self._history.undo_description
+        redo_description = self._history.redo_description
+        self._btn_undo.setToolTip(
+            f"Undo {undo_description} (Ctrl+Z)"
+            if undo_description
+            else "Nothing to undo (Ctrl+Z)"
+        )
+        self._btn_redo.setToolTip(
+            f"Redo {redo_description} (Ctrl+Shift+Z or Ctrl+Y)"
+            if redo_description
+            else "Nothing to redo (Ctrl+Shift+Z or Ctrl+Y)"
+        )
+
+        shortcuts_allowed = not self._text_entry_has_focus()
+        self._undo_shortcut.setEnabled(can_undo and shortcuts_allowed)
+        for shortcut in self._redo_shortcuts:
+            shortcut.setEnabled(can_redo and shortcuts_allowed)
+
+    def _execute_annotation_command(
+        self,
+        *,
+        description: str,
+        anchor_ms: int,
+        mutation: Callable[[], bool],
+    ) -> bool:
+        """Run one mutation through the shared history boundary."""
+        if not self._session:
+            return False
+        changed = self._history.execute(
+            self._session,
+            description=description,
+            anchor_ms=anchor_ms,
+            mutation=mutation,
+        )
+        self._update_history_controls()
+        return changed
+
     def record_phase_transition(self, phase_id: int) -> None:
         """Records a phase transition at the current video position timestamp."""
         if not self._session or not self._session.intervals:
             return
+        position_ms = self._player_widget.position_ms
         try:
-            changed = self._editor.apply_transition(
-                self._session,
-                phase_id=phase_id,
-                position_ms=self._player_widget.position_ms,
+            changed = self._execute_annotation_command(
+                description=f"assign phase {phase_id}",
+                anchor_ms=position_ms,
+                mutation=lambda: self._editor.apply_transition(
+                    self._session,
+                    phase_id=phase_id,
+                    position_ms=position_ms,
+                ),
             )
         except ValueError as error:
             self.statusBar().showMessage(f"Annotation not changed: {error}", 5000)
@@ -211,17 +290,17 @@ class MainWindow(QMainWindow):
             phase = self._ontology.get_phase_by_id(phase_id)
             self.statusBar().showMessage(
                 f"Assigned {phase.name} at "
-                f"{format_timecode(self._player_widget.position_ms)}",
+                f"{format_timecode(position_ms)}",
                 3000,
             )
         else:
             phase = self._ontology.get_phase_by_id(phase_id)
             self.statusBar().showMessage(
                 f"Already {phase.name} at "
-                f"{format_timecode(self._player_widget.position_ms)}",
+                f"{format_timecode(position_ms)}",
                 3000,
             )
-        self._update_active_phase(self._player_widget.position_ms)
+        self._update_active_phase(position_ms)
 
     def _open_file_dialog(self) -> None:
         file_path, _ = QFileDialog.getOpenFileName(
@@ -247,6 +326,8 @@ class MainWindow(QMainWindow):
             ontology_id=self._ontology.ontology_id,
             ontology_version=self._ontology.ontology_version,
         )
+        self._history.clear()
+        self._update_history_controls()
         self._select_segment(None)
         self._phase_palette.set_annotation_enabled(False)
         self._phase_palette.set_active_phase(None)
@@ -390,7 +471,13 @@ class MainWindow(QMainWindow):
         if not self._session or not 0 <= index < len(self._session.intervals):
             return False
         try:
-            changed = self._editor.update_notes(self._session, index, notes)
+            changed = self._execute_annotation_command(
+                description="edit segment note",
+                anchor_ms=self._session.intervals[index].start_ms,
+                mutation=lambda: self._editor.update_notes(
+                    self._session, index, notes
+                ),
+            )
         except ValueError as error:
             self.statusBar().showMessage(f"Note not saved: {error}", 5000)
             return False
@@ -407,8 +494,12 @@ class MainWindow(QMainWindow):
             return False
         anchor_ms = self._session.intervals[index].start_ms
         try:
-            changed = self._editor.relabel_interval(
-                self._session, interval_index=index, phase_id=phase_id
+            changed = self._execute_annotation_command(
+                description=f"change segment to phase {phase_id}",
+                anchor_ms=anchor_ms,
+                mutation=lambda: self._editor.relabel_interval(
+                    self._session, interval_index=index, phase_id=phase_id
+                ),
             )
         except ValueError as error:
             self.statusBar().showMessage(f"Segment not relabeled: {error}", 5000)
@@ -455,11 +546,21 @@ class MainWindow(QMainWindow):
         ):
             return False
         position_ms = self._player_widget.position_ms
+        selected = self._session.intervals[segment_index]
+        anchor_ms = (
+            selected.end_ms - 1
+            if boundary_name == "start"
+            else selected.start_ms
+        )
         try:
-            changed = self._editor.move_boundary(
-                self._session,
-                boundary_index=boundary_index,
-                position_ms=position_ms,
+            changed = self._execute_annotation_command(
+                description=f"move segment {boundary_name}",
+                anchor_ms=anchor_ms,
+                mutation=lambda: self._editor.move_boundary(
+                    self._session,
+                    boundary_index=boundary_index,
+                    position_ms=position_ms,
+                ),
             )
         except ValueError as error:
             self.statusBar().showMessage(f"Boundary not changed: {error}", 5000)
@@ -491,7 +592,15 @@ class MainWindow(QMainWindow):
         if operation is None:
             raise ValueError(f"Unknown segment resolution '{resolution}'.")
         try:
-            changed = operation(self._session, index)
+            changed = self._execute_annotation_command(
+                description={
+                    "undefined": "convert segment to Undefined",
+                    "left": "merge segment left",
+                    "right": "merge segment right",
+                }[resolution],
+                anchor_ms=anchor_ms,
+                mutation=lambda: operation(self._session, index),
+            )
         except ValueError as error:
             self.statusBar().showMessage(f"Segment not changed: {error}", 5000)
             return False
@@ -509,6 +618,40 @@ class MainWindow(QMainWindow):
         }
         self.statusBar().showMessage(labels[resolution], 3000)
         return True
+
+    def _undo_annotation(self) -> None:
+        """Restore the previous validated annotation snapshot."""
+        if not self._session:
+            return
+        try:
+            entry = self._history.undo(self._session, self._editor)
+        except ValueError as error:
+            self.statusBar().showMessage(f"Undo failed: {error}", 5000)
+            return
+        if entry is None:
+            return
+        self._select_interval_containing(entry.anchor_ms)
+        self._refresh_annotation_views()
+        self._update_active_phase(self._player_widget.position_ms)
+        self._update_history_controls()
+        self.statusBar().showMessage(f"Undid {entry.description}", 3000)
+
+    def _redo_annotation(self) -> None:
+        """Restore the next validated annotation snapshot."""
+        if not self._session:
+            return
+        try:
+            entry = self._history.redo(self._session, self._editor)
+        except ValueError as error:
+            self.statusBar().showMessage(f"Redo failed: {error}", 5000)
+            return
+        if entry is None:
+            return
+        self._select_interval_containing(entry.anchor_ms)
+        self._refresh_annotation_views()
+        self._update_active_phase(self._player_widget.position_ms)
+        self._update_history_controls()
+        self.statusBar().showMessage(f"Redid {entry.description}", 3000)
 
     def _update_active_phase(self, position_ms: int) -> None:
         """Derive playhead-active state independently from edit selection."""
