@@ -45,7 +45,7 @@ Status: **Completed and manually accepted on 2026-09-07.**
 
 ## C4.4 — Integration and refinement
 
-Status: **Planned.**
+Status: **Completed on 2026-09-07.** The user-visible drag workflow was already manually accepted in C4.3; C4.4 closed the milestone with end-to-end and repeated-edit coverage.
 
 - Verify one drag undoes/redoes as one action.
 - Keep timeline, segment list, palette, playhead, selection, and history controls synchronized.

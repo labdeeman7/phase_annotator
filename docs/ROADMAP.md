@@ -157,7 +157,7 @@ Goal: make temporal correction fast while keeping every edit safe and reversible
 
 The agreed C4.1-C4.4 design, history semantics, and deep-review reading map are detailed in `C4_HISTORY_AND_DRAGGING.md`.
 
-Status: **In progress; C4.1-C4.3 completed and manually accepted.**
+Status: **Completed on 2026-09-07; user-visible workflow manually accepted.**
 
 Implementation:
 
@@ -301,4 +301,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Plan and implement C4 draggable boundaries and undo/redo before persistence work begins.
+Begin C5 media metadata and playback reliability before session persistence work.

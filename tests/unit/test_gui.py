@@ -11,6 +11,7 @@ from phase_annotator.ui.timeline_widget import TimelineWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
+from phase_annotator.domain.validation import validate_contiguous_coverage
 
 
 def make_window() -> MainWindow:
@@ -311,9 +312,116 @@ def test_committed_timeline_drag_is_one_undoable_command(qtbot):
         AnnotationInterval(5_000, 10_000, 2),
     ]
     assert window._history.undo_description == "drag timeline boundary"
+    assert window._selected_segment_index == 1
+    assert window._timeline_widget.selected_index == 1
+    assert window._segment_list_widget.selected_index == 1
     window._undo_annotation()
     assert window._session.intervals == original
     assert not window._history.can_undo
+    assert window._history.can_redo
+
+    window._redo_annotation()
+    assert window._session.intervals == [
+        AnnotationInterval(0, 5_000, 1),
+        AnnotationInterval(5_000, 10_000, 2),
+    ]
+    assert window._selected_segment_index == 1
+
+
+def test_mouse_drag_runs_complete_preview_commit_and_history_flow(
+    qtbot, monkeypatch
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=[
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ],
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    seeks = []
+    monkeypatch.setattr(window._player_widget, "seek_ms", seeks.append)
+    show_window(qtbot, window)
+    timeline = window._timeline_widget
+    boundary_x = timeline._boundary_x(1)
+    target_x = round(0.55 * timeline.width())
+    target_ms = round((target_x / timeline.width()) * 10_000)
+
+    qtbot.mousePress(timeline, Qt.LeftButton, pos=QPoint(boundary_x, 24))
+    qtbot.mouseMove(timeline, QPoint(target_x, 24))
+    assert window._session.intervals[0].end_ms == 4_000
+    assert seeks[-1] == target_ms
+    qtbot.mouseRelease(timeline, Qt.LeftButton, pos=QPoint(target_x, 24))
+
+    assert window._session.intervals == [
+        AnnotationInterval(0, target_ms, 1),
+        AnnotationInterval(target_ms, 10_000, 2),
+    ]
+    assert window._history.undo_description == "drag timeline boundary"
+    assert window._selected_segment_index == 1
+    assert timeline.selected_index == 1
+    assert window._segment_list_widget.selected_index == 1
+
+
+def test_cancelled_boundary_preview_restores_playhead_without_history(
+    qtbot, monkeypatch
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2),
+    ]
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=list(intervals),
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+    seeks = []
+    monkeypatch.setattr(window._player_widget, "seek_ms", seeks.append)
+
+    window._preview_boundary_drag(7_000)
+    window._cancel_boundary_drag("invalid", 4_000)
+
+    assert seeks == [7_000, 4_000]
+    assert window._session.intervals == intervals
+    assert not window._history.can_undo
+    assert window.statusBar().currentMessage().startswith(
+        "Boundary drag cancelled"
+    )
+
+
+def test_repeated_boundary_drags_preserve_coverage_and_undo_individually(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    original = [
+        AnnotationInterval(0, 3_000, 1),
+        AnnotationInterval(3_000, 7_000, 2),
+        AnnotationInterval(7_000, 10_000, 3),
+    ]
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=list(original),
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+
+    window._commit_boundary_drag(1, 4_000)
+    after_first = list(window._session.intervals)
+    window._commit_boundary_drag(2, 8_000)
+
+    assert validate_contiguous_coverage(window._session.intervals, 10_000) == []
+    window._undo_annotation()
+    assert window._session.intervals == after_first
+    window._undo_annotation()
+    assert window._session.intervals == original
 
 
 def test_segment_selection_is_synchronized_across_views(qtbot):

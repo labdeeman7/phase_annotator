@@ -65,7 +65,7 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C4.1: add visible controls plus safe `Ctrl+Z`, `Ctrl+Shift+Z`, and `Ctrl+Y` shortcuts
 - [x] C4.2: add internal-boundary handles, hover feedback, and hit testing
 - [x] C4.3: add transient drag preview, seek feedback, cancel, and one-command commit
-- [ ] C4.4: integrate drag history and complete synchronization/acceptance coverage
+- [x] C4.4: integrate drag history and complete synchronization/acceptance coverage
 
 ## Planned Milestone 4 — Session Saving, Loading, Autosave & Crash Recovery
 
