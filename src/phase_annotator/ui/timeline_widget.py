@@ -12,6 +12,9 @@ class TimelineWidget(QWidget):
 
     BOUNDARY_HIT_RADIUS_PX = 8
     segment_selection_requested = Signal(int, int)  # interval index, seek time
+    boundary_preview_requested = Signal(int)  # preview timestamp
+    boundary_move_requested = Signal(int, int)  # boundary index, timestamp
+    boundary_drag_cancelled = Signal(str, int)  # reason, original timestamp
 
     def __init__(
         self,
@@ -32,7 +35,10 @@ class TimelineWidget(QWidget):
         self._selected_index: Optional[int] = None
         self._active_index: Optional[int] = None
         self._hovered_boundary_index: Optional[int] = None
-        self._pressed_boundary_index: Optional[int] = None
+        self._drag_boundary_index: Optional[int] = None
+        self._drag_original_ms: Optional[int] = None
+        self._drag_preview_ms: Optional[int] = None
+        self._drag_preview_valid = False
         self._ontology = ontology
 
     @property
@@ -47,8 +53,21 @@ class TimelineWidget(QWidget):
     def hovered_boundary_index(self) -> Optional[int]:
         return self._hovered_boundary_index
 
+    @property
+    def drag_boundary_index(self) -> Optional[int]:
+        return self._drag_boundary_index
+
+    @property
+    def drag_preview_ms(self) -> Optional[int]:
+        return self._drag_preview_ms
+
+    @property
+    def is_drag_preview_valid(self) -> bool:
+        return self._drag_preview_valid
+
     def set_duration(self, duration_ms: int) -> None:
         self._duration_ms = max(0, duration_ms)
+        self._reset_drag_state()
         self._set_hovered_boundary(None)
         self.update()
 
@@ -58,6 +77,7 @@ class TimelineWidget(QWidget):
 
     def set_intervals(self, intervals: List[AnnotationInterval]) -> None:
         self._intervals = intervals
+        self._reset_drag_state()
         self._set_hovered_boundary(None)
         self.update()
 
@@ -128,6 +148,18 @@ class TimelineWidget(QWidget):
             painter.setPen(pen)
             painter.drawLine(needle_x, 0, needle_x, height)
 
+            # Draw transient preview last so the playhead cannot hide whether
+            # the proposed release is valid (cyan) or invalid (red).
+            if self._drag_preview_ms is not None:
+                preview_x = round(
+                    (self._drag_preview_ms / self._duration_ms) * width
+                )
+                preview_color = QColor(
+                    "#00D1FF" if self._drag_preview_valid else "#FF3B30"
+                )
+                painter.setPen(QPen(preview_color, 4))
+                painter.drawLine(preview_x, 0, preview_x, height)
+
         # Draw Border
         painter.setPen(QPen(QColor("#444444"), 1))
         painter.drawRect(0, 0, width - 1, height - 1)
@@ -138,9 +170,13 @@ class TimelineWidget(QWidget):
             click_x = event.position().x()
             boundary_index = self.boundary_index_at_x(click_x)
             if boundary_index is not None:
-                # C4.2 reserves the handle gesture. C4.3 will turn this press
-                # into transient drag preview state and one release command.
-                self._pressed_boundary_index = boundary_index
+                original_ms = self._intervals[boundary_index].start_ms
+                self._drag_boundary_index = boundary_index
+                self._drag_original_ms = original_ms
+                self._drag_preview_ms = original_ms
+                self._drag_preview_valid = True
+                self.setCursor(Qt.CursorShape.SplitHCursor)
+                self.update()
                 event.accept()
                 return
             ratio = max(0.0, min(1.0, click_x / self.width()))
@@ -158,17 +194,54 @@ class TimelineWidget(QWidget):
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event) -> None:
-        if event.button() == Qt.MouseButton.LeftButton:
-            self._pressed_boundary_index = None
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            and self._drag_boundary_index is not None
+        ):
+            self._update_drag_preview(event.position().x())
+            boundary_index = self._drag_boundary_index
+            original_ms = self._drag_original_ms
+            preview_ms = self._drag_preview_ms
+            preview_valid = self._drag_preview_valid
+            self._reset_drag_state()
+            self._set_hovered_boundary(
+                self.boundary_index_at_x(event.position().x())
+            )
+            if preview_ms == original_ms:
+                self.boundary_drag_cancelled.emit("unchanged", original_ms)
+            elif preview_valid:
+                self.boundary_move_requested.emit(boundary_index, preview_ms)
+            else:
+                self.boundary_drag_cancelled.emit("invalid", original_ms)
+            event.accept()
+            return
         super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event) -> None:
+        if self._drag_boundary_index is not None:
+            self._update_drag_preview(event.position().x())
+            event.accept()
+            return
         self._set_hovered_boundary(self.boundary_index_at_x(event.position().x()))
         super().mouseMoveEvent(event)
 
     def leaveEvent(self, event) -> None:
-        self._set_hovered_boundary(None)
+        if self._drag_boundary_index is None:
+            self._set_hovered_boundary(None)
         super().leaveEvent(event)
+
+    def keyPressEvent(self, event) -> None:
+        if (
+            event.key() == Qt.Key.Key_Escape
+            and self._drag_boundary_index is not None
+        ):
+            original_ms = self._drag_original_ms
+            self._reset_drag_state()
+            self._set_hovered_boundary(None)
+            self.boundary_drag_cancelled.emit("cancelled", original_ms)
+            event.accept()
+            return
+        super().keyPressEvent(event)
 
     def boundary_index_at_x(self, x_position: float) -> Optional[int]:
         """Return the nearest internal boundary within the pixel hit radius."""
@@ -198,3 +271,22 @@ class TimelineWidget(QWidget):
         )
         self.setCursor(cursor)
         self.update()
+
+    def _update_drag_preview(self, x_position: float) -> None:
+        if self._drag_boundary_index is None:
+            return
+        ratio = max(0.0, min(1.0, x_position / self.width()))
+        preview_ms = round(ratio * self._duration_ms)
+        left = self._intervals[self._drag_boundary_index - 1]
+        right = self._intervals[self._drag_boundary_index]
+        self._drag_preview_ms = preview_ms
+        self._drag_preview_valid = left.start_ms < preview_ms < right.end_ms
+        self.setCursor(Qt.CursorShape.SplitHCursor)
+        self.update()
+        self.boundary_preview_requested.emit(preview_ms)
+
+    def _reset_drag_state(self) -> None:
+        self._drag_boundary_index = None
+        self._drag_original_ms = None
+        self._drag_preview_ms = None
+        self._drag_preview_valid = False

@@ -47,7 +47,7 @@ There is no repository interface, GUI integration, CSV exporter, autosave, backu
 - `main_window.py`: constructs the window and controls, owns session/selection state, delegates annotation mutation to `AnnotationEditor`, and refreshes the synchronized views.
 - `domain/annotation_history.py`: Qt-free bounded command history. It captures isolated before/after interval snapshots around successful mutations and restores them through `AnnotationEditor` validation.
 - `player_widget.py`: wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`.
-- `timeline_widget.py`: paints phase intervals, selection, playhead, and internal-boundary handles; it performs non-mutating nearest-boundary hit testing while ordinary clicks request a combined selection and seek.
+- `timeline_widget.py`: paints phase intervals, selection, playhead, internal-boundary handles, and transient drag preview; it emits preview seek, commit, and cancellation intent but never mutates the annotation session.
 - `segment_list_widget.py`: active `QListWidget`-based custom segment cards and combined selection/seek requests.
 - `segment_note_dialog.py`: modal editor for one optional segment note; it exposes the accepted text but does not mutate the session.
 - `table_widget.py`: unused duplicate/experimental M3 implementation; despite its name, it also uses a list rather than a table.

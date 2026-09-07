@@ -138,6 +138,15 @@ class MainWindow(QMainWindow):
         self._timeline_widget.segment_selection_requested.connect(
             self._request_segment_selection
         )
+        self._timeline_widget.boundary_preview_requested.connect(
+            self._preview_boundary_drag
+        )
+        self._timeline_widget.boundary_move_requested.connect(
+            self._commit_boundary_drag
+        )
+        self._timeline_widget.boundary_drag_cancelled.connect(
+            self._cancel_boundary_drag
+        )
         self._segment_list_widget.segment_selection_requested.connect(
             self._request_segment_selection
         )
@@ -545,7 +554,29 @@ class MainWindow(QMainWindow):
             or not 0 <= segment_index < len(self._session.intervals)
         ):
             return False
-        position_ms = self._player_widget.position_ms
+        return self._move_boundary_to_position(
+            segment_index,
+            boundary_index=boundary_index,
+            boundary_name=boundary_name,
+            position_ms=self._player_widget.position_ms,
+            history_description=f"move segment {boundary_name}",
+        )
+
+    def _move_boundary_to_position(
+        self,
+        segment_index: int,
+        *,
+        boundary_index: int,
+        boundary_name: str,
+        position_ms: int,
+        history_description: str,
+    ) -> bool:
+        """Commit one boundary position through validation and history."""
+        if (
+            not self._session
+            or not 0 <= segment_index < len(self._session.intervals)
+        ):
+            return False
         selected = self._session.intervals[segment_index]
         anchor_ms = (
             selected.end_ms - 1
@@ -554,7 +585,7 @@ class MainWindow(QMainWindow):
         )
         try:
             changed = self._execute_annotation_command(
-                description=f"move segment {boundary_name}",
+                description=history_description,
                 anchor_ms=anchor_ms,
                 mutation=lambda: self._editor.move_boundary(
                     self._session,
@@ -577,6 +608,33 @@ class MainWindow(QMainWindow):
             3000,
         )
         return True
+
+    def _preview_boundary_drag(self, position_ms: int) -> None:
+        """Seek with a transient drag preview without changing annotation data."""
+        self._player_widget.seek_ms(position_ms)
+        self._timeline_widget.set_position(position_ms)
+        self._update_active_phase(position_ms)
+        self._update_time_label(position_ms, self._slider.maximum())
+
+    def _commit_boundary_drag(self, boundary_index: int, position_ms: int) -> None:
+        """Commit a completed timeline drag as exactly one history command."""
+        self._move_boundary_to_position(
+            boundary_index,
+            boundary_index=boundary_index,
+            boundary_name="start",
+            position_ms=position_ms,
+            history_description="drag timeline boundary",
+        )
+
+    def _cancel_boundary_drag(self, reason: str, original_ms: int) -> None:
+        """Restore preview seeking and report why no drag command was created."""
+        self._preview_boundary_drag(original_ms)
+        messages = {
+            "unchanged": "Boundary drag made no change",
+            "invalid": "Boundary drag cancelled: position would invalidate a segment",
+            "cancelled": "Boundary drag cancelled",
+        }
+        self.statusBar().showMessage(messages.get(reason, "Boundary drag cancelled"), 3000)
 
     def _resolve_segment(self, index: int, *, resolution: str) -> bool:
         """Apply one explicit no-gap resolution for a selected segment."""

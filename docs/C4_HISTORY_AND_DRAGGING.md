@@ -35,13 +35,13 @@ Status: **Completed and manually accepted on 2026-09-07.**
 
 ## C4.3 — Drag preview and single commit
 
-Status: **Planned.**
+Status: **Completed and manually accepted on 2026-09-07.**
 
 - Mouse press on a handle begins transient preview state.
 - Mouse movement updates the preview and seeks the video without mutating the session.
 - Valid mouse release calls `AnnotationEditor.move_boundary()` exactly once and creates one history entry.
-- Invalid release displays a red preview/error and leaves the session unchanged rather than silently clamping.
-- Escape cancels a drag; releasing at the original position is a no-op.
+- Invalid preview is red; invalid release restores the original playhead and leaves the session unchanged rather than silently clamping.
+- Escape cancels a drag and restores the original playhead; releasing at the original position is a no-op.
 
 ## C4.4 — Integration and refinement
 

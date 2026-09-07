@@ -196,7 +196,124 @@ def test_timeline_handle_click_is_reserved_without_selecting_or_seeking(qtbot):
     qtbot.mouseClick(timeline, Qt.LeftButton, pos=QPoint(400, 24))
 
     assert requests == []
-    assert timeline._pressed_boundary_index is None
+    assert timeline.drag_boundary_index is None
+
+
+def test_timeline_valid_drag_previews_then_requests_one_boundary_move(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    intervals = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 7_000, 2),
+        AnnotationInterval(7_000, 10_000, 3),
+    ]
+    timeline.set_intervals(intervals)
+    previews = []
+    moves = []
+    timeline.boundary_preview_requested.connect(previews.append)
+    timeline.boundary_move_requested.connect(
+        lambda index, position: moves.append((index, position))
+    )
+    timeline.show()
+
+    qtbot.mousePress(timeline, Qt.LeftButton, pos=QPoint(400, 24))
+    qtbot.mouseMove(timeline, QPoint(500, 24))
+    assert timeline.drag_boundary_index == 1
+    assert timeline.drag_preview_ms == 5_000
+    assert timeline.is_drag_preview_valid
+    assert intervals[0].end_ms == 4_000
+    assert intervals[1].start_ms == 4_000
+
+    qtbot.mouseRelease(timeline, Qt.LeftButton, pos=QPoint(500, 24))
+
+    assert previews
+    assert moves == [(1, 5_000)]
+    assert timeline.drag_boundary_index is None
+
+
+def test_timeline_invalid_drag_cancels_without_move_request(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    timeline.set_intervals(
+        [
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ]
+    )
+    moves = []
+    cancellations = []
+    timeline.boundary_move_requested.connect(
+        lambda index, position: moves.append((index, position))
+    )
+    timeline.boundary_drag_cancelled.connect(
+        lambda reason, original: cancellations.append((reason, original))
+    )
+    timeline.show()
+
+    qtbot.mousePress(timeline, Qt.LeftButton, pos=QPoint(400, 24))
+    qtbot.mouseMove(timeline, QPoint(800, 24))
+    assert not timeline.is_drag_preview_valid
+    qtbot.mouseRelease(timeline, Qt.LeftButton, pos=QPoint(800, 24))
+
+    assert moves == []
+    assert cancellations == [("invalid", 4_000)]
+
+
+def test_timeline_escape_cancels_active_drag(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    timeline.set_intervals(
+        [
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ]
+    )
+    cancellations = []
+    timeline.boundary_drag_cancelled.connect(
+        lambda reason, original: cancellations.append((reason, original))
+    )
+    timeline.show()
+
+    qtbot.mousePress(timeline, Qt.LeftButton, pos=QPoint(400, 24))
+    qtbot.mouseMove(timeline, QPoint(500, 24))
+    qtbot.keyClick(timeline, Qt.Key_Escape)
+
+    assert timeline.drag_boundary_index is None
+    assert cancellations == [("cancelled", 4_000)]
+
+
+def test_committed_timeline_drag_is_one_undoable_command(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    original = [
+        AnnotationInterval(0, 4_000, 1),
+        AnnotationInterval(4_000, 10_000, 2),
+    ]
+    window._session = AnnotationSession(
+        video_info=VideoInfo("synthetic_case.mp4", duration_ms=10_000),
+        annotator_id="annotator_01",
+        intervals=list(original),
+    )
+    window._timeline_widget.set_duration(10_000)
+    window._refresh_annotation_views()
+
+    window._commit_boundary_drag(1, 5_000)
+
+    assert window._session.intervals == [
+        AnnotationInterval(0, 5_000, 1),
+        AnnotationInterval(5_000, 10_000, 2),
+    ]
+    assert window._history.undo_description == "drag timeline boundary"
+    window._undo_annotation()
+    assert window._session.intervals == original
+    assert not window._history.can_undo
 
 
 def test_segment_selection_is_synchronized_across_views(qtbot):

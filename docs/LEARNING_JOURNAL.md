@@ -328,6 +328,12 @@ The timeline converts every internal boundary timestamp into an x-coordinate, th
 
 Separating hit testing and hover feedback from dragging makes the interaction easier to verify: C4.2 can prove which boundary the user targeted without changing annotation data. C4.3 can then build a drag state machine on top of that stable geometric decision.
 
+### C4.3 — Preview is not committed state
+
+An active drag stores boundary index, original timestamp, preview timestamp, and preview validity inside `TimelineWidget`. Mouse movement changes only those fields and requests a video seek. Mouse release emits one commit intent only when valid and changed; `MainWindow` then uses the same `AnnotationEditor.move_boundary()` and history gateway as button-based correction.
+
+This distinction prevents dozens of mouse-move events from becoming dozens of domain mutations or Undo entries. It is a general interaction pattern: keep rapidly changing gesture state local and temporary, then translate the completed gesture into one application command.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.
