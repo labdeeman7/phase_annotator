@@ -133,6 +133,72 @@ def test_timeline_click_selects_interval_and_requests_seek(qtbot):
     assert requests == [(1, 7_500)]
 
 
+def test_timeline_boundary_hit_testing_uses_nearest_internal_boundary(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    timeline.set_intervals(
+        [
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ]
+    )
+
+    assert timeline.boundary_index_at_x(400) == 1
+    assert timeline.boundary_index_at_x(407) == 1
+    assert timeline.boundary_index_at_x(693) == 2
+    assert timeline.boundary_index_at_x(500) is None
+    assert timeline.boundary_index_at_x(0) is None
+    assert timeline.boundary_index_at_x(1_000) is None
+
+
+def test_timeline_boundary_hover_changes_cursor(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    timeline.set_intervals(
+        [
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ]
+    )
+    timeline.show()
+
+    qtbot.mouseMove(timeline, QPoint(400, 24))
+    assert timeline.hovered_boundary_index == 1
+    assert timeline.cursor().shape() == Qt.CursorShape.SplitHCursor
+
+    qtbot.mouseMove(timeline, QPoint(600, 24))
+    assert timeline.hovered_boundary_index is None
+    assert timeline.cursor().shape() == Qt.CursorShape.PointingHandCursor
+
+
+def test_timeline_handle_click_is_reserved_without_selecting_or_seeking(qtbot):
+    timeline = TimelineWidget(ontology=load_default_ontology())
+    qtbot.addWidget(timeline)
+    timeline.resize(1_000, 48)
+    timeline.set_duration(10_000)
+    timeline.set_intervals(
+        [
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 10_000, 2),
+        ]
+    )
+    requests = []
+    timeline.segment_selection_requested.connect(
+        lambda index, seek_ms: requests.append((index, seek_ms))
+    )
+    timeline.show()
+
+    qtbot.mouseClick(timeline, Qt.LeftButton, pos=QPoint(400, 24))
+
+    assert requests == []
+    assert timeline._pressed_boundary_index is None
+
+
 def test_segment_selection_is_synchronized_across_views(qtbot):
     window = make_window()
     qtbot.addWidget(window)

@@ -26,10 +26,10 @@ Use validated before/after interval snapshots rather than bespoke inverse logic.
 
 ## C4.2 — Boundary handles and hit testing
 
-Status: **Planned.**
+Status: **Completed and manually accepted on 2026-09-07.**
 
-- Draw handles only for internal shared boundaries.
-- Use a forgiving pixel hit area and a resize cursor near a handle.
+- Draw subtle lines only for internal shared boundaries and emphasize the hovered handle in cyan.
+- Use an 8-pixel nearest-boundary hit area and a horizontal-resize cursor near a handle.
 - Preserve normal click-to-select/seek behavior away from handles.
 - Test boundary choice independently from mutation.
 

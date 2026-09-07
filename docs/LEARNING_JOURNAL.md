@@ -322,6 +322,12 @@ Undo checks that the current annotation equals the entry's expected After snapsh
 
 The temporal anchor is separate from the snapshot. Interval indexes are unstable after splitting and coalescing, so the UI selects the restored interval containing the command's anchor rather than reusing an old index. Text-entry focus disables application history shortcuts so `Ctrl+Z` remains available to the active text editor.
 
+### C4.2 — Hit testing before mutation
+
+The timeline converts every internal boundary timestamp into an x-coordinate, then uses a generator expression to find the `(distance, boundary_index)` pair with the smallest distance. Python tuple ordering also makes an exact tie deterministic by choosing the smaller index. The boundary is interactive only when that distance is within eight pixels.
+
+Separating hit testing and hover feedback from dragging makes the interaction easier to verify: C4.2 can prove which boundary the user targeted without changing annotation data. C4.3 can then build a drag state machine on top of that stable geometric decision.
+
 ### Law of Demeter
 
 The Law of Demeter is often summarized as “talk only to your immediate friends.” Code such as `main_window._player_widget._player.position()` reaches through one object into another object's private implementation and creates fragile coupling. A public property such as `player_widget.position_ms` lets callers depend on the wrapper's contract instead.

@@ -157,7 +157,7 @@ Goal: make temporal correction fast while keeping every edit safe and reversible
 
 The agreed C4.1-C4.4 design, history semantics, and deep-review reading map are detailed in `C4_HISTORY_AND_DRAGGING.md`.
 
-Status: **In progress; C4.1 completed and manually accepted.**
+Status: **In progress; C4.1-C4.2 completed and manually accepted.**
 
 Implementation:
 

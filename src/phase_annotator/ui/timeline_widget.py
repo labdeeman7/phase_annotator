@@ -10,6 +10,7 @@ from phase_annotator.domain.ontology import PhaseOntology
 class TimelineWidget(QWidget):
     """Custom Qt canvas widget rendering surgical phase intervals & interactive playhead needle."""
 
+    BOUNDARY_HIT_RADIUS_PX = 8
     segment_selection_requested = Signal(int, int)  # interval index, seek time
 
     def __init__(
@@ -23,12 +24,15 @@ class TimelineWidget(QWidget):
         self.setMinimumWidth(300)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+        self.setMouseTracking(True)
 
         self._duration_ms: int = 0
         self._current_position_ms: int = 0
         self._intervals: List[AnnotationInterval] = []
         self._selected_index: Optional[int] = None
         self._active_index: Optional[int] = None
+        self._hovered_boundary_index: Optional[int] = None
+        self._pressed_boundary_index: Optional[int] = None
         self._ontology = ontology
 
     @property
@@ -39,8 +43,13 @@ class TimelineWidget(QWidget):
     def active_index(self) -> Optional[int]:
         return self._active_index
 
+    @property
+    def hovered_boundary_index(self) -> Optional[int]:
+        return self._hovered_boundary_index
+
     def set_duration(self, duration_ms: int) -> None:
         self._duration_ms = max(0, duration_ms)
+        self._set_hovered_boundary(None)
         self.update()
 
     def set_position(self, position_ms: int) -> None:
@@ -49,6 +58,7 @@ class TimelineWidget(QWidget):
 
     def set_intervals(self, intervals: List[AnnotationInterval]) -> None:
         self._intervals = intervals
+        self._set_hovered_boundary(None)
         self.update()
 
     def set_selected_index(self, index: Optional[int]) -> None:
@@ -100,6 +110,18 @@ class TimelineWidget(QWidget):
                     painter.setPen(QPen(QColor("#00D1FF"), 3))
                     painter.drawRect(start_x + 2, 6, max(0, block_width - 4), height - 13)
 
+            # Internal boundaries are shared by two intervals. Keep their
+            # resting treatment subtle, then make the active handle obvious.
+            for boundary_index in range(1, len(self._intervals)):
+                boundary_x = self._boundary_x(boundary_index)
+                hovered = boundary_index == self._hovered_boundary_index
+                color = QColor("#00D1FF" if hovered else "#D0D0D0")
+                painter.setPen(QPen(color, 4 if hovered else 1))
+                painter.drawLine(boundary_x, 3, boundary_x, height - 4)
+                if hovered:
+                    painter.fillRect(boundary_x - 4, 2, 9, 6, color)
+                    painter.fillRect(boundary_x - 4, height - 8, 9, 6, color)
+
             # Draw Playhead Needle (Red Vertical Line)
             needle_x = int((self._current_position_ms / self._duration_ms) * width)
             pen = QPen(QColor("#FF0000"), 3)
@@ -114,6 +136,13 @@ class TimelineWidget(QWidget):
         if self._duration_ms > 0 and event.button() == Qt.MouseButton.LeftButton:
             self.setFocus(Qt.FocusReason.MouseFocusReason)
             click_x = event.position().x()
+            boundary_index = self.boundary_index_at_x(click_x)
+            if boundary_index is not None:
+                # C4.2 reserves the handle gesture. C4.3 will turn this press
+                # into transient drag preview state and one release command.
+                self._pressed_boundary_index = boundary_index
+                event.accept()
+                return
             ratio = max(0.0, min(1.0, click_x / self.width()))
             target_ms = int(ratio * self._duration_ms)
             # Half-open intervals exclude duration_ms. Use the last real
@@ -124,3 +153,48 @@ class TimelineWidget(QWidget):
                 if interval.start_ms <= selection_ms < interval.end_ms:
                     self.segment_selection_requested.emit(index, target_ms)
                     break
+            event.accept()
+            return
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self._pressed_boundary_index = None
+        super().mouseReleaseEvent(event)
+
+    def mouseMoveEvent(self, event) -> None:
+        self._set_hovered_boundary(self.boundary_index_at_x(event.position().x()))
+        super().mouseMoveEvent(event)
+
+    def leaveEvent(self, event) -> None:
+        self._set_hovered_boundary(None)
+        super().leaveEvent(event)
+
+    def boundary_index_at_x(self, x_position: float) -> Optional[int]:
+        """Return the nearest internal boundary within the pixel hit radius."""
+        if self._duration_ms <= 0 or self.width() <= 0 or len(self._intervals) < 2:
+            return None
+        candidates = (
+            (abs(x_position - self._boundary_x(index)), index)
+            for index in range(1, len(self._intervals))
+        )
+        distance, boundary_index = min(candidates)
+        if distance <= self.BOUNDARY_HIT_RADIUS_PX:
+            return boundary_index
+        return None
+
+    def _boundary_x(self, boundary_index: int) -> int:
+        boundary_ms = self._intervals[boundary_index].start_ms
+        return round((boundary_ms / self._duration_ms) * self.width())
+
+    def _set_hovered_boundary(self, boundary_index: Optional[int]) -> None:
+        if boundary_index == self._hovered_boundary_index:
+            return
+        self._hovered_boundary_index = boundary_index
+        cursor = (
+            Qt.CursorShape.SplitHCursor
+            if boundary_index is not None
+            else Qt.CursorShape.PointingHandCursor
+        )
+        self.setCursor(cursor)
+        self.update()
