@@ -83,7 +83,7 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C5.3: implement explicit lightweight match/mismatch/unknown source comparison
 - [x] C5.4: label frame timing honestly and propagate measured/assumed FPS
 - [x] C5.5: surface actionable media/backend failures and disable invalid annotation state
-- [ ] C5.6: validate with synthetic and representative non-committed media
+- [x] C5.6: validate with synthetic and representative non-committed media
 
 ## Upcoming Milestones
 

@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-09-09 against the C5.4 working tree based on `main` at `79449ce`.
+Last verified on 2026-09-09 against the completed C5 working tree based on `main` at `74b808d`.
 
 ## What the application currently does
 
@@ -63,4 +63,4 @@ On 2026-09-09, the repository-local Python 3.11.5 environment passed all 142 tes
 
 ## Recommended next increment
 
-Complete C5.6 integration validation with synthetic and representative non-committed media. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.
+Begin C6 manual session save, load, and dirty-state safety. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.

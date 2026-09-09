@@ -2,9 +2,9 @@
 
 ## Purpose and current maturity
 
-This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype completed through Codex milestone C4 and moving next to C5, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, draggable boundaries, and in-memory undo/redo exist, while reliable media metadata, UI-integrated saving, recovery, export, and distribution do not.
+This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype completed through Codex milestone C5 and moving next to C6, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, draggable boundaries, undo/redo, media metadata, and failure handling exist, while UI-integrated saving, recovery, export, and distribution do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C5 is active; `docs/C5_MEDIA_RELIABILITY.md` is its detailed contract. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C5 is complete; `docs/C5_MEDIA_RELIABILITY.md` records its media contract and validation evidence. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 

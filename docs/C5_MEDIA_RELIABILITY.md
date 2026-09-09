@@ -62,12 +62,14 @@ Status: **Complete.**
 
 ## C5.6 — Integration validation
 
-Status: **Planned.**
+Status: **Complete.**
 
-- Unit-test optional/missing metadata, source descriptors, compatibility, and failure mapping.
-- Test a small generated synthetic CFR asset where practical without committing clinical or large media.
-- Manually test representative project media and document backend/platform limits.
+- The complete 142-test suite covers optional/missing metadata, schema 1.0 compatibility, Qt translation, descriptor comparison, stale results, timing presentation, and failure-state controls.
+- `scripts/smoke_test_media.py` provides a repeatable local Qt-pipeline check without hashing the source or printing its absolute path.
+- On the current Windows/PySide6 backend, the ignored representative H.264/AAC MP4 loaded in under two seconds with duration 2,050,703 ms, resolution 720×576, Qt-reported 24.9875 FPS, one initial coverage interval, and no media error.
+- A generated video fixture was not committed or made dependent on a system media executable. Synthetic Qt metadata and invalid/missing-file behavior are deterministic automated tests; codec decoding remains a local smoke test.
+- This validates the current machine/backend only. Linux and packaged-application codec behavior remain distribution test obligations.
 
 ## Learning-mode reading map
 
-For C5.5, focus on `VideoPlayerWidget._forward_media_error()`, `MainWindow._on_media_error()`, and the early failure branch in `_load_video()`. Skim the Qt error-message mapping and repeated control assertions.
+For C5.6, focus on `scripts/smoke_test_media.py` and the validation record above. The important distinction is between deterministic automated contract tests and a representative environment-dependent codec smoke test.

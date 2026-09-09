@@ -31,6 +31,9 @@ python -m pytest -v tests/
 
 # Syntax/import-independent compilation check
 python -m compileall -q src tests
+
+# Manual local-media smoke check (the video remains ignored by Git)
+python scripts/smoke_test_media.py test_dataset/<local-video>.mp4
 ```
 
 On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless Qt tests. There is currently no configured linter, formatter, type checker, coverage threshold, or CI job.
@@ -43,4 +46,4 @@ On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless
 
 ## Current coverage gaps
 
-There are no tests for real playback/codec behavior, phase hotkey transitions, invalid transition rollback, timeline/card seek signals, save failures, backup/recovery, schema compatibility, or a complete GUI workflow. See `CURRENT_STATE.md` before interpreting a green suite as production readiness.
+The automated suite does not decode real video. `scripts/smoke_test_media.py` provides an explicit local-backend check using ignored representative media and reports only the basename plus technical metadata. There are still no automated tests for cross-platform codec behavior, save failures, backup/recovery, or a complete persisted GUI workflow. See `CURRENT_STATE.md` before interpreting a green suite as production readiness.
