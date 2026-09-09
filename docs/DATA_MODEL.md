@@ -101,6 +101,8 @@ Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 adds o
 
 The media fields form a lightweight **source descriptor**, not guaranteed identity. No content hash is stored. `source_path` is a convenient last-known locator but can become stale after a move and may reveal local directory or user names; exclude it from research exports, logs, screenshots, fixtures, and committed examples. File size and modification time can support later mismatch warnings but cannot prove equality. `frame_numbers_are_estimated` remains true unless a measured FPS and known CFR mode are both available.
 
+Source comparison returns `match`, `mismatch`, or `unknown` with per-field evidence. Filename agreement alone is unknown; at least one other descriptor must agree. Conflicting filename, size, modification time, duration, or dimensions is a mismatch. A different absolute path is reported but treated as relocation rather than a conflict when the remaining evidence agrees. Duration comparison allows a small backend-rounding tolerance. No result proves byte-for-byte identity.
+
 ## Integrity requirements for future work
 
 Before UI-integrated persistence or export, make these policies explicit and tested:

@@ -33,12 +33,13 @@ Status: **Complete.**
 
 ## C5.3 — Lightweight source matching
 
-Status: **Planned.**
+Status: **Complete.**
 
-- Compare basename, size, modification time, duration, and dimensions with explicit match/mismatch/unknown results.
-- Treat an absolute-path match as location continuity, not proof of content identity.
-- Allow C6 relocation after warning when a descriptor differs; never silently attach a session to a conflicting video.
-- Document that two files can share all lightweight evidence and still differ.
+- `compare_video_source()` returns an explainable `match`, `mismatch`, or `unknown` result plus per-field evidence.
+- Conflicting filename, size, modification time, duration, or dimensions produces `mismatch`. Duration allows 100 ms of backend rounding by default.
+- A matching filename alone is insufficient and returns `unknown`; it needs at least one agreeing descriptor field.
+- A changed absolute path is reported as relocation evidence but does not by itself make otherwise matching media conflict.
+- These results remain warning evidence, not proof that file contents are identical. C6 will use them when opening and relocating saved sessions.
 
 ## C5.4 — Honest timing UI
 
@@ -67,4 +68,4 @@ Status: **Planned.**
 
 ## Learning-mode reading map
 
-For C5.2, focus on `media/metadata.py`, `read_qt_media_metadata()`, `VideoPlayerWidget._emit_metadata()`, and `MainWindow._on_media_metadata_available()`. Notice the stale-source guard in the last function. Skim Qt widget construction and repeated metadata assertions.
+For C5.3, focus on `compare_video_source()` and the three result dataclasses/enums in `media/matching.py`. The central rule is that path evidence is reported but excluded from the conflict decision. Skim the small field-helper functions and repeated parameterized mismatch cases.

@@ -46,6 +46,7 @@ There is no repository interface, GUI integration, CSV exporter, autosave, backu
 
 - `metadata.py`: frozen toolkit-neutral metadata/failure results and cheap filesystem descriptor probing.
 - `qt_metadata.py`: translates backend-dependent Qt metadata without claiming CFR/VFR knowledge.
+- `matching.py`: produces explainable source match/mismatch/unknown evidence without treating the path as content identity.
 
 The media layer never hashes video contents or searches `PATH` for external executables. `VideoPlayerWidget` emits translated snapshots, and `MainWindow` applies them only when their source still matches the current video.
 

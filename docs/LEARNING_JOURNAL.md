@@ -407,3 +407,9 @@ A file path is similarly a **locator**, not an identity. Size and modification t
 Qt metadata arrives asynchronously and differs by operating-system backend. `MediaMetadata` is therefore a small neutral result, while `read_qt_media_metadata()` is an adapter that translates Qt-specific objects at the application boundary. The annotation domain never imports Qt and missing metadata remains `None` rather than becoming a fabricated default.
 
 Asynchronous results can become stale: a slow signal for video A might arrive after video B is opened. `MainWindow` compares the result's resolved source path with the current source before applying it. This is a reusable UI rule—an asynchronous result should carry enough context for its receiver to prove that it still belongs to the current request.
+
+## C5.3 — Conservative comparisons should explain their evidence
+
+A source comparison is not naturally just `True` or `False`. Missing old-session metadata means “we do not know,” which differs from “a known field conflicts.” `SourceMatchStatus` therefore models three states, while `SourceEvidence` preserves how every field contributed. This is useful whenever uncertainty must not be silently converted into success or failure.
+
+The absolute path is deliberately excluded from the overall conflict decision: paths answer “where was it?” rather than “what is it?” A moved file can still match its filename and other descriptor evidence. Conversely, filename agreement alone remains unknown because it is too weak to accept a source confidently.
