@@ -1,3 +1,4 @@
+from dataclasses import replace
 from pathlib import Path
 from typing import Callable, Optional
 from PySide6.QtCore import Qt
@@ -19,6 +20,7 @@ from phase_annotator.domain.annotation_history import AnnotationHistory
 from phase_annotator.domain.models import AnnotationSession, VideoInfo
 from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
+from phase_annotator.media import MediaMetadata, probe_local_file
 
 
 class MainWindow(QMainWindow):
@@ -134,6 +136,9 @@ class MainWindow(QMainWindow):
         self._player_widget.duration_changed.connect(self._on_duration_changed)
         self._player_widget.playback_state_changed.connect(
             self._on_playback_state_changed
+        )
+        self._player_widget.metadata_available.connect(
+            self._on_media_metadata_available
         )
         self._timeline_widget.segment_selection_requested.connect(
             self._request_segment_selection
@@ -324,10 +329,16 @@ class MainWindow(QMainWindow):
     def _load_video(self, path: Path) -> None:
         """Starts loading a video and prepares its empty annotation session."""
         self._video_path = path
+        source_metadata = probe_local_file(path)
         video_info = VideoInfo(
             video_id=path.name,
             duration_ms=0,
             fps=self._player_widget.fps,
+            source_path=source_metadata.source_path,
+            file_size_bytes=source_metadata.file_size_bytes,
+            file_modified_ns=source_metadata.file_modified_ns,
+            fps_source="assumed",
+            frame_rate_mode="unknown",
         )
         self._session = AnnotationSession(
             video_info=video_info,
@@ -348,6 +359,30 @@ class MainWindow(QMainWindow):
         self._btn_step_forward.setEnabled(True)
         self.statusBar().showMessage(f"Loading: {path.name}")
         self._player_widget.load_video(path)
+
+    def _on_media_metadata_available(self, metadata: MediaMetadata) -> None:
+        """Apply late Qt metadata only when it belongs to the current video."""
+        if self._session is None or self._video_path is None:
+            return
+        if metadata.source_path != str(self._video_path.resolve()):
+            return
+
+        current = self._session.video_info
+        fps = metadata.fps if metadata.fps is not None else current.fps
+        fps_source = metadata.fps_source if metadata.fps is not None else current.fps_source
+        self._session.video_info = replace(
+            current,
+            duration_ms=metadata.duration_ms or current.duration_ms,
+            width=metadata.width or current.width,
+            height=metadata.height or current.height,
+            file_size_bytes=metadata.file_size_bytes,
+            file_modified_ns=metadata.file_modified_ns,
+            fps=fps,
+            fps_source=fps_source,
+            frame_rate_mode=metadata.frame_rate_mode,
+        )
+        if metadata.fps is not None:
+            self._player_widget.fps = metadata.fps
 
     def _on_position_changed(self, position_ms: int) -> None:
         if not self._slider.isSliderDown():

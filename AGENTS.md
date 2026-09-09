@@ -4,7 +4,7 @@
 
 This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype completed through Codex milestone C4 and moving next to C5, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, draggable boundaries, and in-memory undo/redo exist, while reliable media metadata, UI-integrated saving, recovery, export, and distribution do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. While C3 is active, use `docs/C3_CORRECTION_WORKFLOW.md` as its detailed interaction and data-integrity contract. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C5 is active; `docs/C5_MEDIA_RELIABILITY.md` is its detailed contract. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
@@ -20,7 +20,9 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 
 - Keep `domain/` free of PySide6 and storage/IO imports. Domain behavior must remain testable with ordinary pytest.
 - Treat `AnnotationSession` as the in-memory aggregate and `AnnotationInterval` timestamps as milliseconds. Interval semantics are currently effectively half-open `[start_ms, end_ms)` because adjacent boundaries are accepted.
-- Do not claim frame accuracy from the current FPS approximation. The player defaults to 30 FPS and does not inspect source metadata; VFR videos cannot be mapped reliably with the current helpers.
+- Do not claim frame accuracy from the current FPS approximation. Keep FPS provenance and CFR/VFR knowledge explicit; VFR videos cannot be mapped reliably with the current helpers.
+- Never hash source videos. Use the lightweight source descriptor documented for C5. Absolute paths are local session data and must not leak into research exports, logs, screenshots, or committed examples.
+- C5 deliberately uses the packaged PySide6/Qt metadata APIs, not `ffprobe`. Never invoke a system executable from `PATH`; reconsidering a bundled probe belongs to future distribution work with explicit binary provenance, licensing, and platform testing.
 - Preserve session metadata and schema compatibility. Never silently discard unknown or existing annotation data during migrations.
 - Session writes must remain same-directory temporary writes followed by `os.replace`. Before promising backup/recovery behavior, implement and test it; current code does not create `.bak` files.
 - Do not add patient-identifying information to source control, fixtures, logs, screenshots, or example session files. Use synthetic identifiers and metadata.

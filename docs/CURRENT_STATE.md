@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-09-05 against `main` at `15b3892`.
+Last verified on 2026-09-09 against the C5.1 working tree based on `main` at `5f0fd78`.
 
 ## What the application currently does
 
@@ -8,7 +8,7 @@ The application starts a PySide6 desktop window, lets the user choose a local vi
 
 The segment-card action menu is available through right-click and a discoverable **⋮** button. **Edit note...** opens a modal Save/Cancel dialog, and cards with notes show a compact indicator and full-note tooltip. **Change phase** exposes every configured ontology phase and relabels the complete selected segment. Relabeling preserves notes, coalesces equal neighbours, and keeps the resulting interval selected. **Set start to playhead** and **Set end to playhead** move the appropriate shared boundary atomically while preserving positive adjacent durations. **Remove / merge** offers Convert to Undefined, Merge left, and Merge right; unavailable directions are disabled and closing the menu cancels. Visible Undo/Redo buttons and `Ctrl+Z`, `Ctrl+Shift+Z`, and `Ctrl+Y` restore validated interval snapshots for every annotation mutation. Internal timeline boundaries have subtle handles, an emphasized cyan hover state, a resize cursor, and deterministic nearest-boundary hit testing. Dragging a handle seeks and previews without mutating data; one valid release creates one history command, while invalid/Escape cancellation restores the original playhead. The earlier permanent inspector prototype was rejected and removed because notes are infrequent and should not consume persistent sidebar space.
 
-The pure-Python layer provides Undefined plus the six provisional appendectomy phases, session/video/interval dataclasses, millisecond/frame formatting helpers, coverage/overlap validation, and JSON round-trip persistence through a stateless repository.
+The pure-Python layer provides Undefined plus the six provisional appendectomy phases, session/video/interval dataclasses, millisecond/frame formatting helpers, coverage/overlap validation, and JSON round-trip persistence through a stateless repository. C5.1 extends new sessions to schema 1.1 with optional lightweight media descriptors and explicit FPS provenance/frame-rate knowledge; schema 1.0 JSON remains loadable. C5.2 adds a neutral media-result/failure contract, cheap filesystem probing, and a Qt adapter for late duration, resolution, and reported-FPS metadata.
 
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
@@ -20,8 +20,8 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 - The UI never calls `JsonSessionRepository`. There is no manual save, session-open flow, autosave, crash recovery, or close protection.
 - `MainWindow` still combines view construction and presenter/controller coordination; a dedicated presenter has not been extracted.
 - C3 and C4 are complete, with the user-visible correction, dragging, and undo/redo workflows manually accepted. History is not persisted across application or video loads.
-- FPS remains the hard-coded 30.0 default unless code sets it manually. No media metadata is extracted. Frame stepping is millisecond seeking, not decoder-accurate frame navigation.
-- Only the video basename is stored as `video_id`; there is no path, hash, size, or other identity check for reconnecting sessions to source media.
+- The GUI begins with 30.0 FPS explicitly marked `assumed`, then adopts a positive FPS reported by Qt and labels its source `qt`. File size/modification time and available Qt duration/resolution are populated. Qt does not establish CFR/VFR status, so frame stepping remains estimated millisecond seeking rather than decoder-accurate navigation.
+- New GUI sessions record the absolute last-known source path as well as the basename, but source comparison and relocation are not implemented. Video hashing is intentionally prohibited for this project.
 - JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, but does not fsync, clean stale temp files, lock concurrent writers, validate schema, or create the `.bak` backup claimed by historical rules.
 - GUI tests cover editor-backed forward/backward transitions, synchronized views, configured initial coverage, public player state, Play/Pause/Loading/Loaded feedback, mouse/hotkey equivalence, `U`, active-phase feedback, and focus protection for text entry and the segment list. They also verify that clicking the timeline restores annotation shortcuts. They do not yet cover correction tools, save/recovery, or a complete GUI workflow.
 
@@ -56,8 +56,8 @@ The stated next milestone was M4: manual saving, periodic autosave, crash recove
 
 ## Validation baseline
 
-On 2026-09-07, the repository-local Python 3.11.5 environment passed all 111 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-09, the repository-local Python 3.11.5 environment passed all 127 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Begin C5 media metadata and playback reliability. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.
+Begin C5.3 lightweight source comparison with explicit match, mismatch, and unknown results. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.

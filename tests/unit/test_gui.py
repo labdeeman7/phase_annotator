@@ -12,6 +12,7 @@ from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
 from phase_annotator.domain.validation import validate_contiguous_coverage
+from phase_annotator.media import MediaMetadata
 
 
 def make_window() -> MainWindow:
@@ -80,9 +81,53 @@ def test_load_status_changes_when_duration_becomes_available(qtbot, monkeypatch)
     assert window._btn_play.isEnabled()
     assert window._session.ontology_id == "laparoscopic_appendectomy.default"
     assert window._session.ontology_version == "1.0"
+    assert window._session.video_info.source_path == str(
+        Path("synthetic_case.mp4").resolve()
+    )
+    assert window._session.video_info.fps_source == "assumed"
+    assert window._session.video_info.frame_rate_mode == "unknown"
+    assert window._session.video_info.frame_numbers_are_estimated
 
     window._on_duration_changed(10_000)
     assert window.statusBar().currentMessage() == "Loaded: synthetic_case.mp4"
+
+
+def test_late_qt_metadata_updates_only_the_current_video(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    window._load_video(Path("synthetic_case.mp4"))
+
+    window._on_media_metadata_available(
+        MediaMetadata(
+            source_path=str(Path("synthetic_case.mp4").resolve()),
+            file_size_bytes=123,
+            file_modified_ns=456,
+            duration_ms=10_000,
+            width=1920,
+            height=1080,
+            fps=25.0,
+            fps_source="qt",
+            frame_rate_mode="unknown",
+        )
+    )
+
+    video_info = window._session.video_info
+    assert video_info.duration_ms == 10_000
+    assert (video_info.width, video_info.height) == (1920, 1080)
+    assert video_info.fps == 25.0
+    assert video_info.fps_source == "qt"
+    assert video_info.frame_numbers_are_estimated
+    assert window._player_widget.fps == 25.0
+
+    window._on_media_metadata_available(
+        MediaMetadata(
+            source_path=str(Path("different.mp4").resolve()),
+            fps=60.0,
+            fps_source="qt",
+        )
+    )
+    assert window._session.video_info.fps == 25.0
 
 
 def test_timeline_widget_position(qtbot):

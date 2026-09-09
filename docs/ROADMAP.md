@@ -176,10 +176,12 @@ Learning focus: command pattern, transient preview state, and transactional UI g
 
 Goal: make timing claims explicit and playback failures understandable.
 
+The agreed C5.1-C5.6 plan, no-hash source-descriptor policy, conditional `ffprobe` decision, and timing-confidence rules are detailed in `C5_MEDIA_RELIABILITY.md`.
+
 Implementation:
 
 - Capture media duration, dimensions, and available frame-rate metadata.
-- Choose and document a source-video identity strategy (for example normalized metadata plus file size/hash tradeoff).
+- Use and document the approved lightweight source descriptor without video hashing.
 - Surface Qt media loading/codec errors in the UI.
 - Define CFR/VFR behavior and label displayed frame numbers as exact or estimated accordingly.
 - Test seeking and annotation against small synthetic CFR media; manually test representative project media.

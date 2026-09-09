@@ -5,6 +5,8 @@ from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import QWidget, QVBoxLayout
 
+from phase_annotator.media.qt_metadata import read_qt_media_metadata
+
 
 class VideoPlayerWidget(QWidget):
     """Wrapper around Qt QMediaPlayer & QVideoWidget with surgical video playback signals."""
@@ -13,6 +15,7 @@ class VideoPlayerWidget(QWidget):
     position_changed = Signal(int)  # Emits current position in ms
     duration_changed = Signal(int)  # Emits video duration in ms
     playback_state_changed = Signal(bool)  # True while actively playing
+    metadata_available = Signal(object)  # Emits a neutral MediaMetadata snapshot
 
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
@@ -25,6 +28,7 @@ class VideoPlayerWidget(QWidget):
         self._player.setVideoOutput(self._video_widget)
 
         self._fps: float = 30.0  # Default FPS assumption until loaded
+        self._video_path: Optional[Path] = None
 
         # Layout
         layout = QVBoxLayout(self)
@@ -35,6 +39,8 @@ class VideoPlayerWidget(QWidget):
         self._player.positionChanged.connect(self.position_changed.emit)
         self._player.durationChanged.connect(self.duration_changed.emit)
         self._player.playbackStateChanged.connect(self._forward_playback_state)
+        self._player.metaDataChanged.connect(self._emit_metadata)
+        self._player.tracksChanged.connect(self._emit_metadata)
 
     @property
     def fps(self) -> float:
@@ -61,8 +67,20 @@ class VideoPlayerWidget(QWidget):
 
     def load_video(self, video_path: Path) -> None:
         """Loads a video file into the media player."""
+        self._video_path = video_path
         url = QUrl.fromLocalFile(str(video_path))
         self._player.setSource(url)
+
+    def _emit_metadata(self) -> None:
+        if self._video_path is None:
+            return
+        metadata = read_qt_media_metadata(
+            path=self._video_path,
+            container_metadata=self._player.metaData(),
+            video_tracks=self._player.videoTracks(),
+            fallback_duration_ms=self._player.duration(),
+        )
+        self.metadata_available.emit(metadata)
 
     def play(self) -> None:
         self._player.play()

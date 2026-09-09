@@ -17,7 +17,7 @@ JsonSessionRepository ────────── domain models (not connecte
 
 ### Domain (`src/phase_annotator/domain/`)
 
-- `models.py`: `VideoInfo`, `AnnotationInterval`, and `AnnotationSession` dataclasses.
+- `models.py`: `VideoInfo`, `AnnotationInterval`, and `AnnotationSession` dataclasses. `VideoInfo` separates optional media values from their provenance and records a lightweight, non-cryptographic source descriptor.
 - `ontology.py`: `Phase` and the code-defined provisional six-phase ontology.
 - `validation.py`: overlap detection and ordered, contiguous full-coverage validation. `AnnotationEditor` additionally enforces configured phase IDs and playhead bounds.
 - `time_utils.py`: constant-FPS timestamp/frame arithmetic and timecode formatting.
@@ -41,6 +41,13 @@ The `PhasePaletteWidget` renders the configured phase order, names, colors, hotk
 - `json_repo.py`: direct dataclass-to-JSON serialization and loading. Save writes a same-directory temporary file and atomically replaces the destination.
 
 There is no repository interface, GUI integration, CSV exporter, autosave, backup, migration layer, or recovery coordinator yet.
+
+### Media (`src/phase_annotator/media/`)
+
+- `metadata.py`: frozen toolkit-neutral metadata/failure results and cheap filesystem descriptor probing.
+- `qt_metadata.py`: translates backend-dependent Qt metadata without claiming CFR/VFR knowledge.
+
+The media layer never hashes video contents or searches `PATH` for external executables. `VideoPlayerWidget` emits translated snapshots, and `MainWindow` applies them only when their source still matches the current video.
 
 ### UI (`src/phase_annotator/ui/`)
 

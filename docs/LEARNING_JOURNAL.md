@@ -391,3 +391,19 @@ __main__.py (composition root)
 ```
 
 The **composition root** is the outer startup location where concrete dependencies are selected and assembled. **Dependency injection** means a component receives what it needs rather than constructing a specific dependency internally. `MainWindow` now knows only the `PhaseOntology` contract, so a future cholecystectomy ontology can be supplied without changing window logic.
+
+---
+
+## C5.1 — Store a value together with what we know about it
+
+A numeric value alone can overstate certainty. The player currently uses `30.0` FPS, but that number is an application assumption rather than a fact measured from the video. `VideoInfo` therefore stores `fps`, `fps_source`, and `frame_rate_mode` separately. This lets later code display an estimated frame number without pretending that the media is confirmed constant-frame-rate.
+
+This is a reusable modeling technique: when provenance or confidence changes the meaning of a value, represent it explicitly instead of hiding it in comments or relying on callers to remember. The derived `frame_numbers_are_estimated` property centralizes the rule so UI code does not repeatedly reconstruct it.
+
+A file path is similarly a **locator**, not an identity. Size and modification time are cheap comparison evidence, but two files can share them and a single file can move. Naming the group a source descriptor makes that limitation visible in the design. Schema 1.1 adds these fields as optional defaults, which is a simple additive-evolution strategy that keeps older 1.0 JSON readable.
+
+## C5.2 — Adapters isolate uncertain external metadata
+
+Qt metadata arrives asynchronously and differs by operating-system backend. `MediaMetadata` is therefore a small neutral result, while `read_qt_media_metadata()` is an adapter that translates Qt-specific objects at the application boundary. The annotation domain never imports Qt and missing metadata remains `None` rather than becoming a fabricated default.
+
+Asynchronous results can become stale: a slow signal for video A might arrive after video B is opened. `MainWindow` compares the result's resolved source path with the current source before applying it. This is a reusable UI rule—an asynchronous result should carry enough context for its receiver to prove that it still belongs to the current request.

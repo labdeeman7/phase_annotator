@@ -4,7 +4,7 @@
 
 1. `python -m phase_annotator` creates `QApplication` and `MainWindow`.
 2. **Open Video** selects a local MP4/AVI/MKV/MOV file. `QMediaPlayer.setSource()` receives its local URL.
-3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, a hard-coded `surgeon_01` annotator, duration 0, and the player's default 30 FPS. The status bar shows **Loading**.
+3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, its resolved absolute last-known path, a hard-coded `surgeon_01` annotator, duration 0, and the player's 30 FPS value explicitly marked as assumed with unknown CFR/VFR status. The status bar shows **Loading**.
 4. A positive Qt duration signal updates the slider/timeline/session, initializes one interval using the ontology's configured `initial_phase_id` (Phase 1 for appendectomy) over `[0, duration_ms)`, refreshes both annotation views, and changes status to **Loaded**.
 5. Play/pause is available through the state-aware Play/Pause button or Space. Left/Right seek by `int(1000 / fps)` milliseconds. The slider and painted timeline seek in milliseconds.
 6. The always-visible phase palette is built from the configured ontology. Clicking a phase or pressing its configured window shortcut (including `U`) calls the same `record_phase_transition()` method, which delegates interval changes to the transactional `AnnotationEditor`. Phase shortcuts are disabled while a text-entry control or the segment list has keyboard focus; clicking the timeline restores the normal annotation context.
@@ -29,6 +29,6 @@ There is currently no draggable boundary correction, persistent undo history, sa
 
 ## Video accuracy limitations
 
-Qt Multimedia chooses the platform media backend and codec support is environment-dependent. This repository contains no media probing, codec fallback, sample video, or playback integration test. FPS is assumed to be 30.0; source FPS, variable frame rate, time bases, keyframes, rotation, and stream errors are not handled. Consequently, displayed frame numbers and frame-step controls are estimates based on timestamps, not guaranteed decoded-frame indices.
+Qt Multimedia chooses the platform media backend and codec support is environment-dependent. This repository contains no media probing, codec fallback, sample video, or playback integration test. FPS is currently 30.0 with `fps_source="assumed"`; source FPS, variable frame rate, time bases, keyframes, rotation, and stream errors are not handled. Consequently, displayed frame numbers and frame-step controls are estimates based on timestamps, not guaranteed decoded-frame indices.
 
 Milliseconds are the authoritative annotation unit today. Do not derive a claim of VFR frame accuracy from `ms_to_frame()` or `frame_to_ms()`; both are simple constant-rate arithmetic.

@@ -8,7 +8,18 @@ from phase_annotator.storage.json_repo import JsonSessionRepository
 
 def test_save_session_atomic(tmp_path: Path):
     repo = JsonSessionRepository()
-    video = VideoInfo(video_id="case_01.mp4", duration_ms=60000, fps=30.0)
+    video = VideoInfo(
+        video_id="case_01.mp4",
+        duration_ms=60000,
+        fps=30.0,
+        width=1920,
+        height=1080,
+        source_path=str((tmp_path / "case_01.mp4").resolve()),
+        file_size_bytes=123456,
+        file_modified_ns=987654321,
+        fps_source="qt",
+        frame_rate_mode="unknown",
+    )
     session = AnnotationSession(
         video_info=video,
         annotator_id="dr_smith",
@@ -28,6 +39,12 @@ def test_save_session_atomic(tmp_path: Path):
 
     assert data["annotator_id"] == "dr_smith"
     assert data["video_info"]["video_id"] == "case_01.mp4"
+    assert data["video_info"]["source_path"] == video.source_path
+    assert data["video_info"]["file_size_bytes"] == 123456
+    assert data["video_info"]["file_modified_ns"] == 987654321
+    assert data["video_info"]["fps_source"] == "qt"
+    assert data["video_info"]["frame_rate_mode"] == "unknown"
+    assert data["schema_version"] == "1.1"
     assert data["ontology_id"] == "laparoscopic_appendectomy.default"
     assert data["ontology_version"] == "1.0"
     assert len(data["intervals"]) == 1
@@ -88,3 +105,10 @@ def test_load_legacy_session_defaults_missing_ontology_identity(tmp_path: Path):
 
     assert session.ontology_id == ""
     assert session.ontology_version == ""
+    assert session.schema_version == "1.0"
+    assert session.video_info.source_path is None
+    assert session.video_info.file_size_bytes is None
+    assert session.video_info.file_modified_ns is None
+    assert session.video_info.fps_source == "unknown"
+    assert session.video_info.frame_rate_mode == "unknown"
+    assert session.video_info.frame_numbers_are_estimated

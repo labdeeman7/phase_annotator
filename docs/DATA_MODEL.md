@@ -9,9 +9,14 @@ AnnotationSession
 ├── video_info: VideoInfo
 │   ├── video_id: str
 │   ├── duration_ms: int
-│   ├── fps: float = 30.0
+│   ├── fps: float | null
 │   ├── width: int | null
-│   └── height: int | null
+│   ├── height: int | null
+│   ├── source_path: str | null (absolute last-known local path)
+│   ├── file_size_bytes: int | null
+│   ├── file_modified_ns: int | null
+│   ├── fps_source: unknown | assumed | qt | ffprobe
+│   └── frame_rate_mode: unknown | cfr | vfr
 ├── annotator_id: str
 ├── ontology_id: str
 ├── ontology_version: str
@@ -20,7 +25,7 @@ AnnotationSession
 │   ├── end_ms: int
 │   ├── phase_id: int
 │   └── notes: str
-├── schema_version: str = "1.0"
+├── schema_version: str = "1.1"
 ├── created_at: float (Unix timestamp)
 └── updated_at: float (Unix timestamp)
 ```
@@ -66,7 +71,7 @@ Forward seeking must not falsely advance `reviewed_until_ms`. Completion is an e
 
 ## Persisted JSON
 
-Persistence is a direct `dataclasses.asdict()` representation. Loading reconstructs known fields and defaults missing `schema_version`, `created_at`, and `updated_at`; it does not preserve unknown fields or perform an explicit schema migration. Example:
+Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 adds optional media fields, so schema 1.0 files remain loadable through dataclass defaults. Loading reconstructs known fields and defaults missing `schema_version`, `created_at`, and `updated_at`; it does not preserve unknown fields or perform a general migration. Example:
 
 ```json
 {
@@ -75,7 +80,12 @@ Persistence is a direct `dataclasses.asdict()` representation. Loading reconstru
     "duration_ms": 120000,
     "fps": 30.0,
     "width": 1920,
-    "height": 1080
+    "height": 1080,
+    "source_path": "C:/synthetic-media/synthetic_case_01.mp4",
+    "file_size_bytes": 123456,
+    "file_modified_ns": 1700000000000000000,
+    "fps_source": "qt",
+    "frame_rate_mode": "unknown"
   },
   "annotator_id": "annotator_01",
   "ontology_id": "laparoscopic_appendectomy.default",
@@ -83,11 +93,13 @@ Persistence is a direct `dataclasses.asdict()` representation. Loading reconstru
   "intervals": [
     {"start_ms": 0, "end_ms": 15000, "phase_id": 1, "notes": ""}
   ],
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "created_at": 0.0,
   "updated_at": 0.0
 }
 ```
+
+The media fields form a lightweight **source descriptor**, not guaranteed identity. No content hash is stored. `source_path` is a convenient last-known locator but can become stale after a move and may reveal local directory or user names; exclude it from research exports, logs, screenshots, fixtures, and committed examples. File size and modification time can support later mismatch warnings but cannot prove equality. `frame_numbers_are_estimated` remains true unless a measured FPS and known CFR mode are both available.
 
 ## Integrity requirements for future work
 

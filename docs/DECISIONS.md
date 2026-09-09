@@ -21,10 +21,6 @@
 - **Decision**: Implement both a custom painted `TimelineWidget` and custom segment cards hosted by a `QListWidget` side-by-side. Clicking a card jumps playback to that segment's start timestamp.
 - **Implementation note**: `SegmentListWidget` is the active view. `table_widget.py` is an unused duplicate from M3 and is not evidence of a second table-based UI.
 
-## Proposed decisions still required
-
-The code does not yet settle media identity, frame accuracy, or schema migration. Decide and test these before treating the persisted format as stable or implementing CSV export.
-
 ## ADR 005: Continuous Coverage, Undefined, Delete, and Merge Semantics
 
 - **Status**: Approved
@@ -65,3 +61,16 @@ The code does not yet settle media identity, frame accuracy, or schema migration
   - Undefined intervals are summarized and require informed confirmation but do not necessarily prohibit completion.
   - Editing a completed session requires confirmation and returns it to draft for the first release; revision history is deferred.
 - **Consequences**: The application can resume work without confusing playhead position, provisional coverage, and human-reviewed progress. Lifecycle/progress fields must be designed before session persistence is treated as stable; the full tracking and completion UI remain planned for C6-C8.
+
+## ADR 008: Lightweight Media Descriptor Without Content Hashing
+
+- **Status**: Approved
+- **Context**: Sessions need enough source evidence to warn about an obviously wrong video, but clinical videos may be large and the target computers are not suited to repeated full-file hashing.
+- **Decision**:
+  - Never hash video contents, including full or sampled SHA-256.
+  - Store the basename plus optional absolute last-known path, byte size, modification time, duration, dimensions, FPS provenance, and CFR/VFR knowledge.
+  - Treat these fields as a source descriptor and comparison evidence, never as globally unique identity.
+  - Keep the absolute path in local session JSON for convenient reopening, but exclude it from research exports and avoid exposing it in logs, screenshots, fixtures, or examples.
+  - A session creation timestamp describes the annotation session and is not evidence about the video.
+  - C5 uses metadata exposed by the already packaged PySide6/Qt stack and does not invoke or bundle a separate `ffprobe`. Reconsideration belongs to future distribution work and requires verified binary provenance, licensing compliance, supported-platform builds, and installer integration. Never require an executable installed on `PATH`.
+- **Consequences**: Metadata checks remain fast and practical, but relocation needs an explicit user confirmation workflow and no combination of descriptor fields can mathematically prove that two files have identical content.

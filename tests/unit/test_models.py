@@ -20,3 +20,47 @@ def test_annotation_session_creation():
     assert session.video_info.video_id == "appendectomy_case_01.mp4"
     assert session.annotator_id == "researcher_1"
     assert len(session.intervals) == 0
+    assert session.schema_version == "1.1"
+
+
+def test_video_info_distinguishes_assumed_from_measured_cfr():
+    assumed = VideoInfo(
+        video_id="assumed.mp4",
+        duration_ms=1_000,
+        fps=30.0,
+        fps_source="assumed",
+        frame_rate_mode="unknown",
+    )
+    measured_cfr = VideoInfo(
+        video_id="measured.mp4",
+        duration_ms=1_000,
+        fps=25.0,
+        fps_source="ffprobe",
+        frame_rate_mode="cfr",
+    )
+
+    assert assumed.frame_numbers_are_estimated
+    assert not measured_cfr.frame_numbers_are_estimated
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"duration_ms": -1},
+        {"fps": 0},
+        {"width": 0},
+        {"height": -1},
+        {"file_size_bytes": -1},
+        {"file_modified_ns": -1},
+        {"fps": 30.0, "fps_source": "invented"},
+        {"frame_rate_mode": "sometimes"},
+        {"fps": None, "fps_source": "assumed"},
+        {"fps": None, "frame_rate_mode": "cfr"},
+    ],
+)
+def test_video_info_rejects_invalid_metadata(overrides):
+    values = {"video_id": "synthetic.mp4", "duration_ms": 1_000}
+    values.update(overrides)
+
+    with pytest.raises(ValueError):
+        VideoInfo(**values)
