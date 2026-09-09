@@ -2,9 +2,9 @@
 
 ## Purpose and current maturity
 
-This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype completed through Codex milestone C5 and moving next to C6, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, draggable boundaries, undo/redo, media metadata, and failure handling exist, while UI-integrated saving, recovery, export, and distribution do not.
+This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype completed through Codex milestone C6, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, and continuous canonical JSON sidecar persistence exist, while explicit completion, distribution, and cross-platform validation do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C5 is complete; `docs/C5_MEDIA_RELIABILITY.md` records its media contract and validation evidence. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C6 is active; `docs/C6_CONTINUOUS_PERSISTENCE.md` is its detailed contract. `docs/C5_MEDIA_RELIABILITY.md` records the completed media contract and validation evidence. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
@@ -12,7 +12,7 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 - `src/phase_annotator/domain/`: pure-Python dataclasses, ontology, time conversion, and validation.
 - `src/phase_annotator/config/`: packaged JSON ontology resources and resource-loading adapter.
 - `src/phase_annotator/media/`: lightweight source descriptors, Qt metadata translation, and source comparison.
-- `src/phase_annotator/storage/`: JSON serialization and atomic replacement. It is not wired into the GUI yet.
+- `src/phase_annotator/storage/`: JSON serialization, atomic replacement, sidecar policy, validation, source decisions, and dirty-state coordination used by the GUI.
 - `src/phase_annotator/ui/`: PySide6 main window, Qt Multimedia player, timeline, and segment cards.
 - `tests/unit/`, `tests/integration/`: domain/storage tests plus lightweight Qt widget tests.
 - `scripts/`: explicit local validation utilities; representative videos remain ignored.
@@ -26,7 +26,7 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 - Never hash source videos. Use the lightweight source descriptor documented for C5. Absolute paths are local session data and must not leak into research exports, logs, screenshots, or committed examples.
 - C5 deliberately uses the packaged PySide6/Qt metadata APIs, not `ffprobe`. Never invoke a system executable from `PATH`; reconsidering a bundled probe belongs to future distribution work with explicit binary provenance, licensing, and platform testing.
 - Preserve session metadata and schema compatibility. Never silently discard unknown or existing annotation data during migrations.
-- Session writes must remain same-directory temporary writes followed by `os.replace`. Before promising backup/recovery behavior, implement and test it; current code does not create `.bak` files.
+- C6 requires the canonical annotation to be `<video filename>.phase-annotations.json` beside the video and to save automatically after successful annotation mutations. Session writes must remain same-directory temporary writes followed by `os.replace`. Do not add routine Save/Save As or a second autosave/recovery artifact without revisiting ADR 010.
 - Do not add patient-identifying information to source control, fixtures, logs, screenshots, or example session files. Use synthetic identifiers and metadata.
 - Do not treat the unused `ui/table_widget.py` duplicate as the active UI; `MainWindow` imports `SegmentListWidget` from `ui/segment_list_widget.py`.
 
@@ -68,7 +68,7 @@ When a substantial milestone is divided into named sub-slices, create one focuse
 
 ## Annotation-data expectations
 
-Validate data at boundaries rather than trusting UI state. At minimum, future work should enforce known phase IDs, non-negative ordered timestamps, video-duration bounds, non-overlap, and an explicit gap policy before saving/exporting. Avoid mutating an existing valid interval until a proposed transition has been validated. Saving, autosaving, loading, crash recovery, and CSV export require tests covering round trips and failure behavior.
+Validate data at boundaries rather than trusting UI state. At minimum, persistence work must enforce known phase IDs, non-negative ordered timestamps, video-duration bounds, non-overlap, and continuous coverage before loading/saving. Avoid mutating an existing valid interval until a proposed transition has been validated. Continuous saving and loading require tests covering round trips, source decisions, write failures, and dirty-state behavior. JSON is canonical; CSV is deferred until a real consumer requires it.
 
 Do not redesign the ontology or persisted schema casually. The six-phase ontology is provisional and phase 2 is optional; schema or ontology changes need a documented decision and migration/compatibility plan.
 

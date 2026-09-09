@@ -25,7 +25,10 @@ AnnotationSession
 │   ├── end_ms: int
 │   ├── phase_id: int
 │   └── notes: str
-├── schema_version: str = "1.1"
+├── status: draft | completed = "draft"
+├── completed_at: float | null
+├── resume_position_ms: int = 0
+├── schema_version: str = "1.2"
 ├── created_at: float (Unix timestamp)
 └── updated_at: float (Unix timestamp)
 ```
@@ -58,20 +61,19 @@ Once media duration is known, an empty session is provisionally covered by the o
 
 Expected phase order is display/clinical guidance only. Repeated and out-of-order phase transitions remain valid.
 
-## Planned lifecycle and progress fields
+## Lifecycle and resume fields
 
-Full interval coverage does not prove full human review because the current phase provisionally extends into unwatched footage. The persisted session model will therefore distinguish:
+Full interval coverage does not prove completion because the current phase provisionally extends into unwatched footage. The persisted session model therefore includes:
 
 - `status`: `draft` or `completed`;
 - `completed_at`: nullable completion timestamp;
-- `resume_position_ms`: last saved playhead position for convenience;
-- `reviewed_until_ms`: furthest contiguously reviewed position.
+- `resume_position_ms`: last checkpointed playhead position for convenience.
 
-Forward seeking must not falsely advance `reviewed_until_ms`. Completion is an explicit validated action. Undefined footage is summarized for confirmation rather than automatically blocking completion. Editing a completed session returns it to draft after confirmation.
+Resume position is not proof of review. `reviewed_until_ms` is deferred until a trustworthy definition is needed. Completion remains an explicit validated action in C8. Undefined footage is summarized for confirmation rather than automatically blocking completion. Editing a completed session returns it to draft after confirmation.
 
 ## Persisted JSON
 
-Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 adds optional media fields, so schema 1.0 files remain loadable through dataclass defaults. Loading reconstructs known fields and defaults missing `schema_version`, `created_at`, and `updated_at`; it does not preserve unknown fields or perform a general migration. Example:
+Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added optional media fields and schema 1.2 adds lifecycle/resume fields. Older known schemas remain loadable through explicit defaults. Unknown fields are rejected rather than silently erased on the next write; there is not yet a general migration framework. Example:
 
 ```json
 {
@@ -93,7 +95,10 @@ Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 adds o
   "intervals": [
     {"start_ms": 0, "end_ms": 15000, "phase_id": 1, "notes": ""}
   ],
-  "schema_version": "1.1",
+  "status": "draft",
+  "completed_at": null,
+  "resume_position_ms": 0,
+  "schema_version": "1.2",
   "created_at": 0.0,
   "updated_at": 0.0
 }
@@ -103,15 +108,15 @@ The media fields form a lightweight **source descriptor**, not guaranteed identi
 
 Source comparison returns `match`, `mismatch`, or `unknown` with per-field evidence. Filename agreement alone is unknown; at least one other descriptor must agree. Conflicting filename, size, modification time, duration, or dimensions is a mismatch. A different absolute path is reported but treated as relocation rather than a conflict when the remaining evidence agrees. Duration comparison allows a small backend-rounding tolerance. No result proves byte-for-byte identity.
 
-## Integrity requirements for future work
+## Remaining integrity work
 
-Before UI-integrated persistence or export, make these policies explicit and tested:
+Before explicit completion and production use, make these policies explicit and tested:
 
 - how an unfinished/final interval is represented;
 - phase-ID and video-bound validation;
 - source-video identity and relocation behavior;
 - schema migration and unknown-field behavior;
-- crash recovery, backup, concurrent writer, and stale-temp handling;
+- write failure/retry, concurrent writer, and stale-temp behavior;
 - timestamp/frame semantics for CFR and VFR media.
 
 Session fixtures and documentation must use synthetic identifiers. Do not store patient identifiers or real clinical metadata in the repository.

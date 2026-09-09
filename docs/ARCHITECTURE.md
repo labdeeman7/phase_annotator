@@ -39,8 +39,9 @@ The `PhasePaletteWidget` renders the configured phase order, names, colors, hotk
 ### Storage (`src/phase_annotator/storage/`)
 
 - `json_repo.py`: direct dataclass-to-JSON serialization and loading. Save writes a same-directory temporary file and atomically replaces the destination.
+- `session_persistence.py`: deterministic sidecar naming, load validation, C5 source-comparison decisions, and saved/dirty state.
 
-There is no repository interface, GUI integration, CSV exporter, autosave, backup, migration layer, or recovery coordinator yet.
+`MainWindow` uses the coordinator to create/load `<video filename>.phase-annotations.json`, save every annotation command, checkpoint resume position, and guard close/video replacement only after a failed write leaves dirty work. There is no general schema migration framework, backup/recovery artifact, file locking, or alternate read-only-directory location. CSV is not required by the current roadmap.
 
 ### Media (`src/phase_annotator/media/`)
 

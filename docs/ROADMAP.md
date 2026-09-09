@@ -2,7 +2,7 @@
 
 ## Product outcome
 
-Deliver a dependable desktop application for annotating temporal phases in surgical videos. It should ship with a clinically reviewed appendectomy phase set, allow phase selection by mouse and keyboard, preserve annotations safely, resume interrupted work, and export deterministic research data.
+Deliver a dependable desktop application for annotating temporal phases in surgical videos. It should ship with a clinically reviewed appendectomy phase set, allow phase selection by mouse and keyboard, preserve annotations continuously, resume interrupted work, and produce trustworthy canonical JSON.
 
 The architecture should remain sufficiently flexible to load another phase set without rewriting UI or domain logic. This is flexibility through a small validated configuration contract—not a general-purpose annotation platform or plugin system.
 
@@ -15,9 +15,9 @@ The first complete release is reached when an annotator can:
 3. see the configured phases, colors, and hotkeys, including `U` for Undefined;
 4. annotate and correct the entire video using mouse or keyboard;
 5. save, close, reopen, and resume without losing or corrupting work;
-6. recover a newer autosave after an interrupted session;
-7. see validation problems and resolve them before final export;
-8. export versioned JSON and deterministic research CSV;
+6. resume the canonical sidecar after an interrupted session;
+7. see validation problems and resolve them before completion;
+8. retain versioned, interpretable canonical JSON;
 9. reproduce the same results through documented tests and a CI build.
 
 Real representative videos must be used for a manual acceptance pass. Automated widget tests alone cannot prove codec availability, seeking behavior, usability, or timing accuracy.
@@ -192,57 +192,39 @@ Exit gate: **Passed for the C5 foundation.** Source comparisons produce explaina
 
 Learning focus: media time bases, metadata trust, and platform decoder boundaries.
 
-### C6 — Manual session save, load, and dirty-state safety
+### C6 — Continuous sidecar persistence
 
-Goal: establish the reliable session lifecycle before adding background recovery.
+Goal: automatically save and safely resume one canonical JSON annotation sidecar per video without routine Save/Save As interaction.
 
-Implementation:
+The detailed C6.1-C6.7 contract, dirty-state meaning, source-safety behavior, and sidecar policy are in `C6_CONTINUOUS_PERSISTENCE.md`.
 
-- Wire a session/application service to `JsonSessionRepository`.
-- Implement Save, Save As, Open Session, `Ctrl+S`, recent path handling, and meaningful errors.
-- Prompt before replacing/closing dirty work.
-- Validate loaded schema, configuration identity, source-video identity, and intervals.
-- Persist draft/completed lifecycle metadata plus distinct resume and contiguous-review progress fields.
-- Decide backup and stale-temporary-file behavior; test write failures and round trips.
+Status: **Complete.** The sidecar workflow is integrated and covered by domain, coordinator, repository, and lightweight GUI tests. A read-only-folder fallback was deliberately not added without demonstrated need.
 
-Exit gate: save-close-reopen preserves all data; destructive navigation is guarded; simulated persistence failures do not corrupt the last valid session.
+Exit gate: every annotation mutation survives save-close-reopen; existing sidecars load only after validation/source checks; failed writes remain visibly dirty; destructive navigation is guarded only when unsaved work actually exists.
 
-Learning focus: repository boundaries, dirty state, atomicity, and failure-path testing.
+Learning focus: repository versus coordinator boundaries, dirty state, atomicity, and failure-path testing.
 
-### C7 — Autosave and crash recovery
+### C7 — Persistence hardening where evidence requires it
 
-Goal: recover work predictably without confusing autosaves with user-approved saves.
+Goal: address demonstrated gaps after continuous canonical saving, without automatically building a second autosave/recovery system.
 
-Implementation:
+Candidate work includes retry ergonomics, stale temporary files, optional backups, and crash recovery only where testing shows atomic immediate saving is insufficient. C7 may be reduced or skipped if C6 meets the practical reliability requirement.
 
-- Periodic/debounced autosave only when state is dirty.
-- Separate recovery artifact and provenance from the canonical session.
-- Startup/reopen prompt comparing recovery and saved timestamps.
-- Restore, discard, and stale-recovery cleanup paths.
-- Logging that contains no sensitive annotation content or patient identifiers.
-- Restore resume position without treating a forward seek as reviewed footage.
+### C8 — Completion and trustworthy JSON
 
-Exit gate: forced termination loses at most the documented autosave interval; recovery choices are tested and understandable.
-
-Learning focus: timers, recovery state machines, and canonical versus derived data.
-
-### C8 — Validation, completion, and research export
-
-Goal: produce trustworthy, reproducible research artifacts.
+Goal: distinguish valid draft work from explicitly completed annotation while keeping JSON canonical.
 
 Implementation:
 
-- Add a validation summary for gaps, overlaps, unknown phases, invalid bounds, and incomplete coverage according to the annotation contract.
-- Distinguish draft save from completed/finalized session.
-- Require an explicit completion action, validate review progress, and summarize Undefined duration/segments for informed confirmation.
-- Confirm that editing a completed session reopens it as draft.
-- Define a deterministic CSV schema with video identity, annotator, phase identity/name, timestamps, and configuration/schema versions.
-- Ensure locale-independent ordering and formatting.
-- Add golden-file and JSON-to-CSV integration tests.
+- Add a validation summary for coverage, phase IDs, bounds, ontology, and source association.
+- Provide an explicit completion action and summarize Undefined segments for confirmation.
+- Persist `draft`/`completed` and `completed_at`; editing completed work returns it to draft after confirmation.
+- Keep `resume_position_ms` distinct from proof of review. Defer `reviewed_until_ms` until its semantics are justified.
+- Do not require CSV export. Add a converter later only for a demonstrated downstream need.
 
-Exit gate: invalid finalization is blocked with actionable messages; the same session always produces byte-equivalent CSV where intended; schema documentation includes an example.
+Exit gate: invalid completion is blocked with actionable feedback and the canonical JSON contains enough versioned context to interpret the annotations.
 
-Learning focus: validation boundaries, stable exports, and reproducible datasets.
+Learning focus: validation boundaries, lifecycle state, and trustworthy research artifacts.
 
 ### C9 — Usability and annotation efficiency pass
 
@@ -253,7 +235,7 @@ Candidate work, validated with actual use rather than assumed upfront:
 - Configurable seek/step controls and playback-speed options.
 - Keyboard shortcut reference and onboarding hints.
 - Better timeline zoom/navigation for long procedures.
-- Status bar for save/autosave/media state.
+- Status bar for persistence and media state.
 - Prominent, non-blocking top-of-window notifications for errors; keep routine state and success feedback in the status bar.
 - Layout persistence and high-DPI/accessibility review.
 - Performance checks with long videos and many intervals.
@@ -272,7 +254,7 @@ Implementation:
 - Add GitHub Actions for supported Python versions, domain/storage tests, and headless Qt tests.
 - Add test coverage for critical workflows rather than pursuing a vanity percentage.
 - Package a Windows build and document Qt Multimedia/runtime considerations.
-- Perform clean-machine install, launch, annotate, recover, and export acceptance tests.
+- Perform clean-machine install, launch, annotate, save/resume, and completion acceptance tests.
 - Reconcile package/window versioning and write release notes/user guide.
 
 Exit gate: CI is green from a clean checkout; a versioned artifact passes the release checklist on a clean supported machine.

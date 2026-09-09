@@ -38,6 +38,25 @@ class JsonSessionRepository:
         with open(filepath, "r", encoding="utf-8") as f:
             data: Dict[str, Any] = json.load(f)
 
+        self._reject_unknown_fields(
+            data,
+            {
+                "video_info", "annotator_id", "ontology_id", "ontology_version",
+                "intervals", "status", "completed_at", "resume_position_ms",
+                "schema_version", "created_at", "updated_at",
+            },
+            "session",
+        )
+        self._reject_unknown_fields(
+            data["video_info"], set(VideoInfo.__dataclass_fields__), "video_info"
+        )
+        for index, interval_data in enumerate(data["intervals"]):
+            self._reject_unknown_fields(
+                interval_data,
+                set(AnnotationInterval.__dataclass_fields__),
+                f"intervals[{index}]",
+            )
+
         video_info = VideoInfo(**data["video_info"])
         intervals = [AnnotationInterval(**interval_data) for interval_data in data["intervals"]]
 
@@ -47,9 +66,21 @@ class JsonSessionRepository:
             ontology_id=data.get("ontology_id", ""),
             ontology_version=data.get("ontology_version", ""),
             intervals=intervals,
+            status=data.get("status", "draft"),
+            completed_at=data.get("completed_at"),
+            resume_position_ms=data.get("resume_position_ms", 0),
             schema_version=data.get("schema_version", "1.0"),
             created_at=data.get("created_at", 0.0),
             updated_at=data.get("updated_at", 0.0),
         )
 
         return session
+
+    @staticmethod
+    def _reject_unknown_fields(
+        data: Dict[str, Any], allowed: set[str], location: str
+    ) -> None:
+        """Fail visibly instead of silently erasing newer-schema information."""
+        unknown = sorted(set(data) - allowed)
+        if unknown:
+            raise ValueError(f"Unknown fields in {location}: {unknown}")

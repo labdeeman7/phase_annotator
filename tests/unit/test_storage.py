@@ -44,7 +44,10 @@ def test_save_session_atomic(tmp_path: Path):
     assert data["video_info"]["file_modified_ns"] == 987654321
     assert data["video_info"]["fps_source"] == "qt"
     assert data["video_info"]["frame_rate_mode"] == "unknown"
-    assert data["schema_version"] == "1.1"
+    assert data["schema_version"] == "1.2"
+    assert data["status"] == "draft"
+    assert data["completed_at"] is None
+    assert data["resume_position_ms"] == 0
     assert data["ontology_id"] == "laparoscopic_appendectomy.default"
     assert data["ontology_version"] == "1.0"
     assert len(data["intervals"]) == 1
@@ -112,3 +115,33 @@ def test_load_legacy_session_defaults_missing_ontology_identity(tmp_path: Path):
     assert session.video_info.fps_source == "unknown"
     assert session.video_info.frame_rate_mode == "unknown"
     assert session.video_info.frame_numbers_are_estimated
+    assert session.status == "draft"
+    assert session.completed_at is None
+    assert session.resume_position_ms == 0
+
+
+def test_load_rejects_unknown_fields_instead_of_silently_dropping_them(
+    tmp_path: Path,
+):
+    path = tmp_path / "future.json"
+    path.write_text(
+        json.dumps(
+            {
+                "video_info": {
+                    "video_id": "case.mp4",
+                    "duration_ms": 1000,
+                    "fps": 30.0,
+                    "future_video_field": "keep me",
+                },
+                "annotator_id": "annotator",
+                "ontology_id": "laparoscopic_appendectomy.default",
+                "ontology_version": "1.0",
+                "intervals": [],
+                "schema_version": "1.2",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Unknown fields in video_info"):
+        JsonSessionRepository().load(path)

@@ -20,7 +20,23 @@ def test_annotation_session_creation():
     assert session.video_info.video_id == "appendectomy_case_01.mp4"
     assert session.annotator_id == "researcher_1"
     assert len(session.intervals) == 0
-    assert session.schema_version == "1.1"
+    assert session.schema_version == "1.2"
+
+
+def test_annotation_session_lifecycle_defaults_and_validation():
+    video = VideoInfo("synthetic.mp4", duration_ms=1_000)
+    session = AnnotationSession(video, annotator_id="annotator")
+
+    assert session.status == "draft"
+    assert session.completed_at is None
+    assert session.resume_position_ms == 0
+
+    with pytest.raises(ValueError, match="completed sessions require"):
+        AnnotationSession(video, "annotator", status="completed")
+    with pytest.raises(ValueError, match="draft sessions cannot"):
+        AnnotationSession(video, "annotator", completed_at=1.0)
+    with pytest.raises(ValueError, match="resume_position_ms"):
+        AnnotationSession(video, "annotator", resume_position_ms=-1)
 
 
 def test_video_info_distinguishes_assumed_from_measured_cfr():

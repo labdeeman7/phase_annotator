@@ -49,18 +49,19 @@
   - Other ontologies may choose a different initial phase, including Undefined.
 - **Consequences**: Sequential annotation starts naturally, while unusual footage can still be relabeled Undefined at zero. Automatically populated future coverage is provisional and cannot be interpreted as proof of review.
 
-## ADR 007: Draft/Completed Lifecycle and Review Progress
+## ADR 007: Draft/Completed Lifecycle and Resume Position
 
 - **Status**: Approved
-- **Context**: Full coverage can contain automatically assigned provisional labels, so coverage validity alone cannot demonstrate that an annotator reviewed the whole video or indicate where unfinished work should resume.
+- **Context**: Full coverage can contain automatically assigned provisional labels, so coverage validity alone cannot demonstrate completion. The application also needs a convenient place to resume without claiming that every preceding timestamp was reviewed.
 - **Decision**:
   - Sessions have an explicit lifecycle status, initially `draft` and later `completed` through a deliberate completion action.
-  - Persist `completed_at` (and completion identity if required by the workflow), `resume_position_ms`, and `reviewed_until_ms` as distinct concepts.
-  - Seeking forward changes resume position but must not automatically advance contiguous review progress.
-  - Completion validates video identity, ontology identity, interval coverage/bounds/phase IDs, and review progress.
+  - Persist nullable `completed_at` and non-negative `resume_position_ms`.
+  - Restoring or seeking to a resume position does not prove review progress.
+  - Defer `reviewed_until_ms` until the product has a concrete, trustworthy definition of reviewed footage.
+  - Completion validates video association, ontology identity, interval coverage/bounds, and phase IDs.
   - Undefined intervals are summarized and require informed confirmation but do not necessarily prohibit completion.
   - Editing a completed session requires confirmation and returns it to draft for the first release; revision history is deferred.
-- **Consequences**: The application can resume work without confusing playhead position, provisional coverage, and human-reviewed progress. Lifecycle/progress fields must be designed before session persistence is treated as stable; the full tracking and completion UI remain planned for C6-C8.
+- **Consequences**: The application can resume work without confusing playhead position with proof of review. C6 persists the fields; C8 owns the explicit completion workflow.
 
 ## ADR 008: Lightweight Media Descriptor Without Content Hashing
 
@@ -85,3 +86,17 @@
   - Keep procedure selection at the composition root and keep reusable domain/UI components independent of appendectomy-specific loaders and phase IDs.
   - Retain appendectomy terminology in ontology identifiers, configuration files, clinical decisions, and tests that specifically describe that default.
 - **Consequences**: Other phase ontologies can use the same application architecture, but user-facing ontology selection is still future work and the bundled appendectomy phase set remains provisional until clinically reviewed.
+
+## ADR 010: Automatic Canonical Sidecar Persistence
+
+- **Status**: Approved
+- **Context**: Annotation normally happens on one computer against one local video. Routine Save, Save As, manual session opening, periodic autosave copies, and recovery artifacts would add interaction and state that the current workflow does not need.
+- **Decision**:
+  - Use `<video filename>.phase-annotations.json` beside the video as its deterministic canonical sidecar.
+  - Automatically create it after valid duration initialization, load it when the video opens, and atomically save after every successful annotation mutation.
+  - Keep valid in-memory work after a write failure and define dirty state as divergence from the last successful canonical write.
+  - Prompt on close/video replacement only when a persistence failure has left dirty work.
+  - Use C5 source evidence before attaching an existing sidecar. A mismatch blocks loading; unknown evidence requires confirmation.
+  - Treat read-only-directory fallback as an exceptional later C6 slice; do not introduce ordinary Save As behavior into the core workflow.
+  - Keep JSON canonical and defer CSV until a demonstrated consumer requires it.
+- **Consequences**: The normal workflow has no save ceremony and minimizes crash exposure. Videos and annotations remain easy to move together. Read-only media locations need an explicit fallback policy, and immediate persistence failures must be highly visible.

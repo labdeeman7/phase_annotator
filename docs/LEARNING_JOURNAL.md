@@ -425,3 +425,11 @@ This illustrates progressive disclosure: preserve important detail, but present 
 `QMediaPlayer` reports framework-specific error enums and backend strings. `VideoPlayerWidget` translates those into application-level messages before emitting them, so `MainWindow` only decides what failed media means for the workflow: pause, disable unsafe controls, and show the explanation.
 
 This separates mechanism from policy. The wrapper understands Qt's failure vocabulary; the window understands whether annotation is allowed. The same distinction makes both sides easier to test.
+
+## C6.1 — Continuous persistence changes what “dirty” means
+
+In a traditional document editor, an edit usually makes the document dirty until the user presses Save. Phase Annotator will instead write its canonical sidecar after every successful annotation command. Here, dirty means only that memory differs from the **last successful write**, usually because persistence failed. That definition makes close prompts exceptional rather than routine.
+
+The existing JSON repository knows how to serialize and atomically replace one file. A persistence coordinator will add application policy: derive the sidecar path, decide when saving is allowed, validate before loading, track dirty state, and interpret failures. Keeping those responsibilities separate prevents file-format code from becoming coupled to Qt workflow.
+
+C7 autosave/recovery and CSV export were deliberately deferred under the YAGNI principle (“you aren't gonna need it”): avoid building a second persistence system or output format until continuous canonical saving or a real downstream consumer demonstrates the need.

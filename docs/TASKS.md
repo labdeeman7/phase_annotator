@@ -76,16 +76,22 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 
 ## Upcoming Milestones
 
-- [ ] C6: Manual session save, load, lifecycle fields, and dirty-state safety
-- [ ] C7: Autosave and crash recovery
-- [ ] C8: Validation, completion, and deterministic research export
+- [x] C6.1: persist continuous-sidecar, dirty-state, loading, resume, and schema contract
+- [x] C6.2: add backward-compatible lifecycle/resume fields and persistence coordinator
+- [x] C6.3: automatically create and save new-session sidecars
+- [x] C6.4: automatically validate, source-check, and load existing sidecars
+- [x] C6.5: persist and restore bounded resume checkpoints
+- [x] C6.6: guard dirty close/replacement; retain sidecar-only storage until evidence justifies a fallback
+- [x] C6.7: complete persistence failure and round-trip validation
+- [ ] C7: harden persistence only where C6 testing demonstrates a gap
+- [ ] C8: validation, explicit completion, and trustworthy canonical JSON
 - [ ] C9: Usability and annotation-efficiency pass
 - [ ] C10: Packaging, documentation, and release readiness
 
 ## Known cleanup (do not confuse with feature work)
 
 - [ ] Resolve unused duplicate `src/phase_annotator/ui/table_widget.py`
-- [ ] Unify package/window version reporting
+- [x] Unify package/window version reporting
 - [ ] Remove stale TODO and unused imports after confirming intended behavior
 - [ ] Add a configured lint/format/type-check toolchain
 

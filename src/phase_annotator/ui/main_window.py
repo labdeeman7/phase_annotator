@@ -1,13 +1,14 @@
 from dataclasses import replace
 from pathlib import Path
+import time
 from typing import Callable, Optional
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QKeySequence, QShortcut
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
     QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox, QComboBox,
-    QDialog, QMenu
+    QDialog, QMenu, QMessageBox
 )
 
 from phase_annotator.ui.player_widget import VideoPlayerWidget
@@ -22,6 +23,12 @@ from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
 from phase_annotator.media import MediaMetadata, probe_local_file
 from phase_annotator import __version__
+from phase_annotator.domain.models import CURRENT_SESSION_SCHEMA_VERSION
+from phase_annotator.storage import (
+    LoadStatus,
+    SessionPersistenceCoordinator,
+    SessionPersistenceError,
+)
 
 
 class MainWindow(QMainWindow):
@@ -29,7 +36,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, ontology: PhaseOntology):
         super().__init__()
-        self.setWindowTitle(f"Phase Annotator v{__version__}")
+        self._base_window_title = f"Phase Annotator v{__version__}"
+        self.setWindowTitle(self._base_window_title)
         self.resize(1200, 800)
 
         # Domain State
@@ -40,9 +48,14 @@ class MainWindow(QMainWindow):
             initial_phase_id=self._ontology.initial_phase_id,
         )
         self._history = AnnotationHistory(max_entries=100)
+        self._persistence = SessionPersistenceCoordinator(self._ontology)
         self._session: Optional[AnnotationSession] = None
         self._video_path: Optional[Path] = None
         self._media_load_failed = False
+        self._sidecar_load_blocked = False
+        self._sidecar_block_message = ""
+        self._loaded_existing_session = False
+        self._loading_video = False
         # Transient UI selection; valid only for the current interval sequence.
         self._selected_segment_index: Optional[int] = None
 
@@ -165,6 +178,11 @@ class MainWindow(QMainWindow):
         self._phase_palette.phase_selected.connect(self.record_phase_transition)
         self._create_phase_shortcuts()
         self._create_history_shortcuts()
+
+        self._resume_timer = QTimer(self)
+        self._resume_timer.setInterval(10_000)
+        self._resume_timer.timeout.connect(self._checkpoint_resume_during_playback)
+        self._resume_timer.start()
         QApplication.instance().focusChanged.connect(
             self._update_phase_shortcut_state
         )
@@ -278,6 +296,8 @@ class MainWindow(QMainWindow):
             anchor_ms=anchor_ms,
             mutation=mutation,
         )
+        if changed:
+            self._persist_session()
         self._update_history_controls()
         return changed
 
@@ -330,10 +350,16 @@ class MainWindow(QMainWindow):
         if file_path:
             self._load_video(Path(file_path))
 
-    def _load_video(self, path: Path) -> None:
+    def _load_video(self, path: Path) -> bool:
         """Starts loading a video and prepares its empty annotation session."""
+        if not self._prepare_to_leave_current_session("open another video"):
+            return False
         self._video_path = path
+        self._loading_video = True
         self._media_load_failed = False
+        self._sidecar_load_blocked = False
+        self._sidecar_block_message = ""
+        self._loaded_existing_session = False
         source_metadata = probe_local_file(path)
         video_info = VideoInfo(
             video_id=path.name,
@@ -345,12 +371,37 @@ class MainWindow(QMainWindow):
             fps_source="assumed",
             frame_rate_mode="unknown",
         )
-        self._session = AnnotationSession(
+        new_session = AnnotationSession(
             video_info=video_info,
             annotator_id="surgeon_01",
             ontology_id=self._ontology.ontology_id,
             ontology_version=self._ontology.ontology_version,
         )
+        load_result = self._persistence.inspect(path, source_metadata)
+        if load_result.status is LoadStatus.NEW:
+            self._session = new_session
+            self._persistence.bind(load_result.sidecar_path)
+        elif load_result.status is LoadStatus.LOADED:
+            self._accept_loaded_session(load_result.session, source_metadata)
+            self._persistence.bind(load_result.sidecar_path)
+        elif load_result.status is LoadStatus.UNKNOWN_SOURCE:
+            answer = QMessageBox.question(
+                self,
+                "Confirm annotation sidecar",
+                "The existing annotation sidecar lacks enough source metadata "
+                "to confirm this video. Load it anyway?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if answer == QMessageBox.StandardButton.Yes:
+                self._accept_loaded_session(load_result.session, source_metadata)
+                self._persistence.bind(load_result.sidecar_path)
+            else:
+                self._session = new_session
+                self._block_sidecar("Existing annotations were not confirmed.")
+        else:
+            self._session = new_session
+            self._block_sidecar(load_result.message)
         self._history.clear()
         self._update_history_controls()
         self._select_segment(None)
@@ -359,14 +410,112 @@ class MainWindow(QMainWindow):
         self._update_phase_shortcut_state()
         self._refresh_annotation_views()
         self._on_playback_state_changed(False)
+        self._loading_video = False
         self._set_media_controls_enabled(True)
+        if self._sidecar_load_blocked:
+            self._timeline_widget.setEnabled(False)
+            self._segment_list_widget.setEnabled(False)
         if source_metadata.failure is not None:
             self._on_media_error(
                 f"The video file is missing or unreadable: {path.name}"
             )
-            return
-        self.statusBar().showMessage(f"Loading: {path.name}")
+            return False
+        if self._sidecar_load_blocked:
+            self.statusBar().showMessage(self._sidecar_block_message)
+        else:
+            self.statusBar().showMessage(f"Loading: {path.name}")
         self._player_widget.load_video(path)
+        return True
+
+    def _accept_loaded_session(
+        self, session: AnnotationSession, source_metadata: MediaMetadata
+    ) -> None:
+        self._session = session
+        self._loaded_existing_session = True
+        self._session.schema_version = CURRENT_SESSION_SCHEMA_VERSION
+        self._session.video_info = replace(
+            self._session.video_info,
+            source_path=source_metadata.source_path,
+            file_size_bytes=source_metadata.file_size_bytes,
+            file_modified_ns=source_metadata.file_modified_ns,
+        )
+
+    def _block_sidecar(self, message: str) -> None:
+        self._sidecar_load_blocked = True
+        self._sidecar_block_message = f"Annotations unavailable: {message}"
+
+    def _update_dirty_indicator(self) -> None:
+        suffix = " [UNSAVED]" if self._persistence.is_dirty else ""
+        self.setWindowTitle(f"{self._base_window_title}{suffix}")
+
+    def _persist_session(self) -> bool:
+        """Write the current valid session to its canonical sidecar immediately."""
+        if (
+            self._session is None
+            or self._persistence.sidecar_path is None
+            or self._sidecar_load_blocked
+            or not self._session.intervals
+        ):
+            return False
+
+        duration_ms = self._session.video_info.duration_ms
+        self._session.resume_position_ms = min(
+            max(self._player_widget.position_ms, 0), duration_ms
+        )
+        self._session.updated_at = time.time()
+        self._persistence.mark_dirty()
+        self._update_dirty_indicator()
+        try:
+            self._persistence.save(self._session)
+        except SessionPersistenceError as error:
+            self.statusBar().showMessage(f"Annotations not saved: {error}")
+            return False
+        self._update_dirty_indicator()
+        return True
+
+    def _checkpoint_resume(self) -> None:
+        """Persist a meaningful playback checkpoint without saving every tick."""
+        if (
+            self._loading_video
+            or self._session is None
+            or not self._session.intervals
+        ):
+            return
+        position_ms = min(
+            max(self._player_widget.position_ms, 0),
+            self._session.video_info.duration_ms,
+        )
+        if position_ms != self._session.resume_position_ms:
+            self._persist_session()
+
+    def _checkpoint_resume_during_playback(self) -> None:
+        if self._player_widget.is_playing:
+            self._checkpoint_resume()
+
+    def _prepare_to_leave_current_session(self, action: str) -> bool:
+        """Try one final checkpoint, then make unresolved write failure explicit."""
+        self._checkpoint_resume()
+        if not self._persistence.is_dirty:
+            return True
+
+        choice = QMessageBox.warning(
+            self,
+            "Unsaved annotations",
+            f"The latest annotations could not be written before trying to {action}.",
+            QMessageBox.StandardButton.Retry
+            | QMessageBox.StandardButton.Discard
+            | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Retry,
+        )
+        if choice == QMessageBox.StandardButton.Retry:
+            return self._persist_session()
+        return choice == QMessageBox.StandardButton.Discard
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        if self._prepare_to_leave_current_session("close the application"):
+            event.accept()
+        else:
+            event.ignore()
 
     def _on_media_metadata_available(self, metadata: MediaMetadata) -> None:
         """Apply late Qt metadata only when it belongs to the current video."""
@@ -384,7 +533,11 @@ class MainWindow(QMainWindow):
         fps_source = metadata.fps_source if metadata.fps is not None else current.fps_source
         self._session.video_info = replace(
             current,
-            duration_ms=metadata.duration_ms or current.duration_ms,
+            duration_ms=(
+                current.duration_ms
+                if self._loaded_existing_session
+                else metadata.duration_ms or current.duration_ms
+            ),
             width=metadata.width or current.width,
             height=metadata.height or current.height,
             file_size_bytes=metadata.file_size_bytes,
@@ -410,16 +563,44 @@ class MainWindow(QMainWindow):
     def _on_duration_changed(self, duration_ms: int) -> None:
         self._slider.setRange(0, duration_ms)
         self._timeline_widget.set_duration(duration_ms)
-        if self._session and duration_ms > 0 and not self._media_load_failed:
-            self._session.video_info.duration_ms = duration_ms
+        if (
+            self._session
+            and duration_ms > 0
+            and not self._media_load_failed
+            and not self._sidecar_load_blocked
+        ):
+            if (
+                self._loaded_existing_session
+                and abs(self._session.video_info.duration_ms - duration_ms) > 100
+            ):
+                self._block_sidecar(
+                    "The saved duration conflicts with the loaded video."
+                )
+                self._phase_palette.set_annotation_enabled(False)
+                self._timeline_widget.setEnabled(False)
+                self._segment_list_widget.setEnabled(False)
+                self.statusBar().showMessage(self._sidecar_block_message)
+                self._update_phase_shortcut_state()
+                self._update_time_label(self._player_widget.position_ms, duration_ms)
+                return
+            if not self._loaded_existing_session:
+                self._session.video_info.duration_ms = duration_ms
             if not self._session.intervals:
                 self._editor.initialize_coverage(self._session)
                 self._refresh_annotation_views()
+                self._persist_session()
+            elif self._loaded_existing_session:
+                self._timeline_widget.set_duration(
+                    self._session.video_info.duration_ms
+                )
+                self._persist_session()
+                self._player_widget.seek_ms(self._session.resume_position_ms)
             self._phase_palette.set_annotation_enabled(bool(self._session.intervals))
             self._update_phase_shortcut_state()
             self._update_active_phase(self._player_widget.position_ms)
             if self._video_path:
-                self.statusBar().showMessage(f"Loaded: {self._video_path.name}")
+                if not self._persistence.is_dirty:
+                    self.statusBar().showMessage(f"Loaded: {self._video_path.name}")
         self._update_time_label(self._player_widget.position_ms, duration_ms)
 
     def _on_media_error(self, message: str) -> None:
@@ -449,6 +630,8 @@ class MainWindow(QMainWindow):
             self._btn_play.setText("Play")
             icon = QStyle.StandardPixmap.SP_MediaPlay
         self._btn_play.setIcon(self.style().standardIcon(icon))
+        if not is_playing:
+            self._checkpoint_resume()
 
     def _refresh_annotation_views(self) -> None:
         """Rebuild both interval views from the session source of truth."""
@@ -765,6 +948,7 @@ class MainWindow(QMainWindow):
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self._update_history_controls()
+        self._persist_session()
         self.statusBar().showMessage(f"Undid {entry.description}", 3000)
 
     def _redo_annotation(self) -> None:
@@ -782,6 +966,7 @@ class MainWindow(QMainWindow):
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self._update_history_controls()
+        self._persist_session()
         self.statusBar().showMessage(f"Redid {entry.description}", 3000)
 
     def _update_active_phase(self, position_ms: int) -> None:

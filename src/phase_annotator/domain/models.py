@@ -4,7 +4,8 @@ from dataclasses import dataclass, field
 from typing import List, Optional
 
 
-CURRENT_SESSION_SCHEMA_VERSION = "1.1"
+CURRENT_SESSION_SCHEMA_VERSION = "1.2"
+SESSION_STATUSES = frozenset({"draft", "completed"})
 FPS_SOURCES = frozenset({"unknown", "assumed", "qt", "ffprobe"})
 FRAME_RATE_MODES = frozenset({"unknown", "cfr", "vfr"})
 
@@ -110,9 +111,33 @@ class AnnotationSession:
     ontology_id: str = ""
     ontology_version: str = ""
     intervals: List[AnnotationInterval] = field(default_factory=list)
+    status: str = "draft"
+    completed_at: Optional[float] = None
+    resume_position_ms: int = 0
     schema_version: str = CURRENT_SESSION_SCHEMA_VERSION
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
+
+    def __post_init__(self) -> None:
+        if self.status not in SESSION_STATUSES:
+            raise ValueError(f"status must be one of {sorted(SESSION_STATUSES)}.")
+        if self.completed_at is not None and (
+            isinstance(self.completed_at, bool)
+            or not isinstance(self.completed_at, (int, float))
+            or not math.isfinite(self.completed_at)
+            or self.completed_at < 0
+        ):
+            raise ValueError("completed_at must be a non-negative timestamp or None.")
+        if self.status == "completed" and self.completed_at is None:
+            raise ValueError("completed sessions require completed_at.")
+        if self.status == "draft" and self.completed_at is not None:
+            raise ValueError("draft sessions cannot have completed_at.")
+        if (
+            not isinstance(self.resume_position_ms, int)
+            or isinstance(self.resume_position_ms, bool)
+            or self.resume_position_ms < 0
+        ):
+            raise ValueError("resume_position_ms must be a non-negative integer.")
 
     def add_interval(self, interval: AnnotationInterval) -> None:
         self.intervals.append(interval)

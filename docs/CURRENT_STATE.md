@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-09-09 against the post-C5 documentation cleanup based on `main` at `e5fd3b9`.
+Last verified on 2026-09-09 against the C6 implementation tree based on `main` at `b081d8b`.
 
 ## What Phase Annotator currently does
 
@@ -10,7 +10,9 @@ The application starts a PySide6 desktop window, lets the user choose a local vi
 
 The segment-card action menu is available through right-click and a discoverable **⋮** button. **Edit note...** opens a modal Save/Cancel dialog, and cards with notes show a compact indicator and full-note tooltip. **Change phase** exposes every configured ontology phase and relabels the complete selected segment. Relabeling preserves notes, coalesces equal neighbours, and keeps the resulting interval selected. **Set start to playhead** and **Set end to playhead** move the appropriate shared boundary atomically while preserving positive adjacent durations. **Remove / merge** offers Convert to Undefined, Merge left, and Merge right; unavailable directions are disabled and closing the menu cancels. Visible Undo/Redo buttons and `Ctrl+Z`, `Ctrl+Shift+Z`, and `Ctrl+Y` restore validated interval snapshots for every annotation mutation. Internal timeline boundaries have subtle handles, an emphasized cyan hover state, a resize cursor, and deterministic nearest-boundary hit testing. Dragging a handle seeks and previews without mutating data; one valid release creates one history command, while invalid/Escape cancellation restores the original playhead. The earlier permanent inspector prototype was rejected and removed because notes are infrequent and should not consume persistent sidebar space.
 
-The pure-Python layer provides Undefined plus the six provisional appendectomy phases, session/video/interval dataclasses, millisecond/frame formatting helpers, coverage/overlap validation, and JSON round-trip persistence through a stateless repository. C5.1 extends new sessions to schema 1.1 with optional lightweight media descriptors and explicit FPS provenance/frame-rate knowledge; schema 1.0 JSON remains loadable. C5.2 adds a neutral media-result/failure contract, cheap filesystem probing, and a Qt adapter for late duration, resolution, and reported-FPS metadata. C5.3 adds explainable match/mismatch/unknown source comparison without hashing.
+The pure-Python layer provides Undefined plus the six provisional appendectomy phases, session/video/interval dataclasses, millisecond/frame formatting helpers, coverage/overlap validation, and JSON persistence. Schema 1.2 adds draft/completed lifecycle fields and a bounded resume checkpoint while retaining known legacy defaults. A persistence coordinator now owns deterministic adjacent-sidecar naming, validation, source decisions, and dirty state above the stateless atomic JSON repository. C5 supplies lightweight media probing and explainable match/mismatch/unknown source comparison without hashing.
+
+C6 connects persistence to the GUI. Once duration is known, a new valid session is written to `<video filename>.phase-annotations.json`; every annotation mutation, undo, and redo saves immediately. Matching sidecars load automatically, unknown source evidence requires confirmation, and invalid or mismatching sidecars disable annotation. Resume is checkpointed on edits, pause, periodically during playback, and before clean close/replacement. A persistent `[UNSAVED]` title marker and retry/discard/cancel guard appear only when a write failure leaves memory ahead of disk.
 
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
@@ -18,20 +20,19 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 
 ## What is only partial or unsafe
 
-- Annotation state exists only in `MainWindow._session`; opening another video replaces it without a dirty-state warning.
-- The UI never calls `JsonSessionRepository`. There is no manual save, session-open flow, autosave, crash recovery, or close protection.
+- Annotation state lives in `MainWindow._session` and is mirrored immediately to the canonical sidecar. History remains process-local and is not restored.
+- Explicit completion remains unimplemented; C6 only persists its schema fields.
 - `MainWindow` still combines view construction and presenter/controller coordination; a dedicated presenter has not been extracted.
 - C3 and C4 are complete, with the user-visible correction, dragging, and undo/redo workflows manually accepted. History is not persisted across application or video loads.
 - The GUI begins with 30.0 FPS explicitly marked `assumed`, then adopts a positive FPS reported by Qt and labels its source `qt`. File size/modification time and available Qt duration/resolution are populated. Qt does not establish CFR/VFR status, so frame stepping remains estimated millisecond seeking rather than decoder-accurate navigation.
 - Missing/unreadable files fail before backend loading. Qt resource, format/codec, network, and permission errors produce actionable status-bar messages and disable playback, seeking, and annotation controls for that failed load.
 - New GUI sessions record the absolute last-known source path as well as the basename. The C5.3 comparison engine exists, but session loading and relocation do not yet call it. Video hashing is intentionally prohibited for this project.
-- JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, but does not fsync, clean stale temp files, lock concurrent writers, validate schema, or create the `.bak` backup claimed by historical rules.
-- GUI tests cover transition, selection, correction menus, notes, relabeling, boundary edits, removal/merge, undo/redo, dragging, timing presentation, media metadata, errors, and focus protection. They do not yet cover save/recovery, packaged cross-platform playback, or a complete persisted GUI workflow.
+- JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, with coordinator validation and visible dirty failure state. It does not fsync, clean stale temp files, lock concurrent writers, create backups, or support read-only source directories.
+- GUI and coordinator tests cover initial save, immediate mutation/undo persistence, matching reload, source outcomes, invalid data, legacy defaults, and write-failure dirty retention. Packaged cross-platform playback and crash/concurrent-writer behavior remain untested.
 
 ## Planned but absent
 
-- Manual save (`Ctrl+S`), autosave, session loading, and crash recovery.
-- Research CSV export. There is no `storage/export_csv.py`, despite older architecture documentation naming it.
+- Explicit completion and its validation/Undefined summary.
 - Distribution/installer work and Windows/Linux media-backend verification.
 - Continuous integration.
 - A real presenter/controller layer. `MainWindow` currently combines orchestration, session creation, and annotation mutations.
@@ -55,12 +56,12 @@ Antigravity established the original M0-M3 foundation:
 4. M2 added the PySide6/Qt Multimedia shell and time utilities.
 5. M3 (`141d6df`, 2026-08-10) added the painted timeline, segment-card list, colored ontology, splitter layout, click-to-seek wiring, and keyboard transitions/frame controls.
 
-Codex then stabilized and extended the application through C0-C5. The historical M4 persistence proposal has been superseded by the more explicit C6 session lifecycle and C7 recovery milestones.
+Codex then stabilized and extended the application through C0-C5. The historical M4 persistence proposal has been superseded by C6 continuous sidecars and evidence-led C7 persistence hardening.
 
 ## Validation baseline
 
-On 2026-09-09, the repository-local Python 3.11.5 environment passed all 142 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-09, the repository-local Python 3.11.5 environment passed all 156 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. C6 was not manually exercised against that large local video because doing so now intentionally creates a real adjacent sidecar. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Begin C6 manual session save, load, and dirty-state safety. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.
+Assess C7 using real C6 usage evidence; skip speculative recovery machinery if atomic continuous saving proves sufficient. Otherwise proceed to C8 explicit completion. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.

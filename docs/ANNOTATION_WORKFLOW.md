@@ -17,7 +17,7 @@
 13. Internal timeline boundaries display subtle handles. Hovering within eight pixels emphasizes the nearest handle and changes the cursor; ordinary clicks outside that area retain select/seek behavior. Pressing a handle begins a drag preview rather than immediately mutating data.
 14. Pressing and dragging a boundary displays a cyan valid or red invalid preview and seeks the video without changing intervals. One valid release invokes the shared boundary command once; invalid release or Escape restores the original playhead and records no history entry.
 
-There is currently no draggable boundary correction, persistent undo history, save/load, session-level dirty-state indicator, prominent error notification, or export action. Whole-segment relabeling, button-based boundary correction, explicit Convert to Undefined/Merge left/Merge right resolution, and in-memory undo/redo are available.
+Draggable boundaries, whole-segment relabeling, button-based boundary correction, Convert to Undefined/Merge left/Merge right resolution, and in-memory undo/redo are available. There is currently no automatic sidecar save/load, persisted history, dirty-state indicator, completion action, or prominent error notification.
 
 ## Qt ownership and signal flow
 

@@ -14,6 +14,7 @@ from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
 from phase_annotator.domain.validation import validate_contiguous_coverage
 from phase_annotator.media import MediaMetadata
+from phase_annotator.storage import JsonSessionRepository
 
 
 def make_window() -> MainWindow:
@@ -111,6 +112,69 @@ def test_load_status_changes_when_duration_becomes_available(
 
     window._on_duration_changed(10_000)
     assert window.statusBar().currentMessage() == "Loaded: synthetic_case.mp4"
+
+    sidecar = tmp_path / "synthetic_case.mp4.phase-annotations.json"
+    saved = JsonSessionRepository().load(sidecar)
+    assert saved.video_info.duration_ms == 10_000
+    assert saved.intervals == [AnnotationInterval(0, 10_000, 1)]
+
+
+def test_annotation_mutation_and_undo_are_immediately_persisted(
+    qtbot, monkeypatch, tmp_path
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    monkeypatch.setattr(
+        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
+    )
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+    sidecar = tmp_path / "case.mp4.phase-annotations.json"
+
+    window._load_video(video_path)
+    window._on_duration_changed(10_000)
+    window.record_phase_transition(2)
+
+    assert [item.phase_id for item in JsonSessionRepository().load(sidecar).intervals] == [
+        1,
+        2,
+    ]
+    window._undo_annotation()
+    assert JsonSessionRepository().load(sidecar).intervals == [
+        AnnotationInterval(0, 10_000, 1)
+    ]
+
+
+def test_existing_matching_sidecar_is_loaded_automatically(
+    qtbot, monkeypatch, tmp_path
+):
+    monkeypatch.setattr(
+        VideoPlayerWidget, "position_ms", property(lambda self: 6_000)
+    )
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+
+    first = make_window()
+    qtbot.addWidget(first)
+    monkeypatch.setattr(first._player_widget, "load_video", lambda path: None)
+    first._load_video(video_path)
+    first._on_duration_changed(10_000)
+    first._session.intervals = [
+        AnnotationInterval(0, 3_000, 1),
+        AnnotationInterval(3_000, 10_000, 2),
+    ]
+    first._session.resume_position_ms = 6_000
+    first._persist_session()
+
+    second = make_window()
+    qtbot.addWidget(second)
+    monkeypatch.setattr(second._player_widget, "load_video", lambda path: None)
+    second._load_video(video_path)
+
+    assert second._loaded_existing_session
+    assert second._session.intervals == first._session.intervals
+    assert second._session.resume_position_ms == 6_000
 
 
 def test_late_qt_metadata_updates_only_the_current_video(
