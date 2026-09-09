@@ -413,3 +413,15 @@ Asynchronous results can become stale: a slow signal for video A might arrive af
 A source comparison is not naturally just `True` or `False`. Missing old-session metadata means “we do not know,” which differs from “a known field conflicts.” `SourceMatchStatus` therefore models three states, while `SourceEvidence` preserves how every field contributed. This is useful whenever uncertainty must not be silently converted into success or failure.
 
 The absolute path is deliberately excluded from the overall conflict decision: paths answer “where was it?” rather than “what is it?” A moved file can still match its filename and other descriptor evidence. Conversely, filename agreement alone remains unknown because it is too weak to accept a source confidently.
+
+## C5.4 — The UI must preserve uncertainty from the model
+
+The first implementation repeated `Estimated`, FPS provenance, milliseconds, and approximation symbols across the main label, buttons, and every segment card. Manual use showed that this was technically explicit but harmed the primary clinical workflow. The revised UI keeps compact `Frame N`/`N frames` labels and puts the caveat in one tooltip, while the model retains full provenance and uncertainty.
+
+This illustrates progressive disclosure: preserve important detail, but present it only where it helps the current decision. Internal correctness does not require every implementation detail to occupy permanent screen space. Millisecond timestamps remain authoritative in storage even though segment cards show the friendlier duration in seconds.
+
+## C5.5 — Translate infrastructure failures at the boundary
+
+`QMediaPlayer` reports framework-specific error enums and backend strings. `VideoPlayerWidget` translates those into application-level messages before emitting them, so `MainWindow` only decides what failed media means for the workflow: pause, disable unsafe controls, and show the explanation.
+
+This separates mechanism from policy. The wrapper understands Qt's failure vocabulary; the window understands whether annotation is allowed. The same distinction makes both sides easier to test.

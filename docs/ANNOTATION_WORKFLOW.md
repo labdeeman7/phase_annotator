@@ -31,4 +31,6 @@ There is currently no draggable boundary correction, persistent undo history, sa
 
 Qt Multimedia chooses the platform media backend and codec support is environment-dependent. This repository contains no media probing, codec fallback, sample video, or playback integration test. FPS is currently 30.0 with `fps_source="assumed"`; source FPS, variable frame rate, time bases, keyframes, rotation, and stream errors are not handled. Consequently, displayed frame numbers and frame-step controls are estimates based on timestamps, not guaranteed decoded-frame indices.
 
-Milliseconds are the authoritative annotation unit today. Do not derive a claim of VFR frame accuracy from `ms_to_frame()` or `frame_to_ms()`; both are simple constant-rate arithmetic.
+Milliseconds are the authoritative annotation unit today. Frame labels stay compact for the clinical workflow, with the uncertainty retained in metadata and disclosed through the main time-label tooltip. Do not derive a claim of VFR frame accuracy from `ms_to_frame()` or `frame_to_ms()`; both are simple constant-rate arithmetic.
+
+Missing/unreadable files are rejected before media loading. If Qt reports a resource, format/codec, network, or permission error, playback and annotation controls are disabled and the status bar explains the failure. Opening a new source begins a fresh load attempt.

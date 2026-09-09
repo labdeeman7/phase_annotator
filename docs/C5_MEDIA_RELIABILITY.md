@@ -43,20 +43,22 @@ Status: **Complete.**
 
 ## C5.4 — Honest timing UI
 
-Status: **Planned.**
+Status: **Complete.**
 
-- Show FPS only with its provenance where useful.
-- Label frame numbers/stepping as estimated unless explicit CFR evidence supports the mapping.
-- For known VFR or unknown mode, keep millisecond timecodes primary and avoid frame-accuracy claims.
-- Propagate known FPS into segment-card estimates consistently.
+- The main time label leads with millisecond timecodes and uses the compact `Frame N` presentation.
+- Segment cards show seconds and a compact frame count; repeated milliseconds, FPS, and provenance were removed as visual noise.
+- Frame-step buttons retain the familiar `-1 Frame` and `+1 Frame` labels.
+- Qt-reported FPS refreshes the time label, frame-step presentation, and segment-card estimates consistently.
+- Internal provenance and uncertainty remain intact. One unobtrusive tooltip explains timestamp-derived frame values while CFR is unconfirmed.
 
 ## C5.5 — Playback and codec errors
 
-Status: **Planned.**
+Status: **Complete.**
 
-- Handle missing/unreadable files, unsupported formats/codecs, invalid media, and backend failures.
-- Do not leave annotation controls enabled when loading fails.
-- Keep routine Loading/Loaded state in the status bar; use actionable error text now and the planned polished notification component later.
+- Missing/unreadable paths fail before Qt loading and receive a filename-scoped status message.
+- `VideoPlayerWidget` translates Qt resource, format/codec, network, and permission errors into actionable text without exposing Qt enums to `MainWindow`.
+- A failed load pauses playback and disables play, frame-step, seek, palette, and annotation shortcuts.
+- Opening another video resets the failure state. Routine Loading/Loaded and failure feedback remain in the status bar; the polished notification component stays deferred.
 
 ## C5.6 — Integration validation
 
@@ -68,4 +70,4 @@ Status: **Planned.**
 
 ## Learning-mode reading map
 
-For C5.3, focus on `compare_video_source()` and the three result dataclasses/enums in `media/matching.py`. The central rule is that path evidence is reported but excluded from the conflict decision. Skim the small field-helper functions and repeated parameterized mismatch cases.
+For C5.5, focus on `VideoPlayerWidget._forward_media_error()`, `MainWindow._on_media_error()`, and the early failure branch in `_load_video()`. Skim the Qt error-message mapping and repeated control assertions.

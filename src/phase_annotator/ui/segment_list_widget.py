@@ -103,8 +103,7 @@ class SegmentCardWidget(QFrame):
         end_frame = ms_to_frame(interval.end_ms, fps)
         total_frames = max(0, end_frame - start_frame)
         subtext_label = QLabel(
-            f"Duration: {duration_sec:.3f}s  |  {interval.duration_ms} ms, "
-            f"{total_frames} frames",
+            f"Duration: {duration_sec:.3f}s  |  {total_frames} frames",
             self,
         )
         subtext_label.setStyleSheet("color: #AAAAAA; font-size: 11px;")
@@ -207,6 +206,7 @@ class SegmentListWidget(QWidget):
         self._ontology = ontology
 
     def set_fps(self, fps: float) -> None:
+        """Configure the rate used for timestamp-derived frame counts."""
         self._fps = fps
 
     def set_intervals(self, intervals: List[AnnotationInterval]) -> None:
@@ -219,7 +219,12 @@ class SegmentListWidget(QWidget):
                 phase = self._ontology.get_phase_by_id(interval.phase_id)
             except KeyError:
                 phase = None
-            card = SegmentCardWidget(interval, phase, fps=self._fps, parent=self)
+            card = SegmentCardWidget(
+                interval,
+                phase,
+                fps=self._fps,
+                parent=self,
+            )
             # Bind the current index now; otherwise every callback would observe
             # the loop's final value when it eventually runs.
             card.actions_requested.connect(

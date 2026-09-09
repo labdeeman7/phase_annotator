@@ -41,6 +41,7 @@ class MainWindow(QMainWindow):
         self._history = AnnotationHistory(max_entries=100)
         self._session: Optional[AnnotationSession] = None
         self._video_path: Optional[Path] = None
+        self._media_load_failed = False
         # Transient UI selection; valid only for the current interval sequence.
         self._selected_segment_index: Optional[int] = None
 
@@ -73,9 +74,10 @@ class MainWindow(QMainWindow):
         slider_layout = QHBoxLayout()
         self._slider = QSlider(Qt.Orientation.Horizontal, self)
         self._slider.setRange(0, 0)
+        self._slider.setEnabled(False)
         self._slider.sliderMoved.connect(self._on_slider_moved)
 
-        self._time_label = QLabel("00:00:00.000 / 00:00:00.000 (Frame 0)", self)
+        self._time_label = QLabel("00:00:00.000 / 00:00:00.000", self)
         slider_layout.addWidget(self._slider, stretch=1)
         slider_layout.addWidget(self._time_label)
         control_layout.addLayout(slider_layout)
@@ -140,6 +142,7 @@ class MainWindow(QMainWindow):
         self._player_widget.metadata_available.connect(
             self._on_media_metadata_available
         )
+        self._player_widget.media_error.connect(self._on_media_error)
         self._timeline_widget.segment_selection_requested.connect(
             self._request_segment_selection
         )
@@ -329,6 +332,7 @@ class MainWindow(QMainWindow):
     def _load_video(self, path: Path) -> None:
         """Starts loading a video and prepares its empty annotation session."""
         self._video_path = path
+        self._media_load_failed = False
         source_metadata = probe_local_file(path)
         video_info = VideoInfo(
             video_id=path.name,
@@ -354,15 +358,22 @@ class MainWindow(QMainWindow):
         self._update_phase_shortcut_state()
         self._refresh_annotation_views()
         self._on_playback_state_changed(False)
-        self._btn_play.setEnabled(True)
-        self._btn_step_back.setEnabled(True)
-        self._btn_step_forward.setEnabled(True)
+        self._set_media_controls_enabled(True)
+        if source_metadata.failure is not None:
+            self._on_media_error(
+                f"The video file is missing or unreadable: {path.name}"
+            )
+            return
         self.statusBar().showMessage(f"Loading: {path.name}")
         self._player_widget.load_video(path)
 
     def _on_media_metadata_available(self, metadata: MediaMetadata) -> None:
         """Apply late Qt metadata only when it belongs to the current video."""
-        if self._session is None or self._video_path is None:
+        if (
+            self._media_load_failed
+            or self._session is None
+            or self._video_path is None
+        ):
             return
         if metadata.source_path != str(self._video_path.resolve()):
             return
@@ -383,6 +394,10 @@ class MainWindow(QMainWindow):
         )
         if metadata.fps is not None:
             self._player_widget.fps = metadata.fps
+        self._refresh_annotation_views()
+        self._update_time_label(
+            self._player_widget.position_ms, self._slider.maximum()
+        )
 
     def _on_position_changed(self, position_ms: int) -> None:
         if not self._slider.isSliderDown():
@@ -394,7 +409,7 @@ class MainWindow(QMainWindow):
     def _on_duration_changed(self, duration_ms: int) -> None:
         self._slider.setRange(0, duration_ms)
         self._timeline_widget.set_duration(duration_ms)
-        if self._session and duration_ms > 0:
+        if self._session and duration_ms > 0 and not self._media_load_failed:
             self._session.video_info.duration_ms = duration_ms
             if not self._session.intervals:
                 self._editor.initialize_coverage(self._session)
@@ -405,6 +420,25 @@ class MainWindow(QMainWindow):
             if self._video_path:
                 self.statusBar().showMessage(f"Loaded: {self._video_path.name}")
         self._update_time_label(self._player_widget.position_ms, duration_ms)
+
+    def _on_media_error(self, message: str) -> None:
+        """Leave a failed load visible but impossible to annotate accidentally."""
+        self._media_load_failed = True
+        self._player_widget.pause()
+        self._set_media_controls_enabled(False)
+        self._phase_palette.set_annotation_enabled(False)
+        self._phase_palette.set_active_phase(None)
+        self._update_phase_shortcut_state()
+        name = self._video_path.name if self._video_path else "video"
+        self.statusBar().showMessage(f"Could not load {name}: {message}")
+
+    def _set_media_controls_enabled(self, enabled: bool) -> None:
+        self._btn_play.setEnabled(enabled)
+        self._btn_step_back.setEnabled(enabled)
+        self._btn_step_forward.setEnabled(enabled)
+        self._slider.setEnabled(enabled)
+        self._timeline_widget.setEnabled(enabled)
+        self._segment_list_widget.setEnabled(enabled)
 
     def _on_playback_state_changed(self, is_playing: bool) -> None:
         if is_playing:
@@ -418,6 +452,9 @@ class MainWindow(QMainWindow):
     def _refresh_annotation_views(self) -> None:
         """Rebuild both interval views from the session source of truth."""
         intervals = self._session.intervals if self._session else []
+        if self._session is not None and self._session.video_info.fps is not None:
+            video_info = self._session.video_info
+            self._segment_list_widget.set_fps(video_info.fps)
         self._timeline_widget.set_intervals(intervals)
         self._segment_list_widget.set_intervals(intervals)
         # Protect future load/removal paths that may replace the interval
@@ -769,5 +806,21 @@ class MainWindow(QMainWindow):
     def _update_time_label(self, current_ms: int, duration_ms: int) -> None:
         current_str = format_timecode(current_ms)
         duration_str = format_timecode(duration_ms)
-        frame_idx = ms_to_frame(current_ms, self._player_widget.fps)
-        self._time_label.setText(f"{current_str} / {duration_str} (Frame {frame_idx})")
+        if self._session is None or self._session.video_info.fps is None:
+            self._time_label.setText(f"{current_str} / {duration_str}")
+            self._time_label.setToolTip("")
+            return
+
+        video_info = self._session.video_info
+        frame_idx = ms_to_frame(current_ms, video_info.fps)
+        if video_info.frame_numbers_are_estimated:
+            tooltip = (
+                "Milliseconds are authoritative. The frame number is estimated "
+                "because constant frame rate has not been confirmed."
+            )
+        else:
+            tooltip = "Frame mapping uses measured constant-frame-rate metadata."
+        self._time_label.setText(
+            f"{current_str} / {duration_str} (Frame {frame_idx})"
+        )
+        self._time_label.setToolTip(tooltip)

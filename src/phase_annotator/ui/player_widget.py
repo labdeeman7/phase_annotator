@@ -16,6 +16,7 @@ class VideoPlayerWidget(QWidget):
     duration_changed = Signal(int)  # Emits video duration in ms
     playback_state_changed = Signal(bool)  # True while actively playing
     metadata_available = Signal(object)  # Emits a neutral MediaMetadata snapshot
+    media_error = Signal(str)
 
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
@@ -41,6 +42,7 @@ class VideoPlayerWidget(QWidget):
         self._player.playbackStateChanged.connect(self._forward_playback_state)
         self._player.metaDataChanged.connect(self._emit_metadata)
         self._player.tracksChanged.connect(self._emit_metadata)
+        self._player.errorOccurred.connect(self._forward_media_error)
 
     @property
     def fps(self) -> float:
@@ -99,7 +101,7 @@ class VideoPlayerWidget(QWidget):
         self._player.setPosition(position_ms)
 
     def step_frames(self, frame_count: int) -> None:
-        """Steps forward or backward by N frames based on current FPS setting."""
+        """Seek by an FPS-derived duration; this is not decoder frame stepping."""
         ms_per_frame = 1000.0 / self._fps
         target_ms = int(self.position_ms + (frame_count * ms_per_frame))
         target_ms = max(0, min(self.duration_ms, target_ms))
@@ -111,3 +113,22 @@ class VideoPlayerWidget(QWidget):
         self.playback_state_changed.emit(
             state == QMediaPlayer.PlaybackState.PlayingState
         )
+
+    def _forward_media_error(
+        self, error: QMediaPlayer.Error, backend_message: str
+    ) -> None:
+        if error == QMediaPlayer.Error.NoError:
+            return
+        summaries = {
+            QMediaPlayer.Error.ResourceError: "The video file could not be read.",
+            QMediaPlayer.Error.FormatError: (
+                "The video format is invalid or its codec is unsupported."
+            ),
+            QMediaPlayer.Error.NetworkError: "A media network error occurred.",
+            QMediaPlayer.Error.AccessDeniedError: (
+                "Permission to read the video was denied."
+            ),
+        }
+        summary = summaries.get(error, "The video could not be loaded.")
+        detail = backend_message.strip()
+        self.media_error.emit(f"{summary} {detail}".strip())

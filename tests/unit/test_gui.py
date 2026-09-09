@@ -2,7 +2,8 @@ from pathlib import Path
 
 import pytest
 from PySide6.QtCore import QPoint, Qt
-from PySide6.QtWidgets import QDialog, QLineEdit
+from PySide6.QtMultimedia import QMediaPlayer
+from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
 
 from phase_annotator.config import load_default_ontology
 from phase_annotator.ui.main_window import MainWindow
@@ -60,6 +61,22 @@ def test_player_widget_exposes_public_playback_state(qtbot):
     assert player_widget.is_playing is False
 
 
+def test_player_widget_translates_qt_format_error(qtbot):
+    player_widget = VideoPlayerWidget()
+    qtbot.addWidget(player_widget)
+    messages = []
+    player_widget.media_error.connect(messages.append)
+
+    player_widget._forward_media_error(
+        QMediaPlayer.Error.FormatError, "Backend rejected stream"
+    )
+
+    assert messages == [
+        "The video format is invalid or its codec is unsupported. "
+        "Backend rejected stream"
+    ]
+
+
 def test_play_button_reflects_player_state(qtbot):
     window = make_window()
     qtbot.addWidget(window)
@@ -71,18 +88,22 @@ def test_play_button_reflects_player_state(qtbot):
     assert window._btn_play.text() == "Play"
 
 
-def test_load_status_changes_when_duration_becomes_available(qtbot, monkeypatch):
+def test_load_status_changes_when_duration_becomes_available(
+    qtbot, monkeypatch, tmp_path
+):
     window = make_window()
     qtbot.addWidget(window)
     monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    video_path = tmp_path / "synthetic_case.mp4"
+    video_path.write_bytes(b"synthetic")
 
-    window._load_video(Path("synthetic_case.mp4"))
+    window._load_video(video_path)
     assert window.statusBar().currentMessage() == "Loading: synthetic_case.mp4"
     assert window._btn_play.isEnabled()
     assert window._session.ontology_id == "laparoscopic_appendectomy.default"
     assert window._session.ontology_version == "1.0"
     assert window._session.video_info.source_path == str(
-        Path("synthetic_case.mp4").resolve()
+        video_path.resolve()
     )
     assert window._session.video_info.fps_source == "assumed"
     assert window._session.video_info.frame_rate_mode == "unknown"
@@ -92,15 +113,19 @@ def test_load_status_changes_when_duration_becomes_available(qtbot, monkeypatch)
     assert window.statusBar().currentMessage() == "Loaded: synthetic_case.mp4"
 
 
-def test_late_qt_metadata_updates_only_the_current_video(qtbot, monkeypatch):
+def test_late_qt_metadata_updates_only_the_current_video(
+    qtbot, monkeypatch, tmp_path
+):
     window = make_window()
     qtbot.addWidget(window)
     monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
-    window._load_video(Path("synthetic_case.mp4"))
+    video_path = tmp_path / "synthetic_case.mp4"
+    video_path.write_bytes(b"synthetic")
+    window._load_video(video_path)
 
     window._on_media_metadata_available(
         MediaMetadata(
-            source_path=str(Path("synthetic_case.mp4").resolve()),
+            source_path=str(video_path.resolve()),
             file_size_bytes=123,
             file_modified_ns=456,
             duration_ms=10_000,
@@ -119,6 +144,11 @@ def test_late_qt_metadata_updates_only_the_current_video(qtbot, monkeypatch):
     assert video_info.fps_source == "qt"
     assert video_info.frame_numbers_are_estimated
     assert window._player_widget.fps == 25.0
+    assert "(Frame 0)" in window._time_label.text()
+    assert "qt" not in window._time_label.text()
+    assert "FPS" not in window._time_label.text()
+    assert "Milliseconds are authoritative" in window._time_label.toolTip()
+    assert window._btn_step_forward.text() == "+1 Frame"
 
     window._on_media_metadata_available(
         MediaMetadata(
@@ -128,6 +158,51 @@ def test_late_qt_metadata_updates_only_the_current_video(qtbot, monkeypatch):
         )
     )
     assert window._session.video_info.fps == 25.0
+
+
+def test_missing_video_disables_media_and_annotation_controls(
+    qtbot, monkeypatch, tmp_path
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    load_calls = []
+    monkeypatch.setattr(
+        window._player_widget, "load_video", lambda path: load_calls.append(path)
+    )
+
+    window._load_video(tmp_path / "missing.mp4")
+
+    assert load_calls == []
+    assert window._media_load_failed
+    assert not window._btn_play.isEnabled()
+    assert not window._btn_step_back.isEnabled()
+    assert not window._btn_step_forward.isEnabled()
+    assert not window._slider.isEnabled()
+    assert not window._timeline_widget.isEnabled()
+    assert not window._segment_list_widget.isEnabled()
+    assert not window._phase_palette.is_annotation_enabled
+    assert "Could not load missing.mp4" in window.statusBar().currentMessage()
+
+
+def test_backend_error_disables_controls_and_preserves_actionable_message(
+    qtbot, monkeypatch, tmp_path
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    monkeypatch.setattr(window._player_widget, "pause", lambda: None)
+    video_path = tmp_path / "invalid.mp4"
+    video_path.write_bytes(b"invalid")
+    window._load_video(video_path)
+
+    window._on_media_error(
+        "The video format is invalid or its codec is unsupported."
+    )
+
+    assert window._media_load_failed
+    assert not window._btn_play.isEnabled()
+    assert not window._phase_palette.is_annotation_enabled
+    assert "codec is unsupported" in window.statusBar().currentMessage()
 
 
 def test_timeline_widget_position(qtbot):
@@ -155,6 +230,20 @@ def test_segment_list_widget_population(qtbot):
     segment_list._list_widget.itemClicked.emit(segment_list._list_widget.item(1))
 
     assert requests == [(1, 5_000)]
+
+
+def test_segment_cards_keep_timing_summary_compact(qtbot):
+    segment_list = SegmentListWidget(ontology=load_default_ontology())
+    qtbot.addWidget(segment_list)
+    segment_list.set_fps(25.0)
+    segment_list.set_intervals([AnnotationInterval(0, 1_000, 1)])
+
+    labels = segment_list._cards[0].findChildren(QLabel)
+    frame_label = next(label for label in labels if "frames" in label.text())
+
+    assert frame_label.text() == "Duration: 1.000s  |  25 frames"
+    assert "ms" not in frame_label.text()
+    assert "FPS" not in frame_label.text()
 
 
 def test_timeline_click_selects_interval_and_requests_seek(qtbot):
