@@ -176,6 +176,8 @@ Learning focus: command pattern, transient preview state, and transactional UI g
 
 Goal: make timing claims explicit and playback failures understandable.
 
+Status: **Completed on 2026-09-09; representative Windows-backend smoke check passed.**
+
 The completed C5.1-C5.6 plan, no-hash source-descriptor policy, Qt-only metadata decision, and timing-confidence rules are detailed in `C5_MEDIA_RELIABILITY.md`.
 
 Implementation:
@@ -183,7 +185,7 @@ Implementation:
 - Capture media duration, dimensions, and available frame-rate metadata.
 - Use and document the approved lightweight source descriptor without video hashing.
 - Surface Qt media loading/codec errors in the UI.
-- Define CFR/VFR behavior and label displayed frame numbers as exact or estimated accordingly.
+- Preserve CFR/VFR uncertainty internally and disclose timestamp-derived frame limitations without crowding the primary workflow.
 - Test seeking and annotation against small synthetic CFR media; manually test representative project media.
 
 Exit gate: **Passed for the C5 foundation.** Source comparisons produce explainable match/mismatch/unknown evidence for future C6 session loading; unsupported media produces a useful error and disables unsafe controls; timing limitations are retained internally, disclosed unobtrusively, and documented. Representative codec validation currently covers this Windows development backend, not packaged or Linux builds.

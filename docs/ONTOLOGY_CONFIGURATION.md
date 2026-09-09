@@ -56,4 +56,4 @@ Generic entry points:
 - `load_packaged_ontology(filename)`: any ontology shipped with the application.
 - `load_default_ontology()`: current startup policy; today this selects appendectomy.
 
-The default configuration displays surgical phases 1-6 in expected order and Undefined (`U`) last. C2 will render this metadata as the visible clickable phase palette and route configured hotkeys through the existing transition command.
+The default configuration displays surgical phases 1-6 in expected order and Undefined (`U`) last. The phase palette renders this metadata and routes both configured hotkeys and mouse clicks through the same transition command.

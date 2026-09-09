@@ -30,7 +30,7 @@ def show_window(qtbot, window: MainWindow) -> None:
 def test_main_window_instantiation(qtbot):
     window = make_window()
     qtbot.addWidget(window)
-    assert "Appendectomy Phase Annotation Tool" in window.windowTitle()
+    assert "Phase Annotator" in window.windowTitle()
     assert window._btn_play.text() == "Play"
     assert not window._btn_play.isEnabled()
     assert window._timeline_widget._ontology is window._ontology

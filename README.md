@@ -1,14 +1,15 @@
-# Appendectomy Phase Annotation Tool
+# Phase Annotator
 
-A lightweight, high-reliability desktop application for annotating temporal surgical phases in laparoscopic appendectomy videos.
+A configurable desktop application for creating and correcting temporal phase annotations in surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology, while the annotation engine and UI consume generic ontology configuration.
 
 ## Project Goals
 
 * **Research Utility**: Produce deterministic, schema-validated temporal phase annotations for surgical AI research.
-* **Data Integrity**: Fail-safe persistence via atomic writes, session recovery, and clear error boundaries.
-* **Engineering Rigor**: Built using Test-Driven Development (TDD), Clean Architecture, and clear domain isolation.
+* **Data Integrity**: Preserve continuous, validated timeline coverage through transactional editing and atomic JSON repository writes.
+* **Flexible Configuration**: Supply phase names, colors, hotkeys, ordering, initial phase, and Undefined role through a versioned ontology.
+* **Engineering Rigor**: Keep annotation rules independent of PySide6 and cover important behavior with automated tests.
 
-## Surgical Phase Ontology
+## Bundled Default Ontology
 
 Default provisional laparoscopic appendectomy ontology:
 
@@ -40,7 +41,7 @@ source venv/bin/activate
 pip install -e ".[dev]"
 
 # Run test suite
-pytest -v tests/
+QT_QPA_PLATFORM=offscreen python -m pytest -v tests
 ```
 
 Windows PowerShell:
@@ -51,6 +52,7 @@ py -3.10 -m venv .venv
 python -m pip install -e ".[dev]"
 $env:QT_QPA_PLATFORM = "offscreen"
 python -m pytest -v tests
+Remove-Item Env:QT_QPA_PLATFORM
 ```
 
 The application entry point is:
@@ -59,7 +61,7 @@ The application entry point is:
 python -m phase_annotator
 ```
 
-This is currently an early prototype: playback and in-memory phase marking exist, but GUI-integrated save/recovery and CSV export are planned rather than implemented.
+This is an early prototype completed through project milestone C5. Playback, mouse/hotkey annotation, synchronized correction tools, draggable boundaries, undo/redo, media metadata, and failure handling work. GUI-integrated session saving/loading, recovery, completion, CSV export, and distribution remain planned.
 
 ## Documentation
 
@@ -69,6 +71,7 @@ This is currently an early prototype: playback and in-memory phase marking exist
 * [Annotation and Video Workflow](docs/ANNOTATION_WORKFLOW.md)
 * [Annotation Data Model](docs/DATA_MODEL.md)
 * [Ontology Configuration](docs/ONTOLOGY_CONFIGURATION.md)
+* [Media Reliability Contract](docs/C5_MEDIA_RELIABILITY.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)

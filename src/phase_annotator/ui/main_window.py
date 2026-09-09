@@ -21,14 +21,15 @@ from phase_annotator.domain.models import AnnotationSession, VideoInfo
 from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
 from phase_annotator.media import MediaMetadata, probe_local_file
+from phase_annotator import __version__
 
 
 class MainWindow(QMainWindow):
-    """Main application window for Appendectomy Phase Annotation Tool."""
+    """Main application window for the configured phase ontology."""
 
     def __init__(self, ontology: PhaseOntology):
         super().__init__()
-        self.setWindowTitle("Appendectomy Phase Annotation Tool v0.2.0")
+        self.setWindowTitle(f"Phase Annotator v{__version__}")
         self.resize(1200, 800)
 
         # Domain State

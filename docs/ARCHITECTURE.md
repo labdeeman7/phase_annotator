@@ -1,6 +1,6 @@
 # Architecture Overview
 
-The implemented application is a small three-package desktop prototype. It follows the intended dependency direction at the domain boundary, but it does not yet have the documented presenter/controller layer.
+The implemented application is a small layered desktop prototype. It follows the intended dependency direction at the domain boundary, but it does not yet have a dedicated presenter/controller layer.
 
 ```text
 __main__.py
@@ -18,7 +18,7 @@ JsonSessionRepository ────────── domain models (not connecte
 ### Domain (`src/phase_annotator/domain/`)
 
 - `models.py`: `VideoInfo`, `AnnotationInterval`, and `AnnotationSession` dataclasses. `VideoInfo` separates optional media values from their provenance and records a lightweight, non-cryptographic source descriptor.
-- `ontology.py`: `Phase` and the code-defined provisional six-phase ontology.
+- `ontology.py`: generic `Phase`/`PhaseOntology` models and validation from decoded configuration.
 - `validation.py`: overlap detection and ordered, contiguous full-coverage validation. `AnnotationEditor` additionally enforces configured phase IDs and playhead bounds.
 - `time_utils.py`: constant-FPS timestamp/frame arithmetic and timecode formatting.
 - `annotation_editor.py`: transactional full-coverage initialization and phase-transition editing, including validation and adjacent-label coalescing.

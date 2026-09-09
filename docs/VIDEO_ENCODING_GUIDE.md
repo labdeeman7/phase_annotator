@@ -72,4 +72,4 @@ Modern codecs like H.264, H.265 (HEVC), and VP9 organize video into a **Group of
 2. **Constant (CFR) vs. Variable Frame Rate (VFR)**:
    * **Constant Frame Rate (CFR)**: Exactly 30.000 frames every second. (Ideal for AI models like ResNet / Transformers).
    * **Variable Frame Rate (VFR)**: Frame rate fluctuates (e.g., drops to 22 FPS when OR camera lags).
-   * Our domain utilities (`ms_to_frame`, `frame_to_ms`) rely on millisecond timecodes to ensure annotations remain frame-accurate even across VFR or CFR recordings!
+   * This application stores annotation boundaries in milliseconds. Its `ms_to_frame` and `frame_to_ms` helpers use constant-rate arithmetic, so they can estimate frame numbers but cannot guarantee decoded-frame accuracy for VFR media. Exact frame mapping would require timestamp information from decoded frames or another verified media index.

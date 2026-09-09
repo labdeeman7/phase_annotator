@@ -29,7 +29,7 @@ Status: **Completed and manually accepted on 2026-09-03.**
 
 ## C3.2 — Compact segment actions and notes
 
-Status: **Revised interaction implemented on 2026-09-05; awaiting manual acceptance.** The earlier permanent inspector prototype was replaced before acceptance.
+Status: **Revised interaction completed and manually accepted on 2026-09-05.** The earlier permanent inspector prototype was replaced before acceptance.
 
 Notes are occasional supporting information, so they must not permanently consume right-sidebar space needed by the segment list. Keep phase, start/end, and duration visible on each segment card. A card with a non-empty note displays a compact note indicator and may expose the note in a tooltip.
 

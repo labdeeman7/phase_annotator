@@ -1,6 +1,6 @@
 # Software Engineering Concepts & Design Patterns Journal
 
-This document records the architectural patterns, design decisions, and testing concepts used in the **Appendectomy Phase Annotation Tool**.
+This document records the architectural patterns, design decisions, and testing concepts used in **Phase Annotator**. Appendectomy is the currently bundled default ontology, not a restriction of the annotation engine.
 
 ---
 

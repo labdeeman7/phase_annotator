@@ -2,7 +2,7 @@
 
 ## Purpose and current maturity
 
-This repository is a desktop tool for producing temporal surgical-phase annotations for laparoscopic appendectomy videos. It is an early prototype completed through Codex milestone C5 and moving next to C6, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, draggable boundaries, undo/redo, media metadata, and failure handling exist, while UI-integrated saving, recovery, export, and distribution do not.
+This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype completed through Codex milestone C5 and moving next to C6, not yet a production annotation system: playback, in-memory annotation, configurable mouse/hotkey phase selection, synchronized correction tools, draggable boundaries, undo/redo, media metadata, and failure handling exist, while UI-integrated saving, recovery, export, and distribution do not.
 
 Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C5 is complete; `docs/C5_MEDIA_RELIABILITY.md` records its media contract and validation evidence. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
@@ -11,9 +11,11 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 - `src/phase_annotator/__main__.py`: `python -m phase_annotator` entry point.
 - `src/phase_annotator/domain/`: pure-Python dataclasses, ontology, time conversion, and validation.
 - `src/phase_annotator/config/`: packaged JSON ontology resources and resource-loading adapter.
+- `src/phase_annotator/media/`: lightweight source descriptors, Qt metadata translation, and source comparison.
 - `src/phase_annotator/storage/`: JSON serialization and atomic replacement. It is not wired into the GUI yet.
 - `src/phase_annotator/ui/`: PySide6 main window, Qt Multimedia player, timeline, and segment cards.
 - `tests/unit/`, `tests/integration/`: domain/storage tests plus lightweight Qt widget tests.
+- `scripts/`: explicit local validation utilities; representative videos remain ignored.
 - `docs/`: architecture, schema/workflow, decisions, status/backlog, testing, and learning notes.
 
 ## Architectural constraints

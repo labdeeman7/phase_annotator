@@ -1,8 +1,8 @@
 # Current State and Handover
 
-Last verified on 2026-09-09 against the completed C5 working tree based on `main` at `74b808d`.
+Last verified on 2026-09-09 against the post-C5 documentation cleanup based on `main` at `e5fd3b9`.
 
-## What the application currently does
+## What Phase Annotator currently does
 
 Milliseconds remain authoritative internally and lead the main time display. Frame labels and segment cards stay compact; one time-label tooltip carries the timestamp-derived-frame caveat while FPS provenance remains internal.
 
@@ -26,7 +26,7 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 - Missing/unreadable files fail before backend loading. Qt resource, format/codec, network, and permission errors produce actionable status-bar messages and disable playback, seeking, and annotation controls for that failed load.
 - New GUI sessions record the absolute last-known source path as well as the basename. The C5.3 comparison engine exists, but session loading and relocation do not yet call it. Video hashing is intentionally prohibited for this project.
 - JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, but does not fsync, clean stale temp files, lock concurrent writers, validate schema, or create the `.bak` backup claimed by historical rules.
-- GUI tests cover editor-backed forward/backward transitions, synchronized views, configured initial coverage, public player state, Play/Pause/Loading/Loaded feedback, mouse/hotkey equivalence, `U`, active-phase feedback, and focus protection for text entry and the segment list. They also verify that clicking the timeline restores annotation shortcuts. They do not yet cover correction tools, save/recovery, or a complete GUI workflow.
+- GUI tests cover transition, selection, correction menus, notes, relabeling, boundary edits, removal/merge, undo/redo, dragging, timing presentation, media metadata, errors, and focus protection. They do not yet cover save/recovery, packaged cross-platform playback, or a complete persisted GUI workflow.
 
 ## Planned but absent
 
@@ -41,13 +41,13 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 
 - `ui/table_widget.py` is an unused near-duplicate of `ui/segment_list_widget.py`; both were added in M3, but only the latter is imported.
 - `docs/DECISIONS.md` previously described a `QTableWidget`/`IntervalTableView`; the implementation uses custom cards in a `QListWidget`.
-- The package metadata and `src/phase_annotator.__version__` say `0.1.0`, while the window title says `v0.2.0`.
+- Package metadata, `phase_annotator.__version__`, and the window title now consistently report `0.1.0`; release versioning remains manual.
 - Historical docs described Clean Architecture/MVP and a storage/export layer more fully than implemented. There is no presenter, repository interface, or CSV adapter yet.
 - Several imports are unused, and no lint/type-check configuration exists to catch them.
 
 ## Git evolution and latest Antigravity work
 
-The six commits form a linear milestone history:
+Antigravity established the original M0-M3 foundation:
 
 1. M0 created the layout, documentation contracts, and `.gemini/rules/`.
 2. M1 added models, ontology, overlap validation, atomic JSON persistence, and tests.
@@ -55,7 +55,7 @@ The six commits form a linear milestone history:
 4. M2 added the PySide6/Qt Multimedia shell and time utilities.
 5. M3 (`141d6df`, 2026-08-10) added the painted timeline, segment-card list, colored ontology, splitter layout, click-to-seek wiring, and keyboard transitions/frame controls.
 
-The stated next milestone was M4: manual saving, periodic autosave, crash recovery, and a learning exercise. No M4 implementation is present.
+Codex then stabilized and extended the application through C0-C5. The historical M4 persistence proposal has been superseded by the more explicit C6 session lifecycle and C7 recovery milestones.
 
 ## Validation baseline
 

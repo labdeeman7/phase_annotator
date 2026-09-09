@@ -1,9 +1,9 @@
 # Architecture Decision Log (ADR)
 
-## ADR 001: Separation of Domain and UI via MVP Pattern
+## ADR 001: Separation of Domain and UI
 - **Status**: Approved
 - **Context**: Surgical video annotation requires strict data validation (no overlaps, gap handling) independent of UI rendering.
-- **Decision**: Keep domain logic in pure Python data classes (`models.py`, `ontology.py`, `validation.py`) with zero PySide6 dependencies. UI components consume domain models.
+- **Decision**: Keep domain logic in pure Python data classes and services with zero PySide6 dependencies. UI components consume domain models. A dedicated MVP presenter is not required by this decision and has not yet been extracted.
 
 ## ADR 002: Atomic Data Persistence Strategy
 - **Status**: Approved
@@ -74,3 +74,14 @@
   - A session creation timestamp describes the annotation session and is not evidence about the video.
   - C5 uses metadata exposed by the already packaged PySide6/Qt stack and does not invoke or bundle a separate `ffprobe`. Reconsideration belongs to future distribution work and requires verified binary provenance, licensing compliance, supported-platform builds, and installer integration. Never require an executable installed on `PATH`.
 - **Consequences**: Metadata checks remain fast and practical, but relocation needs an explicit user confirmation workflow and no combination of descriptor fields can mathematically prove that two files have identical content.
+
+## ADR 009: Generic Phase Annotator With a Bundled Appendectomy Default
+
+- **Status**: Approved
+- **Context**: Phase definitions, hotkeys, colors, expected order, initial phase, and Undefined role are already supplied through an injected ontology. Naming the product after appendectomy incorrectly suggests that the reusable application logic is tied to one procedure.
+- **Decision**:
+  - Name the product **Phase Annotator**.
+  - Continue shipping the provisional laparoscopic appendectomy ontology as the current startup default.
+  - Keep procedure selection at the composition root and keep reusable domain/UI components independent of appendectomy-specific loaders and phase IDs.
+  - Retain appendectomy terminology in ontology identifiers, configuration files, clinical decisions, and tests that specifically describe that default.
+- **Consequences**: Other phase ontologies can use the same application architecture, but user-facing ontology selection is still future work and the bundled appendectomy phase set remains provisional until clinically reviewed.

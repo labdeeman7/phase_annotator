@@ -11,7 +11,7 @@ The authoritative milestone sequence, completion definition, workflow, and quali
 
 ## Handover status
 
-Milestones below reflect historical intent. M3 is present as a prototype, but transition edge cases and end-to-end media behavior are not yet robust; see `CURRENT_STATE.md`.
+The historical M0-M3 work was stabilized and extended through Codex milestones C0-C5. `ROADMAP.md` is authoritative for the current C0-C10 sequence; this file is only its concise checklist.
 
 ## Completed Codex milestone: C0 — Annotation contract and safe transition engine
 
@@ -20,7 +20,7 @@ Milestones below reflect historical intent. M3 is present as a prototype, but tr
 - [x] Enforce phase IDs, video bounds, and coverage policy in the transactional domain editor
 - [x] Expose player position/duration without reaching into private Qt internals
 - [x] Wire `MainWindow` transitions through `AnnotationEditor` and synchronize both views
-- [x] Initialize full Undefined coverage when media duration becomes known
+- [x] Initialize full coverage with the ontology's configured initial phase when media duration becomes known
 - [x] Add Play/Pause state and Loading/Loaded feedback
 
 Media identity is deferred to C5, where media metadata and playback reliability are addressed. Configurable annotator identity belongs with the later session lifecycle rather than the transition engine.
@@ -44,9 +44,7 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] Prevent annotation hotkeys from firing while typing in text-entry controls
 - [x] Add accessibility labels/tooltips and GUI equivalence tests
 
-Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/redo. See `ROADMAP.md` for the complete C0-C10 sequence.
-
-## Active Codex milestone: C3 — Selection and precise correction
+## Completed Codex milestone: C3 — Selection and precise correction
 
 **Status: completed and manually accepted on 2026-09-05.**
 
@@ -59,7 +57,7 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C3.4: add set-start/set-end-to-playhead correction commands
 - [x] C3.5: add the Undefined/merge-left/merge-right/cancel removal flow
 
-## Active Codex milestone: C4 — Undo/redo and draggable boundaries
+## Completed Codex milestone: C4 — Undo/redo and draggable boundaries
 
 - [x] C4.1: add bounded snapshot history and validated Undo/Redo for every annotation mutation
 - [x] C4.1: add visible controls plus safe `Ctrl+Z`, `Ctrl+Shift+Z`, and `Ctrl+Y` shortcuts
@@ -67,16 +65,7 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 - [x] C4.3: add transient drag preview, seek feedback, cancel, and one-command commit
 - [x] C4.4: integrate drag history and complete synchronization/acceptance coverage
 
-## Planned Milestone 4 — Session Saving, Loading, Autosave & Crash Recovery
-
-- [ ] Manual Save (`Ctrl+S`) session action to atomic JSON repository
-- [ ] Explicit session loading and dirty-state/replace-video protection
-- [ ] Background periodic autosave timer
-- [ ] Crash recovery prompt on startup
-- [ ] Define and test backup, stale-temp, and persistence error behavior
-- [ ] Student Hands-on Exercise (M4)
-
-## Active Codex milestone: C5 — Media metadata and playback reliability
+## Completed Codex milestone: C5 — Media metadata and playback reliability
 
 - [x] C5.1: define versioned optional media metadata and lightweight source-descriptor fields
 - [x] C5.2: implement Qt metadata adapter and defer `ffprobe` bundling
@@ -87,9 +76,11 @@ Next: C3 selection/precise correction, then C4 draggable boundaries plus undo/re
 
 ## Upcoming Milestones
 
-- [ ] Milestone 5: Research CSV Export
-- [ ] Milestone 6: Cross-Platform Windows Distribution
-- [ ] Milestone 7: CI / GitHub Actions
+- [ ] C6: Manual session save, load, lifecycle fields, and dirty-state safety
+- [ ] C7: Autosave and crash recovery
+- [ ] C8: Validation, completion, and deterministic research export
+- [ ] C9: Usability and annotation-efficiency pass
+- [ ] C10: Packaging, documentation, and release readiness
 
 ## Known cleanup (do not confuse with feature work)
 
