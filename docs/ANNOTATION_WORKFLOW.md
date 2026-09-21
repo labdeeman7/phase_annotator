@@ -2,9 +2,9 @@
 
 ## Current UI flow
 
-1. `python -m phase_annotator` creates `QApplication` and `MainWindow`.
+1. `python -m phase_annotator` creates `QApplication`, asks the operator for a non-empty annotator ID, and creates `MainWindow`. Cancelling exits. The identity is fixed for that application launch and shown unobtrusively in the window title.
 2. **Open Video** selects a local MP4/AVI/MKV/MOV file. `QMediaPlayer.setSource()` receives its local URL.
-3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, its resolved absolute last-known path, a hard-coded `surgeon_01` annotator, duration 0, and the player's 30 FPS value explicitly marked as assumed with unknown CFR/VFR status. The status bar shows **Loading**.
+3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, resolved absolute last-known path, confirmed active annotator, duration 0, and the player's 30 FPS value explicitly marked as assumed with unknown CFR/VFR status. Existing valid sidecars retain creator/last-editor attribution. The status bar shows **Loading**.
 4. A positive Qt duration signal updates the slider/timeline/session, initializes one interval using the ontology's configured `initial_phase_id` (Phase 1 for appendectomy) over `[0, duration_ms)`, refreshes both annotation views, and changes status to **Loaded**.
 5. Play/pause is available through the state-aware Play/Pause button or Space. Left/Right seek by `int(1000 / fps)` milliseconds. The slider and painted timeline seek in milliseconds.
 6. The always-visible phase palette is built from the configured ontology. Clicking a phase or pressing its configured window shortcut (including `U`) calls the same `record_phase_transition()` method, which delegates interval changes to the transactional `AnnotationEditor`. Phase shortcuts are disabled while a text-entry control or the segment list has keyboard focus; clicking the timeline restores the normal annotation context.
@@ -17,7 +17,7 @@
 13. Internal timeline boundaries display subtle handles. Hovering within eight pixels emphasizes the nearest handle and changes the cursor; ordinary clicks outside that area retain select/seek behavior. Pressing a handle begins a drag preview rather than immediately mutating data.
 14. Pressing and dragging a boundary displays a cyan valid or red invalid preview and seeks the video without changing intervals. One valid release invokes the shared boundary command once; invalid release or Escape restores the original playhead and records no history entry.
 
-Draggable boundaries, whole-segment relabeling, button-based boundary correction, Convert to Undefined/Merge left/Merge right resolution, and in-memory undo/redo are available. There is currently no automatic sidecar save/load, persisted history, dirty-state indicator, completion action, or prominent error notification.
+Draggable boundaries, correction, and in-memory undo/redo are available. The canonical adjacent JSON sidecar loads and saves automatically with resume checkpoints and visible dirty-state failure handling. Clean close or video replacement creates one history snapshot only when annotation data changed since opening that video. External sidecar changes block overwrite. Persisted command history, completion action, and prominent error notifications are not implemented.
 
 ## Qt ownership and signal flow
 

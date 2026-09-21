@@ -60,7 +60,7 @@
   - Defer `reviewed_until_ms` until the product has a concrete, trustworthy definition of reviewed footage.
   - Completion validates video association, ontology identity, interval coverage/bounds, and phase IDs.
   - Undefined intervals are summarized and require informed confirmation but do not necessarily prohibit completion.
-  - Editing a completed session requires confirmation and returns it to draft for the first release; revision history is deferred.
+  - Editing a completed session requires confirmation and returns it to draft; C7 historical snapshots retain the prior completed state when that changed run ends.
 - **Consequences**: The application can resume work without confusing playhead position with proof of review. C6 persists the fields; C8 owns the explicit completion workflow.
 
 ## ADR 008: Lightweight Media Descriptor Without Content Hashing
@@ -100,3 +100,18 @@
   - Treat read-only-directory fallback as an exceptional later C6 slice; do not introduce ordinary Save As behavior into the core workflow.
   - Keep JSON canonical and defer CSV until a demonstrated consumer requires it.
 - **Consequences**: The normal workflow has no save ceremony and minimizes crash exposure. Videos and annotations remain easy to move together. Read-only media locations need an explicit fallback policy, and immediate persistence failures must be highly visible.
+
+## ADR 011: One Annotator Per Launch and Changed-Run Snapshots
+
+- **Status**: Approved for C7 planning
+- **Context**: A supervisor requested annotator identification and retained historical JSON states. A first work-session UI felt like bloat in manual use. Current deployment assumes one surgeon per application launch, usually on separate computers.
+- **Decision**:
+  - Require an annotator ID at every application startup and retain it across videos during that run.
+  - Do not remember the previous ID or allow in-application identity switching.
+  - Preserve legacy `annotator_id`; distinguish creator, last editor, and C8's future completer without embedded work-session records.
+  - Keep one shared resume position per video. It is navigation convenience, not per-user review progress.
+  - On clean close or video replacement, create one validated historical snapshot only when annotation data changed since that video was opened.
+  - Store snapshots in `<video filename>.phase-annotations-history/` with collision-safe UTC filenames; keep annotator identifiers inside JSON rather than filenames.
+  - Keep canonical dirty state, changed-since-open state, and resume-only changes separate.
+  - Detect an externally changed canonical sidecar before overwrite and block rather than merge automatically.
+- **Consequences**: Sequential users gain useful attribution and a lightweight local trail without an account/session-management interface. The trail is not tamper-proof and simultaneous editing remains unsupported.

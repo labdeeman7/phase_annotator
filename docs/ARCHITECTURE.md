@@ -39,9 +39,9 @@ The `PhasePaletteWidget` renders the configured phase order, names, colors, hotk
 ### Storage (`src/phase_annotator/storage/`)
 
 - `json_repo.py`: direct dataclass-to-JSON serialization and loading. Save writes a same-directory temporary file and atomically replaces the destination.
-- `session_persistence.py`: deterministic sidecar naming, load validation, C5 source-comparison decisions, and saved/dirty state.
+- `session_persistence.py`: deterministic sidecar/history naming, load validation, C5 source-comparison decisions, saved/dirty/changed-session state, atomic snapshots, and optimistic external-change detection.
 
-`MainWindow` uses the coordinator to create/load `<video filename>.phase-annotations.json`, save every annotation command, checkpoint resume position, and guard close/video replacement only after a failed write leaves dirty work. There is no general schema migration framework, backup/recovery artifact, file locking, or alternate read-only-directory location. CSV is not required by the current roadmap.
+`MainWindow` uses the coordinator to create/load `<video filename>.phase-annotations.json`, save every annotation command, checkpoint resume position, and create one history snapshot when a changed video is closed or replaced. External revision evidence blocks silent overwrite. There is no automatic merge, OS file lock, general migration framework, or alternate read-only-directory location. CSV is not required by the current roadmap.
 
 ### Media (`src/phase_annotator/media/`)
 
@@ -54,6 +54,7 @@ The media layer never hashes video contents or searches `PATH` for external exec
 ### UI (`src/phase_annotator/ui/`)
 
 - `main_window.py`: constructs the window and controls, owns session/selection state, delegates annotation mutation to `AnnotationEditor`, and refreshes the synchronized views.
+- `annotator_identity.py`: validates/prompt-confirms active application identity and provides the local last-ID settings adapter.
 - `domain/annotation_history.py`: Qt-free bounded command history. It captures isolated before/after interval snapshots around successful mutations and restores them through `AnnotationEditor` validation.
 - `player_widget.py`: wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`.
 - `timeline_widget.py`: paints phase intervals, selection, playhead, internal-boundary handles, and transient drag preview; it emits preview seek, commit, and cancellation intent but never mutates the annotation session.

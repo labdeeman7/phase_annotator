@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
 from typing import Optional
@@ -15,7 +16,7 @@ from phase_annotator.storage.json_repo import JsonSessionRepository
 
 
 SUPPORTED_SESSION_SCHEMA_VERSIONS = frozenset(
-    {"1.0", "1.1", CURRENT_SESSION_SCHEMA_VERSION}
+    {"1.0", "1.1", "1.2", CURRENT_SESSION_SCHEMA_VERSION}
 )
 
 
@@ -39,6 +40,20 @@ class SessionPersistenceError(RuntimeError):
     pass
 
 
+class ExternalSidecarChangeError(SessionPersistenceError):
+    pass
+
+
+class HistorySnapshotError(SessionPersistenceError):
+    pass
+
+
+@dataclass(frozen=True)
+class FileRevision:
+    size_bytes: int
+    modified_ns: int
+
+
 class SessionPersistenceCoordinator:
     """Own sidecar policy and saved/dirty state above the JSON repository."""
 
@@ -51,6 +66,8 @@ class SessionPersistenceCoordinator:
         self._repository = repository or JsonSessionRepository()
         self._sidecar_path: Optional[Path] = None
         self._dirty = False
+        self._annotation_changed = False
+        self._expected_revision: Optional[FileRevision] = None
 
     @property
     def sidecar_path(self) -> Optional[Path]:
@@ -60,9 +77,17 @@ class SessionPersistenceCoordinator:
     def is_dirty(self) -> bool:
         return self._dirty
 
+    @property
+    def annotation_changed(self) -> bool:
+        return self._annotation_changed
+
     @staticmethod
     def sidecar_path_for(video_path: Path) -> Path:
         return video_path.with_name(f"{video_path.name}.phase-annotations.json")
+
+    @staticmethod
+    def history_dir_for(video_path: Path) -> Path:
+        return video_path.with_name(f"{video_path.name}.phase-annotations-history")
 
     def inspect(self, video_path: Path, actual: MediaMetadata) -> LoadResult:
         sidecar_path = self.sidecar_path_for(video_path)
@@ -104,9 +129,17 @@ class SessionPersistenceCoordinator:
     def bind(self, sidecar_path: Path) -> None:
         self._sidecar_path = sidecar_path
         self._dirty = False
+        self._annotation_changed = False
+        self._expected_revision = self._revision(sidecar_path)
 
     def mark_dirty(self) -> None:
         self._dirty = True
+
+    def mark_annotation_changed(self) -> None:
+        self._annotation_changed = True
+
+    def reset_annotation_changed(self) -> None:
+        self._annotation_changed = False
 
     def save(self, session: AnnotationSession) -> None:
         if self._sidecar_path is None:
@@ -116,11 +149,53 @@ class SessionPersistenceCoordinator:
             self._dirty = True
             raise SessionPersistenceError("Session is invalid: " + "; ".join(errors))
         self._dirty = True
+        if self._revision(self._sidecar_path) != self._expected_revision:
+            raise ExternalSidecarChangeError(
+                "The annotation sidecar changed outside this application. "
+                "Reload it before making further edits."
+            )
         try:
             self._repository.save(session, self._sidecar_path)
         except OSError as exc:
             raise SessionPersistenceError(f"Could not write annotation sidecar: {exc}") from exc
+        self._expected_revision = self._revision(self._sidecar_path)
         self._dirty = False
+
+    def archive_snapshot(
+        self, session: AnnotationSession, *, timestamp: Optional[datetime] = None
+    ) -> Path:
+        if self._sidecar_path is None:
+            raise HistorySnapshotError("No annotation sidecar is bound.")
+        errors = self.validation_errors(session)
+        if errors:
+            raise HistorySnapshotError("Session is invalid: " + "; ".join(errors))
+        history_dir = self._sidecar_path.with_name(
+            self._sidecar_path.name.removesuffix(".phase-annotations.json")
+            + ".phase-annotations-history"
+        )
+        stamp = (timestamp or datetime.now(timezone.utc)).astimezone(timezone.utc)
+        stem = stamp.strftime("%Y-%m-%dT%H-%M-%S.%fZ")
+        candidate = history_dir / f"{stem}.json"
+        suffix = 1
+        while candidate.exists():
+            candidate = history_dir / f"{stem}-{suffix}.json"
+            suffix += 1
+        try:
+            self._repository.save(session, candidate)
+        except OSError as exc:
+            raise HistorySnapshotError(
+                f"Could not write annotation history: {exc}"
+            ) from exc
+        self._annotation_changed = False
+        return candidate
+
+    @staticmethod
+    def _revision(path: Path) -> Optional[FileRevision]:
+        try:
+            stat = path.stat()
+        except FileNotFoundError:
+            return None
+        return FileRevision(stat.st_size, stat.st_mtime_ns)
 
     def validation_errors(self, session: AnnotationSession) -> list[str]:
         errors: list[str] = []

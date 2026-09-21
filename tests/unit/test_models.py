@@ -1,5 +1,9 @@
 import pytest
-from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
+from phase_annotator.domain.models import (
+    AnnotationInterval,
+    AnnotationSession,
+    VideoInfo,
+)
 
 
 def test_annotation_interval_duration():
@@ -20,7 +24,9 @@ def test_annotation_session_creation():
     assert session.video_info.video_id == "appendectomy_case_01.mp4"
     assert session.annotator_id == "researcher_1"
     assert len(session.intervals) == 0
-    assert session.schema_version == "1.2"
+    assert session.schema_version == "1.3"
+    assert session.created_by == "researcher_1"
+    assert session.last_edited_by is None
 
 
 def test_annotation_session_lifecycle_defaults_and_validation():

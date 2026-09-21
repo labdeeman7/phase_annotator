@@ -44,7 +44,9 @@ def test_save_session_atomic(tmp_path: Path):
     assert data["video_info"]["file_modified_ns"] == 987654321
     assert data["video_info"]["fps_source"] == "qt"
     assert data["video_info"]["frame_rate_mode"] == "unknown"
-    assert data["schema_version"] == "1.2"
+    assert data["schema_version"] == "1.3"
+    assert data["created_by"] == "dr_smith"
+    assert data["last_edited_by"] is None
     assert data["status"] == "draft"
     assert data["completed_at"] is None
     assert data["resume_position_ms"] == 0
@@ -118,6 +120,8 @@ def test_load_legacy_session_defaults_missing_ontology_identity(tmp_path: Path):
     assert session.status == "draft"
     assert session.completed_at is None
     assert session.resume_position_ms == 0
+    assert session.created_by == "legacy_annotator"
+    assert session.last_edited_by == "legacy_annotator"
 
 
 def test_load_rejects_unknown_fields_instead_of_silently_dropping_them(
@@ -145,3 +149,35 @@ def test_load_rejects_unknown_fields_instead_of_silently_dropping_them(
 
     with pytest.raises(ValueError, match="Unknown fields in video_info"):
         JsonSessionRepository().load(path)
+
+
+def test_rejected_work_session_prototype_data_is_preserved_but_not_added_new(
+    tmp_path: Path,
+):
+    repository = JsonSessionRepository()
+    session = AnnotationSession(
+        VideoInfo("case.mp4", 1_000),
+        "annotator_A",
+        intervals=[AnnotationInterval(0, 1_000, 1)],
+        _legacy_work_sessions=[
+            {
+                "annotator_id": "annotator_A",
+                "started_at": 1.0,
+                "ended_at": 2.0,
+            }
+        ],
+    )
+    migrated_path = tmp_path / "migrated.json"
+    new_path = tmp_path / "new.json"
+
+    repository.save(session, migrated_path)
+    loaded = repository.load(migrated_path)
+    repository.save(loaded, migrated_path)
+    repository.save(
+        AnnotationSession(VideoInfo("new.mp4", 1_000), "annotator_B"), new_path
+    )
+
+    migrated = json.loads(migrated_path.read_text(encoding="utf-8"))
+    new = json.loads(new_path.read_text(encoding="utf-8"))
+    assert migrated["work_sessions"][0]["annotator_id"] == "annotator_A"
+    assert "work_sessions" not in new

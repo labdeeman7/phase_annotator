@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -11,10 +12,12 @@ from phase_annotator.domain.models import (
 )
 from phase_annotator.media import MediaMetadata
 from phase_annotator.storage import (
+    ExternalSidecarChangeError,
     LoadStatus,
     SessionPersistenceCoordinator,
     SessionPersistenceError,
 )
+from phase_annotator.storage.json_repo import JsonSessionRepository
 
 
 def make_session(video_path: Path, **video_overrides) -> AnnotationSession:
@@ -163,3 +166,68 @@ def test_save_failure_leaves_coordinator_dirty(tmp_path: Path):
         coordinator.save(make_session(video_path))
 
     assert coordinator.is_dirty
+
+
+def test_external_sidecar_change_is_not_overwritten(tmp_path: Path):
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"video")
+    coordinator = SessionPersistenceCoordinator(load_default_ontology())
+    sidecar = coordinator.sidecar_path_for(video_path)
+    coordinator.bind(sidecar)
+    session = make_session(video_path)
+    coordinator.save(session)
+    sidecar.write_text(sidecar.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+
+    with pytest.raises(ExternalSidecarChangeError, match="changed outside"):
+        coordinator.save(session)
+
+    assert coordinator.is_dirty
+
+
+def test_changed_run_snapshot_is_collision_safe(tmp_path: Path):
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"video")
+    coordinator = SessionPersistenceCoordinator(load_default_ontology())
+    coordinator.bind(coordinator.sidecar_path_for(video_path))
+    session = make_session(video_path)
+    coordinator.save(session)
+    coordinator.mark_annotation_changed()
+    timestamp = datetime(2026, 9, 21, 12, 0, tzinfo=timezone.utc)
+
+    first = coordinator.archive_snapshot(session, timestamp=timestamp)
+    coordinator.mark_annotation_changed()
+    second = coordinator.archive_snapshot(session, timestamp=timestamp)
+
+    assert first.parent == coordinator.history_dir_for(video_path)
+    assert first.name == "2026-09-21T12-00-00.000000Z.json"
+    assert second.name == "2026-09-21T12-00-00.000000Z-1.json"
+    assert not coordinator.annotation_changed
+
+
+def test_snapshot_failure_preserves_changed_run_state(tmp_path: Path):
+    class SnapshotFailingRepository:
+        def save(self, session, filepath):
+            if filepath.parent.name.endswith("phase-annotations-history"):
+                raise OSError("history unavailable")
+            JsonSessionRepository().save(session, filepath)
+
+        def load(self, filepath):
+            return JsonSessionRepository().load(filepath)
+
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"video")
+    coordinator = SessionPersistenceCoordinator(
+        load_default_ontology(), repository=SnapshotFailingRepository()
+    )
+    coordinator.bind(coordinator.sidecar_path_for(video_path))
+    session = make_session(video_path)
+    coordinator.save(session)
+    coordinator.mark_annotation_changed()
+
+    from phase_annotator.storage import HistorySnapshotError
+
+    with pytest.raises(HistorySnapshotError, match="history unavailable"):
+        coordinator.archive_snapshot(session)
+
+    assert coordinator.annotation_changed
+    assert not coordinator.is_dirty

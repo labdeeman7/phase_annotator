@@ -83,7 +83,11 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C6.5: persist and restore bounded resume checkpoints
 - [x] C6.6: guard dirty close/replacement; retain sidecar-only storage until evidence justifies a fallback
 - [x] C6.7: complete persistence failure and round-trip validation
-- [ ] C7: harden persistence only where C6 testing demonstrates a gap
+- [x] C7.1: add backward-compatible creator/last-editor attribution
+- [x] C7.2: require one annotator identity per application launch
+- [x] C7.3: create one history snapshot per changed video run
+- [x] C7.4: detect external canonical-sidecar changes before overwrite
+- [x] C7.5: validate migration, failure, collision, and sequential-user behavior
 - [ ] C8: validation, explicit completion, and trustworthy canonical JSON
 - [ ] C9: Usability and annotation-efficiency pass
 - [ ] C10: Packaging, documentation, and release readiness

@@ -430,6 +430,14 @@ This separates mechanism from policy. The wrapper understands Qt's failure vocab
 
 In a traditional document editor, an edit usually makes the document dirty until the user presses Save. Phase Annotator will instead write its canonical sidecar after every successful annotation command. Here, dirty means only that memory differs from the **last successful write**, usually because persistence failed. That definition makes close prompts exceptional rather than routine.
 
-The existing JSON repository knows how to serialize and atomically replace one file. A persistence coordinator will add application policy: derive the sidecar path, decide when saving is allowed, validate before loading, track dirty state, and interpret failures. Keeping those responsibilities separate prevents file-format code from becoming coupled to Qt workflow.
+The JSON repository knows how to serialize and atomically replace one file. The persistence coordinator adds application policy: derive the sidecar path, decide when saving is allowed, validate before loading, track dirty state, and interpret failures. Keeping those responsibilities separate prevents file-format code from becoming coupled to Qt workflow.
 
-C7 autosave/recovery and CSV export were deliberately deferred under the YAGNI principle (“you aren't gonna need it”): avoid building a second persistence system or output format until continuous canonical saving or a real downstream consumer demonstrates the need.
+C7 originally deferred additional autosave/recovery under the YAGNI principle (“you aren't gonna need it”). Supervisor feedback later supplied a concrete need for a lightweight historical trail, so C7 was narrowed to one snapshot per changed video run rather than periodic duplicate autosaves. CSV remains deferred until a downstream consumer demonstrates a need.
+
+### Identity, attribution, and resume are different state
+
+The person currently operating the application is not automatically the creator, last editor, or completer of every opened annotation. Likewise, the shared resume position is navigation state rather than evidence of an individual's review. Modeling these concepts separately prevents convenient UI state from becoming misleading research provenance.
+
+Canonical dirty state and “annotation changed since this video was opened” answer different questions. Dirty means memory is ahead of the last successful disk write; changed-since-open decides whether close/replacement merits a historical snapshot. One Boolean cannot safely represent both facts.
+
+The first C7 design modeled explicit work sessions and in-application identity switching. Manual use showed that the additional controls and records made the annotator feel administrative. Removing a technically coherent abstraction after usability feedback is good engineering: the simplest model that preserves the required attribution and history is preferable.

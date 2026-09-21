@@ -14,6 +14,8 @@ The pure-Python layer provides Undefined plus the six provisional appendectomy p
 
 C6 connects persistence to the GUI. Once duration is known, a new valid session is written to `<video filename>.phase-annotations.json`; every annotation mutation, undo, and redo saves immediately. Matching sidecars load automatically, unknown source evidence requires confirmation, and invalid or mismatching sidecars disable annotation. Resume is checkpointed on edits, pause, periodically during playback, and before clean close/replacement. A persistent `[UNSAVED]` title marker and retry/discard/cancel guard appear only when a write failure leaves memory ahead of disk.
 
+C7 asks for an annotator ID on every launch, keeps it fixed across videos for that run, and shows it in the window title. Schema 1.3 preserves legacy `annotator_id` while adding creator and last-editor attribution. Clean close or video replacement creates one atomic timestamped JSON snapshot in a per-video history directory only when annotation data changed; resume-only use creates none. Lightweight sidecar revision evidence blocks silent external overwrite.
+
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
 Codex milestone C1 replaces hard-coded ontology construction with a validated packaged JSON configuration. The default explicitly uses Phase 1 as its provisional initial phase, orders phases 1-6 as expected clinical guidance, places Undefined (`U`) last, and records ontology identity/version in sessions.
@@ -22,6 +24,8 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 
 - Annotation state lives in `MainWindow._session` and is mirrored immediately to the canonical sidecar. History remains process-local and is not restored.
 - Explicit completion remains unimplemented; C6 only persists its schema fields.
+- Completion attribution (`completed_by`) remains unimplemented with the rest of C8.
+- Resume position is shared session convenience, not per-annotator progress or evidence of review.
 - `MainWindow` still combines view construction and presenter/controller coordination; a dedicated presenter has not been extracted.
 - C3 and C4 are complete, with the user-visible correction, dragging, and undo/redo workflows manually accepted. History is not persisted across application or video loads.
 - The GUI begins with 30.0 FPS explicitly marked `assumed`, then adopts a positive FPS reported by Qt and labels its source `qt`. File size/modification time and available Qt duration/resolution are populated. Qt does not establish CFR/VFR status, so frame stepping remains estimated millisecond seeking rather than decoder-accurate navigation.
@@ -36,7 +40,7 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 - Distribution/installer work and Windows/Linux media-backend verification.
 - Continuous integration.
 - A real presenter/controller layer. `MainWindow` currently combines orchestration, session creation, and annotation mutations.
-- User-configurable annotator identity and ontology/configuration loading.
+- User-configurable ontology/configuration loading.
 
 ## Technical debt and inconsistencies
 
@@ -56,12 +60,12 @@ Antigravity established the original M0-M3 foundation:
 4. M2 added the PySide6/Qt Multimedia shell and time utilities.
 5. M3 (`141d6df`, 2026-08-10) added the painted timeline, segment-card list, colored ontology, splitter layout, click-to-seek wiring, and keyboard transitions/frame controls.
 
-Codex then stabilized and extended the application through C0-C5. The historical M4 persistence proposal has been superseded by C6 continuous sidecars and evidence-led C7 persistence hardening.
+Codex then stabilized and extended the application through C0-C7. The historical M4 persistence proposal has been superseded by C6 continuous sidecars and C7 sequential attribution/history.
 
 ## Validation baseline
 
-On 2026-09-09, the repository-local Python 3.11.5 environment passed all 156 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. C6 was not manually exercised against that large local video because doing so now intentionally creates a real adjacent sidecar. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-21, the repository-local Python 3.11.5 environment passed all 166 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. C7 still requires manual identity/history acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Assess C7 using real C6 usage evidence; skip speculative recovery machinery if atomic continuous saving proves sufficient. Otherwise proceed to C8 explicit completion. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.
+Manually accept the simplified C7 launch identity and history-directory behavior using disposable media, then begin C8 explicit completion and general video notes. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.

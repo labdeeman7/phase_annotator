@@ -204,11 +204,19 @@ Exit gate: every annotation mutation survives save-close-reopen; existing sideca
 
 Learning focus: repository versus coordinator boundaries, dirty state, atomicity, and failure-path testing.
 
-### C7 — Persistence hardening where evidence requires it
+### C7 — Annotator attribution and historical snapshots
 
-Goal: address demonstrated gaps after continuous canonical saving, without automatically building a second autosave/recovery system.
+Goal: support safe sequential use by identifiable annotators while retaining one lightweight historical snapshot per changed video run.
 
-Candidate work includes retry ergonomics, stale temporary files, optional backups, and crash recovery only where testing shows atomic immediate saving is insufficient. C7 may be reduced or skipped if C6 meets the practical reliability requirement.
+The agreed identity, attribution, snapshot, and conflict-safety contract is in `C7_ATTRIBUTION_AND_HISTORY.md`.
+
+Status: **Complete pending revised manual acceptance.** Schema 1.3, one identity per launch, changed-run snapshots, and optimistic external-change detection are integrated and tested.
+
+Implementation includes startup identity entry retained across videos for that launch, backward-compatible creator/last-editor attribution, shared resume semantics, clean-close/video-replacement snapshots, and external sidecar change detection. The canonical adjacent JSON remains authoritative; C7 does not add identity switching, embedded work-session records, simultaneous collaboration, automatic merging, cloud accounts, or a regulated audit log.
+
+Exit gate: sequential annotators are attributed correctly; unchanged or resume-only use creates no history copy; each changed video run creates exactly one validated snapshot; external changes cannot be silently overwritten.
+
+Learning focus: identity versus attribution, schema evolution, optimistic conflict detection, and audit-trail limitations.
 
 ### C8 — Completion and trustworthy JSON
 
@@ -219,6 +227,7 @@ Implementation:
 - Add a validation summary for coverage, phase IDs, bounds, ontology, and source association.
 - Provide an explicit completion action and summarize Undefined segments for confirmation.
 - Persist `draft`/`completed` and `completed_at`; editing completed work returns it to draft after confirmation.
+- Attribute explicit completion to the active annotator through `completed_by`.
 - Keep `resume_position_ms` distinct from proof of review. Defer `reviewed_until_ms` until its semantics are justified.
 - Do not require CSV export. Add a converter later only for a demonstrated downstream need.
 
@@ -287,4 +296,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Begin C5 media metadata and playback reliability before session persistence work.
+Manually accept the simplified C7 launch identity and history behavior, then begin C8 completion and trustworthy JSON.

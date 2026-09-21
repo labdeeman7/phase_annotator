@@ -2,9 +2,9 @@
 
 ## Purpose and current maturity
 
-This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype completed through Codex milestone C6, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, and continuous canonical JSON sidecar persistence exist, while explicit completion, distribution, and cross-platform validation do not.
+This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype completed through Codex milestone C7, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, continuous canonical JSON persistence, sequential annotator attribution, changed-run snapshots, and external-write protection exist, while explicit completion, distribution, and cross-platform validation do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C6 is active; `docs/C6_CONTINUOUS_PERSISTENCE.md` is its detailed contract. `docs/C5_MEDIA_RELIABILITY.md` records the completed media contract and validation evidence. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. C7 is implemented pending manual acceptance; `docs/C7_ATTRIBUTION_AND_HISTORY.md` is its detailed contract. C8 completion is next. `docs/C6_CONTINUOUS_PERSISTENCE.md` and `docs/C5_MEDIA_RELIABILITY.md` record completed persistence and media contracts. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
@@ -27,6 +27,7 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 - C5 deliberately uses the packaged PySide6/Qt metadata APIs, not `ffprobe`. Never invoke a system executable from `PATH`; reconsidering a bundled probe belongs to future distribution work with explicit binary provenance, licensing, and platform testing.
 - Preserve session metadata and schema compatibility. Never silently discard unknown or existing annotation data during migrations.
 - C6 requires the canonical annotation to be `<video filename>.phase-annotations.json` beside the video and to save automatically after successful annotation mutations. Session writes must remain same-directory temporary writes followed by `os.replace`. Do not add routine Save/Save As or a second autosave/recovery artifact without revisiting ADR 010.
+- C7 supports sequential identifiable annotators, not simultaneous collaborative editing. One identity is confirmed on every launch and remains fixed for that run. Keep application identity, persisted mutation attribution, shared resume position, canonical dirty state, and changed-since-video-open state distinct. Historical snapshots are local recovery/trail artifacts, not a regulated or tamper-proof audit log.
 - Do not add patient-identifying information to source control, fixtures, logs, screenshots, or example session files. Use synthetic identifiers and metadata.
 - Do not treat the unused `ui/table_widget.py` duplicate as the active UI; `MainWindow` imports `SegmentListWidget` from `ui/segment_list_widget.py`.
 

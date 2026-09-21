@@ -61,7 +61,7 @@ The application entry point is:
 python -m phase_annotator
 ```
 
-This is an early prototype completed through project milestone C6. Playback, mouse/hotkey annotation, synchronized correction tools, draggable boundaries, undo/redo, media checks, and automatic canonical JSON sidecar saving/loading work. Explicit completion, distribution, and broader platform validation remain planned.
+This is an early prototype completed through project milestone C7. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, sequential annotator attribution, changed-run snapshots, and external-write protection work. Explicit completion, distribution, and broader platform validation remain planned.
 
 ## Documentation
 
@@ -73,6 +73,7 @@ This is an early prototype completed through project milestone C6. Playback, mou
 * [Ontology Configuration](docs/ONTOLOGY_CONFIGURATION.md)
 * [Media Reliability Contract](docs/C5_MEDIA_RELIABILITY.md)
 * [Continuous Persistence Plan](docs/C6_CONTINUOUS_PERSISTENCE.md)
+* [Annotator Attribution and History Plan](docs/C7_ATTRIBUTION_AND_HISTORY.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)

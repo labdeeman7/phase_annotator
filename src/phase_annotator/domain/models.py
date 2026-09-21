@@ -1,10 +1,10 @@
 import math
 import time
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 
-CURRENT_SESSION_SCHEMA_VERSION = "1.2"
+CURRENT_SESSION_SCHEMA_VERSION = "1.3"
 SESSION_STATUSES = frozenset({"draft", "completed"})
 FPS_SOURCES = frozenset({"unknown", "assumed", "qt", "ffprobe"})
 FRAME_RATE_MODES = frozenset({"unknown", "cfr", "vfr"})
@@ -117,8 +117,26 @@ class AnnotationSession:
     schema_version: str = CURRENT_SESSION_SCHEMA_VERSION
     created_at: float = field(default_factory=time.time)
     updated_at: float = field(default_factory=time.time)
+    created_by: str = ""
+    last_edited_by: Optional[str] = None
+    # Compatibility only for schema-1.3 files produced by the rejected C7
+    # work-session prototype. New sessions leave this unset and do not emit it.
+    _legacy_work_sessions: Optional[List[Dict[str, Any]]] = field(
+        default=None, repr=False, compare=False
+    )
 
     def __post_init__(self) -> None:
+        if not isinstance(self.annotator_id, str) or not self.annotator_id.strip():
+            raise ValueError("annotator_id must be non-empty text.")
+        if not self.created_by:
+            self.created_by = self.annotator_id
+        if not isinstance(self.created_by, str) or not self.created_by.strip():
+            raise ValueError("created_by must be non-empty text.")
+        if self.last_edited_by is not None and (
+            not isinstance(self.last_edited_by, str)
+            or not self.last_edited_by.strip()
+        ):
+            raise ValueError("last_edited_by must be non-empty text or None.")
         if self.status not in SESSION_STATUSES:
             raise ValueError(f"status must be one of {sorted(SESSION_STATUSES)}.")
         if self.completed_at is not None and (

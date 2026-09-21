@@ -4,7 +4,11 @@ from dataclasses import asdict
 from pathlib import Path
 from typing import Dict, Any
 
-from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
+from phase_annotator.domain.models import (
+    AnnotationInterval,
+    AnnotationSession,
+    VideoInfo,
+)
 
 
 class JsonSessionRepository:
@@ -19,6 +23,9 @@ class JsonSessionRepository:
         filepath.parent.mkdir(parents=True, exist_ok=True)
         
         data = asdict(session)
+        legacy_work_sessions = data.pop("_legacy_work_sessions", None)
+        if legacy_work_sessions is not None:
+            data["work_sessions"] = legacy_work_sessions
 
         # Keep the temporary file beside the target: os.replace is only
         # reliably atomic when both paths are on the same filesystem.
@@ -41,7 +48,8 @@ class JsonSessionRepository:
         self._reject_unknown_fields(
             data,
             {
-                "video_info", "annotator_id", "ontology_id", "ontology_version",
+                "video_info", "annotator_id", "created_by", "last_edited_by",
+                "work_sessions", "ontology_id", "ontology_version",
                 "intervals", "status", "completed_at", "resume_position_ms",
                 "schema_version", "created_at", "updated_at",
             },
@@ -63,6 +71,8 @@ class JsonSessionRepository:
         session = AnnotationSession(
             video_info=video_info,
             annotator_id=data["annotator_id"],
+            created_by=data.get("created_by", data["annotator_id"]),
+            last_edited_by=data.get("last_edited_by", data["annotator_id"]),
             ontology_id=data.get("ontology_id", ""),
             ontology_version=data.get("ontology_version", ""),
             intervals=intervals,
@@ -72,6 +82,7 @@ class JsonSessionRepository:
             schema_version=data.get("schema_version", "1.0"),
             created_at=data.get("created_at", 0.0),
             updated_at=data.get("updated_at", 0.0),
+            _legacy_work_sessions=data.get("work_sessions"),
         )
 
         return session

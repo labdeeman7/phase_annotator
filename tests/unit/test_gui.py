@@ -175,6 +175,53 @@ def test_existing_matching_sidecar_is_loaded_automatically(
     assert second._loaded_existing_session
     assert second._session.intervals == first._session.intervals
     assert second._session.resume_position_ms == 6_000
+    # Both windows deliberately point at one sidecar in this load test. Avoid
+    # turning pytest cleanup into a simulated concurrent-editing prompt.
+    first._persistence.reset_annotation_changed()
+    second._persistence.reset_annotation_changed()
+
+
+def test_changed_run_is_attributed_and_archived_once(
+    qtbot, monkeypatch, tmp_path
+):
+    window = MainWindow(load_default_ontology(), annotator_id="doctor_A")
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    monkeypatch.setattr(
+        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
+    )
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+
+    window._load_video(video_path)
+    window._on_duration_changed(10_000)
+    window.record_phase_transition(2)
+
+    assert window._session.created_by == "doctor_A"
+    assert window._session.last_edited_by == "doctor_A"
+    assert window._prepare_to_leave_current_session("test close")
+
+    snapshots = list(
+        (tmp_path / "case.mp4.phase-annotations-history").glob("*.json")
+    )
+    assert len(snapshots) == 1
+    archived = JsonSessionRepository().load(snapshots[0])
+    assert archived.last_edited_by == "doctor_A"
+    assert archived.resume_position_ms == 4_000
+
+
+def test_resume_only_run_creates_no_snapshot(qtbot, monkeypatch, tmp_path):
+    window = MainWindow(load_default_ontology(), annotator_id="doctor_A")
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+
+    window._load_video(video_path)
+    window._on_duration_changed(10_000)
+    assert window._prepare_to_leave_current_session("test close")
+
+    assert not (tmp_path / "case.mp4.phase-annotations-history").exists()
 
 
 def test_late_qt_metadata_updates_only_the_current_video(

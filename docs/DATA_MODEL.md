@@ -17,7 +17,9 @@ AnnotationSession
 │   ├── file_modified_ns: int | null
 │   ├── fps_source: unknown | assumed | qt | ffprobe
 │   └── frame_rate_mode: unknown | cfr | vfr
-├── annotator_id: str
+├── annotator_id: str (legacy field retained for compatibility)
+├── created_by: str
+├── last_edited_by: str | null
 ├── ontology_id: str
 ├── ontology_version: str
 ├── intervals: list[AnnotationInterval]
@@ -28,7 +30,7 @@ AnnotationSession
 ├── status: draft | completed = "draft"
 ├── completed_at: float | null
 ├── resume_position_ms: int = 0
-├── schema_version: str = "1.2"
+├── schema_version: str = "1.3"
 ├── created_at: float (Unix timestamp)
 └── updated_at: float (Unix timestamp)
 ```
@@ -71,9 +73,22 @@ Full interval coverage does not prove completion because the current phase provi
 
 Resume position is not proof of review. `reviewed_until_ms` is deferred until a trustworthy definition is needed. Completion remains an explicit validated action in C8. Undefined footage is summarized for confirmation rather than automatically blocking completion. Editing a completed session returns it to draft after confirmation.
 
+## C7 attribution and historical snapshots
+
+Schema 1.3 preserves legacy `annotator_id` and adds these explicit concepts:
+
+- `created_by`: who created the annotation session;
+- `last_edited_by`: who made the latest annotation-data mutation;
+- active annotator: application state, entered at every startup and retained across opened videos for that launch;
+- `completed_by`: reserved for C8 explicit completion.
+
+The rejected pre-commit C7 prototype briefly emitted `work_sessions`. The loader preserves that field opaquely when encountered so a trial sidecar can round trip without data loss, but new sessions do not create or use it.
+
+Seeking and resume checkpoints do not change annotation attribution. Resume remains one shared position per video rather than a per-annotator progress record. Historical files are complete validated session JSON snapshots created once when a changed video is closed or replaced and remain independently loadable.
+
 ## Persisted JSON
 
-Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added optional media fields and schema 1.2 adds lifecycle/resume fields. Older known schemas remain loadable through explicit defaults. Unknown fields are rejected rather than silently erased on the next write; there is not yet a general migration framework. Example:
+Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added optional media fields, schema 1.2 lifecycle/resume fields, and schema 1.3 creator/last-editor attribution. Older known schemas remain loadable through explicit defaults. Unknown fields are rejected rather than silently erased on the next write; there is not yet a general migration framework. Example:
 
 ```json
 {
@@ -90,6 +105,8 @@ Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added 
     "frame_rate_mode": "unknown"
   },
   "annotator_id": "annotator_01",
+  "created_by": "annotator_01",
+  "last_edited_by": "annotator_01",
   "ontology_id": "laparoscopic_appendectomy.default",
   "ontology_version": "1.0",
   "intervals": [
@@ -98,7 +115,7 @@ Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added 
   "status": "draft",
   "completed_at": null,
   "resume_position_ms": 0,
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "created_at": 0.0,
   "updated_at": 0.0
 }

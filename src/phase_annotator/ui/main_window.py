@@ -25,6 +25,7 @@ from phase_annotator.media import MediaMetadata, probe_local_file
 from phase_annotator import __version__
 from phase_annotator.domain.models import CURRENT_SESSION_SCHEMA_VERSION
 from phase_annotator.storage import (
+    HistorySnapshotError,
     LoadStatus,
     SessionPersistenceCoordinator,
     SessionPersistenceError,
@@ -34,14 +35,17 @@ from phase_annotator.storage import (
 class MainWindow(QMainWindow):
     """Main application window for the configured phase ontology."""
 
-    def __init__(self, ontology: PhaseOntology):
+    def __init__(self, ontology: PhaseOntology, annotator_id: str = "surgeon_01"):
         super().__init__()
-        self._base_window_title = f"Phase Annotator v{__version__}"
+        self._base_window_title = (
+            f"Phase Annotator v{__version__} — {annotator_id}"
+        )
         self.setWindowTitle(self._base_window_title)
         self.resize(1200, 800)
 
         # Domain State
         self._ontology = ontology
+        self._active_annotator_id = annotator_id
         self._editor = AnnotationEditor(
             valid_phase_ids=self._ontology.phases,
             undefined_phase_id=self._ontology.undefined_phase_id,
@@ -297,6 +301,7 @@ class MainWindow(QMainWindow):
             mutation=mutation,
         )
         if changed:
+            self._mark_annotation_changed()
             self._persist_session()
         self._update_history_controls()
         return changed
@@ -373,7 +378,8 @@ class MainWindow(QMainWindow):
         )
         new_session = AnnotationSession(
             video_info=video_info,
-            annotator_id="surgeon_01",
+            annotator_id=self._active_annotator_id,
+            created_by=self._active_annotator_id,
             ontology_id=self._ontology.ontology_id,
             ontology_version=self._ontology.ontology_version,
         )
@@ -444,6 +450,12 @@ class MainWindow(QMainWindow):
         self._sidecar_load_blocked = True
         self._sidecar_block_message = f"Annotations unavailable: {message}"
 
+    def _mark_annotation_changed(self) -> None:
+        if self._session is None:
+            return
+        self._session.last_edited_by = self._active_annotator_id
+        self._persistence.mark_annotation_changed()
+
     def _update_dirty_indicator(self) -> None:
         suffix = " [UNSAVED]" if self._persistence.is_dirty else ""
         self.setWindowTitle(f"{self._base_window_title}{suffix}")
@@ -493,11 +505,27 @@ class MainWindow(QMainWindow):
             self._checkpoint_resume()
 
     def _prepare_to_leave_current_session(self, action: str) -> bool:
-        """Try one final checkpoint, then make unresolved write failure explicit."""
+        """Save current state and archive it once when annotations changed."""
         self._checkpoint_resume()
-        if not self._persistence.is_dirty:
+        if self._persistence.is_dirty:
+            if not self._resolve_dirty_state(action):
+                return False
+            # Discard permits leaving without turning unresolved memory into a
+            # misleading canonical save or history snapshot.
+            if self._persistence.is_dirty:
+                return True
+        if (
+            self._session is None
+            or not self._session.intervals
+            or self._persistence.sidecar_path is None
+            or self._sidecar_load_blocked
+        ):
             return True
+        if not self._persistence.annotation_changed:
+            return True
+        return self._archive_changed_run(action)
 
+    def _resolve_dirty_state(self, action: str) -> bool:
         choice = QMessageBox.warning(
             self,
             "Unsaved annotations",
@@ -510,6 +538,31 @@ class MainWindow(QMainWindow):
         if choice == QMessageBox.StandardButton.Retry:
             return self._persist_session()
         return choice == QMessageBox.StandardButton.Discard
+
+    def _archive_changed_run(self, action: str) -> bool:
+        while True:
+            try:
+                self._persistence.archive_snapshot(self._session)
+                return True
+            except HistorySnapshotError as error:
+                choice = QMessageBox.warning(
+                    self,
+                    "History snapshot not created",
+                    f"Annotations are saved, but their history snapshot failed: {error}",
+                    QMessageBox.StandardButton.Retry
+                    | QMessageBox.StandardButton.Ignore
+                    | QMessageBox.StandardButton.Cancel,
+                    QMessageBox.StandardButton.Retry,
+                )
+                if choice == QMessageBox.StandardButton.Retry:
+                    continue
+                if choice == QMessageBox.StandardButton.Ignore:
+                    self._persistence.reset_annotation_changed()
+                    return True
+                self.statusBar().showMessage(
+                    f"Cancelled {action}: history snapshot was not created"
+                )
+                return False
 
     def closeEvent(self, event: QCloseEvent) -> None:
         if self._prepare_to_leave_current_session("close the application"):
@@ -948,6 +1001,7 @@ class MainWindow(QMainWindow):
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self._update_history_controls()
+        self._mark_annotation_changed()
         self._persist_session()
         self.statusBar().showMessage(f"Undid {entry.description}", 3000)
 
@@ -966,6 +1020,7 @@ class MainWindow(QMainWindow):
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self._update_history_controls()
+        self._mark_annotation_changed()
         self._persist_session()
         self.statusBar().showMessage(f"Redid {entry.description}", 3000)
 

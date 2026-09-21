@@ -37,13 +37,15 @@ Annotation controls stay disabled while an existing sidecar is unresolved or inv
 
 C6 persists `resume_position_ms`, but does not write on every Qt position signal. Save it with annotation edits, on pause, at a modest periodic checkpoint during playback, and on clean close/video replacement. Restoring the playhead does not imply that footage was reviewed.
 
-The session schema will add:
+The session schema includes:
 
 - `status`: `draft` or `completed`, default `draft`;
 - `completed_at`: nullable Unix timestamp;
 - `resume_position_ms`: non-negative millisecond position.
 
 C6 persists these fields but does not add the completion action. C8 owns completion validation and UI. `reviewed_until_ms` is deferred until a concrete, trustworthy review-progress definition is needed.
+
+C6's single `annotator_id` remains for compatibility. C7 adds creator/last-editor attribution, launch identity, changed-run snapshots, and external-write conflict detection. The shared resume position is not per-annotator progress.
 
 ## Sub-slices
 
