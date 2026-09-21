@@ -95,7 +95,11 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C8.5: archive completed state before deliberate reopening/editing
 - [x] C8.6: validate lifecycle migration, failures, GUI, and automated workflow (manual acceptance pending)
 - [x] C8.7: unify the application shell and controls with a high-contrast dark workstation theme
-- [ ] C9: Usability and annotation-efficiency pass
+- [x] C9.1: add prominent dismissible error/warning notifications
+- [x] C9.2: add playback speed and five-second navigation controls
+- [x] C9.3: add an in-application shortcuts/workflow reference
+- [x] C9.4: add presentation-only timeline zoom and horizontal navigation
+- [x] C9.5: run automated usability acceptance (representative manual acceptance pending)
 - [ ] C10: Packaging, documentation, and release readiness
 
 ## Known cleanup (do not confuse with feature work)
@@ -108,6 +112,6 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 ## Beautification and UI polish (later)
 
 - [x] Replace the mixed default-light/custom-dark appearance with one coherent application theme.
-- [ ] Replace status-bar-only error messages with a prominent, non-blocking notification/banner near the top of the window, similar to a web toast/alert.
-- [ ] Keep routine playback, loading, save, and successful-action feedback in the status bar rather than treating every message as an error.
-- [ ] Define consistent error, warning, success, and informational colors, duration, dismissal, and accessibility behavior before implementing the notification component.
+- [x] Replace status-bar-only critical failures with a prominent, non-blocking notification banner near the top of the window.
+- [x] Keep routine playback, loading, save, and successful-action feedback in the status bar rather than treating every message as an error.
+- [x] Define consistent error, warning, and informational banner colors, dismissal, and accessibility behavior.

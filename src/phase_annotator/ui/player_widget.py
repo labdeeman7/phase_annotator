@@ -100,6 +100,18 @@ class VideoPlayerWidget(QWidget):
         """Seeks to a specific timestamp in milliseconds."""
         self._player.setPosition(position_ms)
 
+    def jump_ms(self, offset_ms: int) -> None:
+        target_ms = max(0, min(self.duration_ms, self.position_ms + offset_ms))
+        self.seek_ms(target_ms)
+
+    def set_playback_rate(self, rate: float) -> None:
+        if rate > 0:
+            self._player.setPlaybackRate(rate)
+
+    @property
+    def playback_rate(self) -> float:
+        return self._player.playbackRate()
+
     def step_frames(self, frame_count: int) -> None:
         """Seek by an FPS-derived duration; this is not decoder frame stepping."""
         ms_per_frame = 1000.0 / self._fps

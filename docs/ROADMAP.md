@@ -245,6 +245,10 @@ Learning focus: validation boundaries, lifecycle state, and trustworthy research
 
 Goal: make sustained annotation practical after correctness is established.
 
+The focused C9.1-C9.5 interaction contract is in `C9_USABILITY_AND_EFFICIENCY.md`.
+
+Status: **Complete pending manual acceptance.** Notification hierarchy, playback efficiency controls, in-application help, and presentation-only timeline zoom are implemented and tested.
+
 Candidate work, validated with actual use rather than assumed upfront:
 
 - Continue evidence-led visual and accessibility refinement after the C8.7 application-theme baseline.
@@ -303,4 +307,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Manually accept C8 completion/reopening with disposable media, then begin C9 workflow efficiency and usability.
+Manually accept the combined C8/C9 workflow with disposable media, then begin C10 engineering quality and Windows packaging.

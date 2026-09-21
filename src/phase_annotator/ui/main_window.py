@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
     QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox, QComboBox,
-    QDialog, QMenu, QMessageBox
+    QDialog, QMenu, QMessageBox, QScrollArea, QFrame
 )
 
 from phase_annotator.ui.player_widget import VideoPlayerWidget
@@ -17,6 +17,7 @@ from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.ui.theme import APPLICATION_STYLESHEET
+from phase_annotator.ui.notification_banner import NotificationBanner
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
 from phase_annotator.domain.completion import summarize_completion
@@ -65,6 +66,7 @@ class MainWindow(QMainWindow):
         self._loading_video = False
         # Transient UI selection; valid only for the current interval sequence.
         self._selected_segment_index: Optional[int] = None
+        self._timeline_zoom_factor = 1.0
 
         # Core UI Widgets
         self._player_widget = VideoPlayerWidget(self)
@@ -78,8 +80,12 @@ class MainWindow(QMainWindow):
         # Central Splitter Layout (Left: Video + Controls + Timeline, Right: Segment List Cards)
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
-        main_layout = QHBoxLayout(central_widget)
+        main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(8, 8, 8, 8)
+        main_layout.setSpacing(8)
+
+        self._notification_banner = NotificationBanner(self)
+        main_layout.addWidget(self._notification_banner)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
 
@@ -88,7 +94,40 @@ class MainWindow(QMainWindow):
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.addWidget(self._player_widget, stretch=1)
-        left_layout.addWidget(self._timeline_widget)
+
+        timeline_toolbar = QHBoxLayout()
+        timeline_toolbar.addWidget(QLabel("Timeline", self))
+        timeline_toolbar.addStretch()
+        self._btn_zoom_out = QPushButton("−", self)
+        self._btn_zoom_out.setToolTip("Zoom timeline out")
+        self._btn_zoom_reset = QPushButton("1×", self)
+        self._btn_zoom_reset.setToolTip("Reset timeline zoom")
+        self._btn_zoom_in = QPushButton("+", self)
+        self._btn_zoom_in.setToolTip("Zoom timeline in")
+        for button in (
+            self._btn_zoom_out,
+            self._btn_zoom_reset,
+            self._btn_zoom_in,
+        ):
+            button.setFixedWidth(42)
+            timeline_toolbar.addWidget(button)
+        self._btn_zoom_out.clicked.connect(lambda: self._change_timeline_zoom(-1))
+        self._btn_zoom_reset.clicked.connect(self._reset_timeline_zoom)
+        self._btn_zoom_in.clicked.connect(lambda: self._change_timeline_zoom(1))
+        left_layout.addLayout(timeline_toolbar)
+
+        self._timeline_scroll = QScrollArea(self)
+        self._timeline_scroll.setWidget(self._timeline_widget)
+        self._timeline_scroll.setWidgetResizable(False)
+        self._timeline_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self._timeline_scroll.setVerticalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self._timeline_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+        self._timeline_scroll.setFixedHeight(66)
+        left_layout.addWidget(self._timeline_scroll)
 
         # Controls & Timecode
         control_layout = QVBoxLayout()
@@ -122,6 +161,26 @@ class MainWindow(QMainWindow):
         self._btn_step_forward.clicked.connect(lambda: self._player_widget.step_frames(1))
         self._btn_step_forward.setEnabled(False)
 
+        self._btn_jump_back = QPushButton("−5 sec", self)
+        self._btn_jump_back.clicked.connect(
+            lambda: self._player_widget.jump_ms(-5_000)
+        )
+        self._btn_jump_back.setEnabled(False)
+
+        self._btn_jump_forward = QPushButton("+5 sec", self)
+        self._btn_jump_forward.clicked.connect(
+            lambda: self._player_widget.jump_ms(5_000)
+        )
+        self._btn_jump_forward.setEnabled(False)
+
+        self._speed_combo = QComboBox(self)
+        self._speed_combo.setAccessibleName("Playback speed")
+        for label, rate in (("0.5×", 0.5), ("1×", 1.0), ("1.5×", 1.5), ("2×", 2.0)):
+            self._speed_combo.addItem(label, rate)
+        self._speed_combo.setCurrentIndex(1)
+        self._speed_combo.currentIndexChanged.connect(self._set_playback_speed)
+        self._speed_combo.setEnabled(False)
+
         self._btn_undo = QPushButton("Undo", self)
         self._btn_undo.setToolTip("Nothing to undo (Ctrl+Z)")
         self._btn_undo.clicked.connect(self._undo_annotation)
@@ -136,6 +195,10 @@ class MainWindow(QMainWindow):
         btn_layout.addWidget(self._btn_play)
         btn_layout.addWidget(self._btn_step_back)
         btn_layout.addWidget(self._btn_step_forward)
+        btn_layout.addWidget(self._btn_jump_back)
+        btn_layout.addWidget(self._btn_jump_forward)
+        btn_layout.addWidget(QLabel("Speed", self))
+        btn_layout.addWidget(self._speed_combo)
         btn_layout.addWidget(self._btn_undo)
         btn_layout.addWidget(self._btn_redo)
         btn_layout.addStretch()
@@ -197,7 +260,9 @@ class MainWindow(QMainWindow):
         )
         QApplication.instance().focusChanged.connect(self._update_history_controls)
         self._create_annotation_menu()
+        self._create_help_menu()
         self._update_annotation_menu()
+        QTimer.singleShot(0, self._apply_timeline_zoom)
         self.statusBar().showMessage("No video loaded")
 
     def _create_annotation_menu(self) -> None:
@@ -222,6 +287,67 @@ class MainWindow(QMainWindow):
         )
         self._action_mark_complete.setEnabled(has_session and not completed)
         self._action_reopen.setEnabled(bool(completed))
+
+    def _create_help_menu(self) -> None:
+        menu = self.menuBar().addMenu("Help")
+        shortcuts = menu.addAction("Shortcuts and controls...")
+        shortcuts.triggered.connect(self._show_shortcuts_help)
+
+    def _show_shortcuts_help(self) -> None:
+        phase_lines = "\n".join(
+            f"{phase.hotkey}    {phase.name}"
+            for phase in self._ontology.ordered_phases
+        )
+        QMessageBox.information(
+            self,
+            "Shortcuts and controls",
+            "Playback\n"
+            "Space    Play / pause\n"
+            "Left / Right    Step by one estimated frame\n"
+            "Buttons    Jump ±5 seconds or change playback speed\n\n"
+            "Editing\n"
+            "Ctrl+Z    Undo\n"
+            "Ctrl+Shift+Z or Ctrl+Y    Redo\n"
+            "Click timeline/card    Select and seek\n"
+            "Drag timeline boundary    Adjust boundary\n"
+            "Right-click segment    Correction actions\n\n"
+            f"Phases\n{phase_lines}\n\n"
+            "Use the Annotation menu for video notes and completion.",
+        )
+
+    def _show_notification(self, message: str, *, level: str = "error") -> None:
+        self._notification_banner.show_notification(message, level=level)
+
+    def _set_playback_speed(self, index: int) -> None:
+        rate = self._speed_combo.itemData(index)
+        if rate is not None:
+            self._player_widget.set_playback_rate(float(rate))
+            self.statusBar().showMessage(f"Playback speed: {rate:g}×", 2500)
+
+    def _change_timeline_zoom(self, direction: int) -> None:
+        levels = (1.0, 2.0, 4.0, 8.0)
+        current = levels.index(self._timeline_zoom_factor)
+        target = max(0, min(len(levels) - 1, current + direction))
+        self._timeline_zoom_factor = levels[target]
+        self._apply_timeline_zoom()
+
+    def _reset_timeline_zoom(self) -> None:
+        self._timeline_zoom_factor = 1.0
+        self._apply_timeline_zoom()
+
+    def _apply_timeline_zoom(self) -> None:
+        viewport_width = max(300, self._timeline_scroll.viewport().width())
+        self._timeline_widget.setFixedWidth(
+            round(viewport_width * self._timeline_zoom_factor)
+        )
+        self._btn_zoom_reset.setText(f"{self._timeline_zoom_factor:g}×")
+        self._btn_zoom_out.setEnabled(self._timeline_zoom_factor > 1.0)
+        self._btn_zoom_in.setEnabled(self._timeline_zoom_factor < 8.0)
+
+    def resizeEvent(self, event) -> None:
+        super().resizeEvent(event)
+        if hasattr(self, "_timeline_scroll"):
+            self._apply_timeline_zoom()
 
     def keyPressEvent(self, event) -> None:
         """Dispatch configured phase hotkeys and playback/navigation keys."""
@@ -396,6 +522,7 @@ class MainWindow(QMainWindow):
         """Starts loading a video and prepares its empty annotation session."""
         if not self._prepare_to_leave_current_session("open another video"):
             return False
+        self._notification_banner.hide_notification()
         self._video_path = path
         self._loading_video = True
         self._media_load_failed = False
@@ -466,6 +593,7 @@ class MainWindow(QMainWindow):
             return False
         if self._sidecar_load_blocked:
             self.statusBar().showMessage(self._sidecar_block_message)
+            self._show_notification(self._sidecar_block_message)
         else:
             self.statusBar().showMessage(f"Loading: {path.name}")
         self._player_widget.load_video(path)
@@ -525,7 +653,9 @@ class MainWindow(QMainWindow):
         try:
             self._persistence.save(self._session)
         except SessionPersistenceError as error:
-            self.statusBar().showMessage(f"Annotations not saved: {error}")
+            message = f"Annotations not saved: {error}"
+            self.statusBar().showMessage(message)
+            self._show_notification(message)
             return False
         self._update_dirty_indicator()
         return True
@@ -796,6 +926,7 @@ class MainWindow(QMainWindow):
                 self._timeline_widget.setEnabled(False)
                 self._segment_list_widget.setEnabled(False)
                 self.statusBar().showMessage(self._sidecar_block_message)
+                self._show_notification(self._sidecar_block_message)
                 self._update_phase_shortcut_state()
                 self._update_time_label(self._player_widget.position_ms, duration_ms)
                 return
@@ -828,12 +959,17 @@ class MainWindow(QMainWindow):
         self._phase_palette.set_active_phase(None)
         self._update_phase_shortcut_state()
         name = self._video_path.name if self._video_path else "video"
-        self.statusBar().showMessage(f"Could not load {name}: {message}")
+        detail = f"Could not load {name}: {message}"
+        self.statusBar().showMessage(detail)
+        self._show_notification(detail)
 
     def _set_media_controls_enabled(self, enabled: bool) -> None:
         self._btn_play.setEnabled(enabled)
         self._btn_step_back.setEnabled(enabled)
         self._btn_step_forward.setEnabled(enabled)
+        self._btn_jump_back.setEnabled(enabled)
+        self._btn_jump_forward.setEnabled(enabled)
+        self._speed_combo.setEnabled(enabled)
         self._slider.setEnabled(enabled)
         self._timeline_widget.setEnabled(enabled)
         self._segment_list_widget.setEnabled(enabled)

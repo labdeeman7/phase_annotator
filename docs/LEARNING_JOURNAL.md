@@ -459,3 +459,9 @@ The completion summary is a pure function: identical session data always produce
 The original interface mixed dark custom annotation widgets with Qt's default light window, menus, controls, and dialogs. Each individual part worked, but the visual system looked accidental and important navigation blended into empty chrome. A small centralized stylesheet now defines shared surfaces, borders, hover/focus states, disabled states, and primary-action emphasis.
 
 Centralizing these tokens is more maintainable than adding unrelated style strings to every widget. Phase-specific color remains local because it represents annotation data; general application chrome belongs to the shared theme.
+
+## C9 — Separate workflow state from view state
+
+Timeline zoom changes the number of pixels used to display the same millisecond intervals; it must never rewrite interval boundaries. Playback rate and horizontal scroll position are similarly transient view/player state. Keeping these values out of `AnnotationSession` prevents convenience settings from contaminating research data or creating unnecessary saves.
+
+Feedback also has hierarchy. A status bar is suitable for routine, short-lived state, but write failures and blocked source associations can be missed there. A reusable banner gives actionable problems a stable visual location while lifecycle decisions continue to use explicit modal confirmation.

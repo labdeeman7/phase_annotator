@@ -11,6 +11,7 @@ from phase_annotator.ui.player_widget import VideoPlayerWidget
 from phase_annotator.ui.timeline_widget import TimelineWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
+from phase_annotator.ui.notification_banner import NotificationBanner
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
 from phase_annotator.domain.validation import validate_contiguous_coverage
 from phase_annotator.media import MediaMetadata
@@ -57,6 +58,46 @@ def test_main_window_instantiation(qtbot):
     assert window._btn_open.objectName() == "openVideoButton"
     assert "QMenuBar" in window.styleSheet()
     assert "#111820" in window.styleSheet()
+    assert window._speed_combo.currentData() == 1.0
+    assert window._timeline_zoom_factor == 1.0
+
+
+def test_notification_banner_shows_and_dismisses(qtbot):
+    banner = NotificationBanner()
+    qtbot.addWidget(banner)
+
+    banner.show_notification("Disk is unavailable", level="error")
+    assert banner.isVisible()
+    assert banner.message == "Disk is unavailable"
+
+    banner.hide_notification()
+    assert not banner.isVisible()
+
+
+def test_playback_speed_help_and_timeline_zoom(qtbot, monkeypatch):
+    window = make_window()
+    qtbot.addWidget(window)
+    messages = []
+    monkeypatch.setattr(
+        QMessageBox,
+        "information",
+        lambda parent, title, message: messages.append((title, message)),
+    )
+
+    window._speed_combo.setCurrentIndex(3)
+    assert window._player_widget.playback_rate == 2.0
+
+    window._change_timeline_zoom(1)
+    assert window._timeline_zoom_factor == 2.0
+    assert window._timeline_widget.width() >= 600
+    assert window._btn_zoom_reset.text() == "2×"
+    window._reset_timeline_zoom()
+    assert window._timeline_zoom_factor == 1.0
+
+    window._show_shortcuts_help()
+    assert messages[0][0] == "Shortcuts and controls"
+    assert "Ctrl+Z" in messages[0][1]
+    assert "Identification of the appendix" in messages[0][1]
 
 
 def test_video_note_completion_and_reopen_lifecycle(

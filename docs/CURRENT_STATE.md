@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-09-21 after implementation of C8, based on C7 commit `106bd53`.
+Last verified on 2026-09-21 after implementation of C9, based on C8.7 commit `010441f`.
 
 ## What Phase Annotator currently does
 
@@ -20,6 +20,8 @@ C8 advances the persisted model to schema 1.4. It adds optional video-level `ses
 
 C8.7 pulls visual consistency forward from C9. `ui/theme.py` gives the application shell, menu, controls, dialogs, status bar, splitter, tooltips, and scrollbars one dark high-contrast workstation theme. Existing phase colors and selected/playhead distinctions remain intact.
 
+C9 adds a dismissible high-visibility banner for actionable media/persistence failures, fixed playback rates from 0.5× to 2×, ±5-second jumps, an in-application shortcut reference, and presentation-only 1×/2×/4×/8× timeline zoom with horizontal scrolling. These controls do not alter annotation timestamps or schema data.
+
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
 Codex milestone C1 replaces hard-coded ontology construction with a validated packaged JSON configuration. The default explicitly uses Phase 1 as its provisional initial phase, orders phases 1-6 as expected clinical guidance, places Undefined (`U`) last, and records ontology identity/version in sessions.
@@ -31,7 +33,7 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 - `MainWindow` still combines view construction and presenter/controller coordination; a dedicated presenter has not been extracted.
 - C3 and C4 are complete, with the user-visible correction, dragging, and undo/redo workflows manually accepted. History is not persisted across application or video loads.
 - The GUI begins with 30.0 FPS explicitly marked `assumed`, then adopts a positive FPS reported by Qt and labels its source `qt`. File size/modification time and available Qt duration/resolution are populated. Qt does not establish CFR/VFR status, so frame stepping remains estimated millisecond seeking rather than decoder-accurate navigation.
-- Missing/unreadable files fail before backend loading. Qt resource, format/codec, network, and permission errors produce actionable status-bar messages and disable playback, seeking, and annotation controls for that failed load.
+- Missing/unreadable files fail before backend loading. Qt resource, format/codec, network, and permission errors produce actionable banner messages and disable playback, seeking, and annotation controls for that failed load.
 - New GUI sessions record the absolute last-known source path as well as the basename. The C5.3 comparison engine exists, but session loading and relocation do not yet call it. Video hashing is intentionally prohibited for this project.
 - JSON saving uses a same-directory dot-prefixed temporary file and `os.replace`, with coordinator validation and visible dirty failure state. It does not fsync, clean stale temp files, lock concurrent writers, create backups, or support read-only source directories.
 - GUI and coordinator tests cover initial save, immediate mutation/undo persistence, matching reload, source outcomes, invalid data, legacy defaults, and write-failure dirty retention. Packaged cross-platform playback and crash/concurrent-writer behavior remain untested.
@@ -65,8 +67,8 @@ Codex then stabilized and extended the application through C0-C7. The historical
 
 ## Validation baseline
 
-On 2026-09-21, the repository-local Python 3.11.5 environment passed all 172 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. C8 requires manual completion/reopening acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-21, the repository-local Python 3.11.5 environment passed all 174 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. The combined C8/C9 workflow requires manual acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Manually accept C8 completion and archive-before-reopen behavior using disposable media, then plan C9 workflow efficiency. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.
+Manually accept the combined C8/C9 workflow using disposable media, then begin C10 release engineering and Windows packaging.

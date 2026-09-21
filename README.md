@@ -61,7 +61,7 @@ The application entry point is:
 python -m phase_annotator
 ```
 
-This is an early prototype implemented through project milestone C8. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, sequential annotator attribution, changed-run snapshots, external-write protection, video-level notes, and explicit completion/reopening work. Distribution and broader platform validation remain planned.
+This is an early prototype implemented through project milestone C9. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, attribution/history, protected completion/reopening, prominent failures, playback-speed/jump controls, shortcut help, and timeline zoom work. Distribution and broader platform validation remain planned.
 
 ## Documentation
 

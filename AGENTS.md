@@ -2,9 +2,9 @@
 
 ## Purpose and current maturity
 
-This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype implemented through Codex milestone C8, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, continuous canonical JSON persistence, sequential annotator attribution, changed-run snapshots, external-write protection, video-level notes, and explicit completion/reopening exist, while distribution and cross-platform validation do not.
+This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology. It is an early prototype implemented through Codex milestone C9, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, continuous canonical JSON persistence, attribution/history, protected completion/reopening, prominent failure feedback, playback efficiency controls, shortcut help, and timeline zoom exist, while distribution and cross-platform validation do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C8_COMPLETION_AND_TRUST.md`, `docs/C7_ATTRIBUTION_AND_HISTORY.md`, `docs/C6_CONTINUOUS_PERSISTENCE.md`, and `docs/C5_MEDIA_RELIABILITY.md` record completed contracts. C9 is next. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C9_USABILITY_AND_EFFICIENCY.md`, `docs/C8_COMPLETION_AND_TRUST.md`, `docs/C7_ATTRIBUTION_AND_HISTORY.md`, `docs/C6_CONTINUOUS_PERSISTENCE.md`, and `docs/C5_MEDIA_RELIABILITY.md` record completed contracts. C10 is next. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
