@@ -18,6 +18,8 @@ C7 asks for an annotator ID on every launch, keeps it fixed across videos for th
 
 C8 advances the persisted model to schema 1.4. It adds optional video-level `session_notes` and explicit `completed_by`, and enforces the lifecycle invariant that a completed session has both completion timestamp and completer while a draft has neither. Known older schemas load with compatible defaults. A compact **Annotation** menu edits the video note, validates and summarizes work before explicit completion, and safely reopens completed annotations. Completed work is navigable but every mutation is guarded; reopening verifies the canonical sidecar and archives the completed record before returning to Draft.
 
+C8.7 pulls visual consistency forward from C9. `ui/theme.py` gives the application shell, menu, controls, dialogs, status bar, splitter, tooltips, and scrollbars one dark high-contrast workstation theme. Existing phase colors and selected/playhead distinctions remain intact.
+
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
 Codex milestone C1 replaces hard-coded ontology construction with a validated packaged JSON configuration. The default explicitly uses Phase 1 as its provisional initial phase, orders phases 1-6 as expected clinical guidance, places Undefined (`U`) last, and records ontology identity/version in sessions.

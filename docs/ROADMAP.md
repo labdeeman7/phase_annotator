@@ -222,6 +222,8 @@ Learning focus: identity versus attribution, schema evolution, optimistic confli
 
 Status: **Complete pending manual acceptance.** Schema 1.4, video-level notes, completion summary/declaration, protected completed state, and archive-before-reopen behavior are implemented and tested.
 
+Post-milestone C8.7 pulled the first C9 usability concern forward: the previously mixed default-light and custom-dark widgets now use one high-contrast workstation theme. This is visual hierarchy and consistency work only; it does not change annotation behavior.
+
 Goal: distinguish valid draft work from explicitly completed annotation while keeping JSON canonical.
 
 The detailed C8.1-C8.6 lifecycle, notes, validation, and reopening contract is in `C8_COMPLETION_AND_TRUST.md`.
@@ -245,6 +247,7 @@ Goal: make sustained annotation practical after correctness is established.
 
 Candidate work, validated with actual use rather than assumed upfront:
 
+- Continue evidence-led visual and accessibility refinement after the C8.7 application-theme baseline.
 - Configurable seek/step controls and playback-speed options.
 - Keyboard shortcut reference and onboarding hints.
 - Better timeline zoom/navigation for long procedures.

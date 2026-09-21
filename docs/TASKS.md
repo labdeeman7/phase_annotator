@@ -94,6 +94,7 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C8.4: persist explicit completion with current annotator and timestamp
 - [x] C8.5: archive completed state before deliberate reopening/editing
 - [x] C8.6: validate lifecycle migration, failures, GUI, and automated workflow (manual acceptance pending)
+- [x] C8.7: unify the application shell and controls with a high-contrast dark workstation theme
 - [ ] C9: Usability and annotation-efficiency pass
 - [ ] C10: Packaging, documentation, and release readiness
 
@@ -106,6 +107,7 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 
 ## Beautification and UI polish (later)
 
+- [x] Replace the mixed default-light/custom-dark appearance with one coherent application theme.
 - [ ] Replace status-bar-only error messages with a prominent, non-blocking notification/banner near the top of the window, similar to a web toast/alert.
 - [ ] Keep routine playback, loading, save, and successful-action feedback in the status bar rather than treating every message as an error.
 - [ ] Define consistent error, warning, success, and informational colors, duration, dismissal, and accessibility behavior before implementing the notification component.

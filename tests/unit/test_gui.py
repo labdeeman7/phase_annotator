@@ -54,6 +54,9 @@ def test_main_window_instantiation(qtbot):
     assert not window._action_video_note.isEnabled()
     assert not window._action_mark_complete.isEnabled()
     assert not window._action_reopen.isEnabled()
+    assert window._btn_open.objectName() == "openVideoButton"
+    assert "QMenuBar" in window.styleSheet()
+    assert "#111820" in window.styleSheet()
 
 
 def test_video_note_completion_and_reopen_lifecycle(

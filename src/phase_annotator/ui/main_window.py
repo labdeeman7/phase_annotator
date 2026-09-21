@@ -16,6 +16,7 @@ from phase_annotator.ui.timeline_widget import TimelineWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
+from phase_annotator.ui.theme import APPLICATION_STYLESHEET
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
 from phase_annotator.domain.completion import summarize_completion
@@ -42,6 +43,7 @@ class MainWindow(QMainWindow):
             f"Phase Annotator v{__version__} — {annotator_id}"
         )
         self.setWindowTitle(self._base_window_title)
+        self.setStyleSheet(APPLICATION_STYLESHEET)
         self.resize(1200, 800)
 
         # Domain State
@@ -103,9 +105,11 @@ class MainWindow(QMainWindow):
 
         btn_layout = QHBoxLayout()
         self._btn_open = QPushButton("Open Video", self)
+        self._btn_open.setObjectName("openVideoButton")
         self._btn_open.clicked.connect(self._open_file_dialog)
 
         self._btn_play = QPushButton("Play", self)
+        self._btn_play.setObjectName("playButton")
         self._btn_play.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
         self._btn_play.clicked.connect(self._player_widget.toggle_play)
         self._btn_play.setEnabled(False)

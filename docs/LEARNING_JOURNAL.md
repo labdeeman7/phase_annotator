@@ -453,3 +453,9 @@ This is a small example of modeling a state machine with validated data. The UI 
 Marking an annotation complete is a human declaration, while reopening it is a state transition with side effects. The application therefore routes every annotation mutation through one editability guard. Reopening verifies the canonical file, archives the completed version, and only then changes the working state to Draft. Centralizing that rule prevents individual hotkeys, menus, drag handlers, undo, or redo from accidentally bypassing it.
 
 The completion summary is a pure function: identical session data always produces identical review facts. Keeping calculation separate from the confirmation dialog makes it easy to test and avoids placing data rules inside widget code.
+
+## C8.7 — A design system fixes hierarchy, not only color
+
+The original interface mixed dark custom annotation widgets with Qt's default light window, menus, controls, and dialogs. Each individual part worked, but the visual system looked accidental and important navigation blended into empty chrome. A small centralized stylesheet now defines shared surfaces, borders, hover/focus states, disabled states, and primary-action emphasis.
+
+Centralizing these tokens is more maintainable than adding unrelated style strings to every widget. Phase-specific color remains local because it represents annotation data; general application chrome belongs to the shared theme.
