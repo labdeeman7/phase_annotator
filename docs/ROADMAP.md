@@ -220,7 +220,11 @@ Learning focus: identity versus attribution, schema evolution, optimistic confli
 
 ### C8 — Completion and trustworthy JSON
 
+Status: **Complete pending manual acceptance.** Schema 1.4, video-level notes, completion summary/declaration, protected completed state, and archive-before-reopen behavior are implemented and tested.
+
 Goal: distinguish valid draft work from explicitly completed annotation while keeping JSON canonical.
+
+The detailed C8.1-C8.6 lifecycle, notes, validation, and reopening contract is in `C8_COMPLETION_AND_TRUST.md`.
 
 Implementation:
 
@@ -296,4 +300,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Manually accept the simplified C7 launch identity and history behavior, then begin C8 completion and trustworthy JSON.
+Manually accept C8 completion/reopening with disposable media, then begin C9 workflow efficiency and usability.

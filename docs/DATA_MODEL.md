@@ -29,8 +29,10 @@ AnnotationSession
 │   └── notes: str
 ├── status: draft | completed = "draft"
 ├── completed_at: float | null
+├── completed_by: str | null
+├── session_notes: str = ""
 ├── resume_position_ms: int = 0
-├── schema_version: str = "1.3"
+├── schema_version: str = "1.4"
 ├── created_at: float (Unix timestamp)
 └── updated_at: float (Unix timestamp)
 ```
@@ -69,9 +71,11 @@ Full interval coverage does not prove completion because the current phase provi
 
 - `status`: `draft` or `completed`;
 - `completed_at`: nullable completion timestamp;
+- `completed_by`: nullable identity of the annotator who explicitly completed it;
+- `session_notes`: optional note about the video/session as a whole, distinct from interval notes;
 - `resume_position_ms`: last checkpointed playhead position for convenience.
 
-Resume position is not proof of review. `reviewed_until_ms` is deferred until a trustworthy definition is needed. Completion remains an explicit validated action in C8. Undefined footage is summarized for confirmation rather than automatically blocking completion. Editing a completed session returns it to draft after confirmation.
+Draft sessions require both completion fields to be null; completed sessions require a valid timestamp and non-empty completer. Resume position is not proof of review. `reviewed_until_ms` is deferred until a trustworthy definition is needed. The explicit completion action summarizes Undefined footage for confirmation rather than automatically blocking completion. Editing a completed session requires confirmation and archives the completed record before returning it to draft.
 
 ## C7 attribution and historical snapshots
 
@@ -80,7 +84,7 @@ Schema 1.3 preserves legacy `annotator_id` and adds these explicit concepts:
 - `created_by`: who created the annotation session;
 - `last_edited_by`: who made the latest annotation-data mutation;
 - active annotator: application state, entered at every startup and retained across opened videos for that launch;
-- `completed_by`: reserved for C8 explicit completion.
+- `completed_by`: added in schema 1.4 for C8 explicit completion.
 
 The rejected pre-commit C7 prototype briefly emitted `work_sessions`. The loader preserves that field opaquely when encountered so a trial sidecar can round trip without data loss, but new sessions do not create or use it.
 
@@ -88,7 +92,7 @@ Seeking and resume checkpoints do not change annotation attribution. Resume rema
 
 ## Persisted JSON
 
-Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added optional media fields, schema 1.2 lifecycle/resume fields, and schema 1.3 creator/last-editor attribution. Older known schemas remain loadable through explicit defaults. Unknown fields are rejected rather than silently erased on the next write; there is not yet a general migration framework. Example:
+Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added optional media fields, schema 1.2 lifecycle/resume fields, schema 1.3 creator/last-editor attribution, and schema 1.4 completion attribution plus video-level notes. Older known schemas remain loadable through explicit defaults. Unknown fields are rejected rather than silently erased on the next write; there is not yet a general migration framework. Example:
 
 ```json
 {
@@ -114,8 +118,10 @@ Persistence is a direct `dataclasses.asdict()` representation. Schema 1.1 added 
   ],
   "status": "draft",
   "completed_at": null,
+  "completed_by": null,
+  "session_notes": "",
   "resume_position_ms": 0,
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "created_at": 0.0,
   "updated_at": 0.0
 }
@@ -127,7 +133,7 @@ Source comparison returns `match`, `mismatch`, or `unknown` with per-field evide
 
 ## Remaining integrity work
 
-Before explicit completion and production use, make these policies explicit and tested:
+Before production use, continue strengthening these policies:
 
 - how an unfinished/final interval is represented;
 - phase-ID and video-bound validation;

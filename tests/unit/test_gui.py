@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtMultimedia import QMediaPlayer
-from PySide6.QtWidgets import QDialog, QLabel, QLineEdit
+from PySide6.QtWidgets import QDialog, QLabel, QLineEdit, QMessageBox
 
 from phase_annotator.config import load_default_ontology
 from phase_annotator.ui.main_window import MainWindow
@@ -51,6 +51,84 @@ def test_main_window_instantiation(qtbot):
     assert not hasattr(window, "_segment_inspector")
     assert not window._btn_undo.isEnabled()
     assert not window._btn_redo.isEnabled()
+    assert not window._action_video_note.isEnabled()
+    assert not window._action_mark_complete.isEnabled()
+    assert not window._action_reopen.isEnabled()
+
+
+def test_video_note_completion_and_reopen_lifecycle(
+    qtbot, monkeypatch, tmp_path
+):
+    window = MainWindow(load_default_ontology(), annotator_id="doctor_A")
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.Yes,
+    )
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+
+    window._load_video(video_path)
+    window._on_duration_changed(10_000)
+    assert window._save_video_note("Overall observation")
+    assert window._mark_complete()
+
+    sidecar = tmp_path / "case.mp4.phase-annotations.json"
+    completed = JsonSessionRepository().load(sidecar)
+    assert completed.status == "completed"
+    assert completed.completed_by == "doctor_A"
+    assert completed.completed_at is not None
+    assert completed.session_notes == "Overall observation"
+    assert "Completed" in window.windowTitle()
+    assert not window._action_mark_complete.isEnabled()
+    assert window._action_reopen.isEnabled()
+
+    assert window._reopen_completed_session()
+    reopened = JsonSessionRepository().load(sidecar)
+    assert reopened.status == "draft"
+    assert reopened.completed_at is None
+    assert reopened.completed_by is None
+    snapshots = list(
+        (tmp_path / "case.mp4.phase-annotations-history").glob("*.json")
+    )
+    assert len(snapshots) == 1
+    archived = JsonSessionRepository().load(snapshots[0])
+    assert archived.status == "completed"
+    assert archived.completed_by == "doctor_A"
+    assert "Draft" in window.windowTitle()
+
+
+def test_completed_annotation_edit_cancel_preserves_completed_state(
+    qtbot, monkeypatch, tmp_path
+):
+    window = make_window()
+    qtbot.addWidget(window)
+    monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+    window._load_video(video_path)
+    window._on_duration_changed(10_000)
+    window._session.status = "completed"
+    window._session.completed_at = 1.0
+    window._session.completed_by = "surgeon_01"
+    window._persist_session()
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        lambda *args, **kwargs: QMessageBox.StandardButton.No,
+    )
+
+    assert not window._save_segment_note(0, "must not be written")
+
+    assert window._session.status == "completed"
+    assert window._session.intervals[0].notes == ""
+    saved = JsonSessionRepository().load(
+        tmp_path / "case.mp4.phase-annotations.json"
+    )
+    assert saved.status == "completed"
+    assert saved.intervals[0].notes == ""
 
 
 def test_player_widget_exposes_public_playback_state(qtbot):

@@ -24,7 +24,7 @@ def test_annotation_session_creation():
     assert session.video_info.video_id == "appendectomy_case_01.mp4"
     assert session.annotator_id == "researcher_1"
     assert len(session.intervals) == 0
-    assert session.schema_version == "1.3"
+    assert session.schema_version == "1.4"
     assert session.created_by == "researcher_1"
     assert session.last_edited_by is None
 
@@ -35,12 +35,26 @@ def test_annotation_session_lifecycle_defaults_and_validation():
 
     assert session.status == "draft"
     assert session.completed_at is None
+    assert session.completed_by is None
+    assert session.session_notes == ""
     assert session.resume_position_ms == 0
 
     with pytest.raises(ValueError, match="completed sessions require"):
         AnnotationSession(video, "annotator", status="completed")
-    with pytest.raises(ValueError, match="draft sessions cannot"):
+    with pytest.raises(ValueError, match="require completed_by"):
+        AnnotationSession(video, "annotator", status="completed", completed_at=1.0)
+    with pytest.raises(ValueError, match="completion metadata"):
         AnnotationSession(video, "annotator", completed_at=1.0)
+
+    completed = AnnotationSession(
+        video,
+        "annotator",
+        status="completed",
+        completed_at=1.0,
+        completed_by="reviewer",
+        session_notes="Overall observation",
+    )
+    assert completed.completed_by == "reviewer"
     with pytest.raises(ValueError, match="resume_position_ms"):
         AnnotationSession(video, "annotator", resume_position_ms=-1)
 

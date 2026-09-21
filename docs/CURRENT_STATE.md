@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-09-09 against the C6 implementation tree based on `main` at `b081d8b`.
+Last verified on 2026-09-21 after implementation of C8, based on C7 commit `106bd53`.
 
 ## What Phase Annotator currently does
 
@@ -14,7 +14,9 @@ The pure-Python layer provides Undefined plus the six provisional appendectomy p
 
 C6 connects persistence to the GUI. Once duration is known, a new valid session is written to `<video filename>.phase-annotations.json`; every annotation mutation, undo, and redo saves immediately. Matching sidecars load automatically, unknown source evidence requires confirmation, and invalid or mismatching sidecars disable annotation. Resume is checkpointed on edits, pause, periodically during playback, and before clean close/replacement. A persistent `[UNSAVED]` title marker and retry/discard/cancel guard appear only when a write failure leaves memory ahead of disk.
 
-C7 asks for an annotator ID on every launch, keeps it fixed across videos for that run, and shows it in the window title. Schema 1.3 preserves legacy `annotator_id` while adding creator and last-editor attribution. Clean close or video replacement creates one atomic timestamped JSON snapshot in a per-video history directory only when annotation data changed; resume-only use creates none. Lightweight sidecar revision evidence blocks silent external overwrite.
+C7 asks for an annotator ID on every launch, keeps it fixed across videos for that run, and shows it in the window title. Schema 1.3 introduced creator and last-editor attribution while preserving legacy `annotator_id`. Clean close or video replacement creates one atomic timestamped JSON snapshot in a per-video history directory only when annotation data changed; resume-only use creates none. Lightweight sidecar revision evidence blocks silent external overwrite.
+
+C8 advances the persisted model to schema 1.4. It adds optional video-level `session_notes` and explicit `completed_by`, and enforces the lifecycle invariant that a completed session has both completion timestamp and completer while a draft has neither. Known older schemas load with compatible defaults. A compact **Annotation** menu edits the video note, validates and summarizes work before explicit completion, and safely reopens completed annotations. Completed work is navigable but every mutation is guarded; reopening verifies the canonical sidecar and archives the completed record before returning to Draft.
 
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
@@ -23,8 +25,6 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 ## What is only partial or unsafe
 
 - Annotation state lives in `MainWindow._session` and is mirrored immediately to the canonical sidecar. History remains process-local and is not restored.
-- Explicit completion remains unimplemented; C6 only persists its schema fields.
-- Completion attribution (`completed_by`) remains unimplemented with the rest of C8.
 - Resume position is shared session convenience, not per-annotator progress or evidence of review.
 - `MainWindow` still combines view construction and presenter/controller coordination; a dedicated presenter has not been extracted.
 - C3 and C4 are complete, with the user-visible correction, dragging, and undo/redo workflows manually accepted. History is not persisted across application or video loads.
@@ -36,7 +36,6 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 
 ## Planned but absent
 
-- Explicit completion and its validation/Undefined summary.
 - Distribution/installer work and Windows/Linux media-backend verification.
 - Continuous integration.
 - A real presenter/controller layer. `MainWindow` currently combines orchestration, session creation, and annotation mutations.
@@ -64,8 +63,8 @@ Codex then stabilized and extended the application through C0-C7. The historical
 
 ## Validation baseline
 
-On 2026-09-21, the repository-local Python 3.11.5 environment passed all 166 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. C7 still requires manual identity/history acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-21, the repository-local Python 3.11.5 environment passed all 172 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. C8 requires manual completion/reopening acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Manually accept the simplified C7 launch identity and history-directory behavior using disposable media, then begin C8 explicit completion and general video notes. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.
+Manually accept C8 completion and archive-before-reopen behavior using disposable media, then plan C9 workflow efficiency. Improving status-bar errors into prominent top-of-window notifications remains deferred to the beautification backlog.

@@ -44,11 +44,13 @@ def test_save_session_atomic(tmp_path: Path):
     assert data["video_info"]["file_modified_ns"] == 987654321
     assert data["video_info"]["fps_source"] == "qt"
     assert data["video_info"]["frame_rate_mode"] == "unknown"
-    assert data["schema_version"] == "1.3"
+    assert data["schema_version"] == "1.4"
     assert data["created_by"] == "dr_smith"
     assert data["last_edited_by"] is None
     assert data["status"] == "draft"
     assert data["completed_at"] is None
+    assert data["completed_by"] is None
+    assert data["session_notes"] == ""
     assert data["resume_position_ms"] == 0
     assert data["ontology_id"] == "laparoscopic_appendectomy.default"
     assert data["ontology_version"] == "1.0"
@@ -80,6 +82,54 @@ def test_load_session(tmp_path: Path):
     assert len(loaded_session.intervals) == 2
     assert loaded_session.intervals[1].phase_id == 2
     assert loaded_session.intervals[1].duration_ms == 8000
+
+
+def test_completed_session_and_video_note_round_trip(tmp_path: Path):
+    repository = JsonSessionRepository()
+    path = tmp_path / "completed.json"
+    original = AnnotationSession(
+        video_info=VideoInfo("case.mp4", 1_000),
+        annotator_id="creator",
+        intervals=[AnnotationInterval(0, 1_000, 1)],
+        status="completed",
+        completed_at=123.0,
+        completed_by="reviewer",
+        session_notes="Unexpected anatomy was reviewed.",
+    )
+
+    repository.save(original, path)
+    loaded = repository.load(path)
+
+    assert loaded.status == "completed"
+    assert loaded.completed_at == 123.0
+    assert loaded.completed_by == "reviewer"
+    assert loaded.session_notes == "Unexpected anatomy was reviewed."
+
+
+def test_legacy_completed_session_defaults_completer_to_legacy_annotator(
+    tmp_path: Path,
+):
+    path = tmp_path / "legacy_completed.json"
+    path.write_text(
+        json.dumps(
+            {
+                "video_info": {"video_id": "case.mp4", "duration_ms": 1_000},
+                "annotator_id": "legacy_reviewer",
+                "intervals": [
+                    {"start_ms": 0, "end_ms": 1_000, "phase_id": 1, "notes": ""}
+                ],
+                "status": "completed",
+                "completed_at": 123.0,
+                "schema_version": "1.2",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    loaded = JsonSessionRepository().load(path)
+
+    assert loaded.completed_by == "legacy_reviewer"
+    assert loaded.session_notes == ""
 
 
 def test_load_legacy_session_defaults_missing_ontology_identity(tmp_path: Path):
@@ -119,6 +169,8 @@ def test_load_legacy_session_defaults_missing_ontology_identity(tmp_path: Path):
     assert session.video_info.frame_numbers_are_estimated
     assert session.status == "draft"
     assert session.completed_at is None
+    assert session.completed_by is None
+    assert session.session_notes == ""
     assert session.resume_position_ms == 0
     assert session.created_by == "legacy_annotator"
     assert session.last_edited_by == "legacy_annotator"

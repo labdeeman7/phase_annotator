@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 
-CURRENT_SESSION_SCHEMA_VERSION = "1.3"
+CURRENT_SESSION_SCHEMA_VERSION = "1.4"
 SESSION_STATUSES = frozenset({"draft", "completed"})
 FPS_SOURCES = frozenset({"unknown", "assumed", "qt", "ffprobe"})
 FRAME_RATE_MODES = frozenset({"unknown", "cfr", "vfr"})
@@ -113,6 +113,8 @@ class AnnotationSession:
     intervals: List[AnnotationInterval] = field(default_factory=list)
     status: str = "draft"
     completed_at: Optional[float] = None
+    completed_by: Optional[str] = None
+    session_notes: str = ""
     resume_position_ms: int = 0
     schema_version: str = CURRENT_SESSION_SCHEMA_VERSION
     created_at: float = field(default_factory=time.time)
@@ -148,8 +150,20 @@ class AnnotationSession:
             raise ValueError("completed_at must be a non-negative timestamp or None.")
         if self.status == "completed" and self.completed_at is None:
             raise ValueError("completed sessions require completed_at.")
-        if self.status == "draft" and self.completed_at is not None:
-            raise ValueError("draft sessions cannot have completed_at.")
+        if self.status == "completed" and (
+            not isinstance(self.completed_by, str) or not self.completed_by.strip()
+        ):
+            raise ValueError("completed sessions require completed_by.")
+        if self.status == "draft" and (
+            self.completed_at is not None or self.completed_by is not None
+        ):
+            raise ValueError("draft sessions cannot have completion metadata.")
+        if self.completed_by is not None and (
+            not isinstance(self.completed_by, str) or not self.completed_by.strip()
+        ):
+            raise ValueError("completed_by must be non-empty text or None.")
+        if not isinstance(self.session_notes, str):
+            raise ValueError("session_notes must be text.")
         if (
             not isinstance(self.resume_position_ms, int)
             or isinstance(self.resume_position_ms, bool)

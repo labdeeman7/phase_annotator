@@ -1,7 +1,7 @@
 So who annotated - Tom argues that the application should have a name for the person that did the annotation somehwere,
-annotation complete flag - He wants a way of knowing whether annotation ongoing or complete 
+annotation complete flag - He wants a way of knowing whether annotation ongoing or complete
 geneal comment - He thinks comments in a phase is good, but a general comment about video is also important
-annotatiion when creatd and completed - He thinks our output json should hold informaton about when created and when completed. 
+annotatiion when creatd and completed - He thinks our output json should hold informaton about when created and when completed.
 when you load a new one, keep old json - So he wants to keep a history of the jsons, we use a single json and assume that we continue, but Tom  wants us to copy the json and perhaps rename it with the current time stamp. For history purposes
 make it sleek - He thinks the design can be sleeker, we planned this
 chck with nick raison - A doctor we know should run some tests before this goes to the final users.

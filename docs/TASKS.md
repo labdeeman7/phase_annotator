@@ -88,7 +88,12 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C7.3: create one history snapshot per changed video run
 - [x] C7.4: detect external canonical-sidecar changes before overwrite
 - [x] C7.5: validate migration, failure, collision, and sequential-user behavior
-- [ ] C8: validation, explicit completion, and trustworthy canonical JSON
+- [x] C8.1: add schema 1.4 general-note and completion-attribution fields
+- [x] C8.2: add optional modal general video-note editing
+- [x] C8.3: implement completion validation and Undefined summary
+- [x] C8.4: persist explicit completion with current annotator and timestamp
+- [x] C8.5: archive completed state before deliberate reopening/editing
+- [x] C8.6: validate lifecycle migration, failures, GUI, and automated workflow (manual acceptance pending)
 - [ ] C9: Usability and annotation-efficiency pass
 - [ ] C10: Packaging, documentation, and release readiness
 

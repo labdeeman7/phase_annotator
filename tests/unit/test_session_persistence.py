@@ -150,6 +150,19 @@ def test_invalid_sidecar_is_blocked(tmp_path: Path, mutation):
     assert result.status is LoadStatus.BLOCKED
 
 
+def test_validation_rejects_inconsistent_lifecycle_metadata(tmp_path: Path):
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"video")
+    session = make_session(video_path)
+    session.completed_by = "reviewer"
+
+    errors = SessionPersistenceCoordinator(
+        load_default_ontology()
+    ).validation_errors(session)
+
+    assert "draft session contains completion metadata" in errors
+
+
 def test_save_failure_leaves_coordinator_dirty(tmp_path: Path):
     class FailingRepository:
         def save(self, session, filepath):

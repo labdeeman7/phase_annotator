@@ -16,7 +16,7 @@ from phase_annotator.storage.json_repo import JsonSessionRepository
 
 
 SUPPORTED_SESSION_SCHEMA_VERSIONS = frozenset(
-    {"1.0", "1.1", "1.2", CURRENT_SESSION_SCHEMA_VERSION}
+    {"1.0", "1.1", "1.2", "1.3", CURRENT_SESSION_SCHEMA_VERSION}
 )
 
 
@@ -205,6 +205,24 @@ class SessionPersistenceCoordinator:
             errors.append("ontology ID does not match the active configuration")
         if session.ontology_version != self._ontology.ontology_version:
             errors.append("ontology version does not match the active configuration")
+        if session.status == "completed":
+            if session.completed_at is None:
+                errors.append("completed session has no completion timestamp")
+            if (
+                not isinstance(session.completed_by, str)
+                or not session.completed_by.strip()
+            ):
+                errors.append("completed session has no completer attribution")
+        elif session.status == "draft":
+            if (
+                session.completed_at is not None
+                or session.completed_by is not None
+            ):
+                errors.append("draft session contains completion metadata")
+        else:
+            errors.append(f"unsupported session status {session.status!r}")
+        if not isinstance(session.session_notes, str):
+            errors.append("video note is not text")
         valid_phase_ids = set(self._ontology.phases)
         unknown_ids = sorted(
             {interval.phase_id for interval in session.intervals} - valid_phase_ids

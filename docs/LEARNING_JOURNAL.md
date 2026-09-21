@@ -441,3 +441,15 @@ The person currently operating the application is not automatically the creator,
 Canonical dirty state and “annotation changed since this video was opened” answer different questions. Dirty means memory is ahead of the last successful disk write; changed-since-open decides whether close/replacement merits a historical snapshot. One Boolean cannot safely represent both facts.
 
 The first C7 design modeled explicit work sessions and in-application identity switching. Manual use showed that the additional controls and records made the annotator feel administrative. Removing a technically coherent abstraction after usability feedback is good engineering: the simplest model that preserves the required attribution and history is preferable.
+
+## C8.1 — Paired fields can encode a state-machine invariant
+
+`status`, `completed_at`, and `completed_by` are not three independent values. Together they describe one lifecycle state: a draft has neither completion field, while a completed annotation has both. Enforcing that relationship in `AnnotationSession.__post_init__()` makes invalid combinations impossible at every construction boundary, including JSON loading and tests, instead of relying on each future UI action to remember the rule.
+
+This is a small example of modeling a state machine with validated data. The UI will later perform the transition, but the domain model remains the final authority on which states are legal.
+
+## C8 — Protect transitions, not just fields
+
+Marking an annotation complete is a human declaration, while reopening it is a state transition with side effects. The application therefore routes every annotation mutation through one editability guard. Reopening verifies the canonical file, archives the completed version, and only then changes the working state to Draft. Centralizing that rule prevents individual hotkeys, menus, drag handlers, undo, or redo from accidentally bypassing it.
+
+The completion summary is a pure function: identical session data always produces identical review facts. Keeping calculation separate from the confirmation dialog makes it easy to test and avoids placing data rules inside widget code.

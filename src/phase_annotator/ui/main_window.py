@@ -3,7 +3,7 @@ from pathlib import Path
 import time
 from typing import Callable, Optional
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QCloseEvent, QKeySequence, QShortcut
+from PySide6.QtGui import QAction, QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
@@ -18,6 +18,7 @@ from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
+from phase_annotator.domain.completion import summarize_completion
 from phase_annotator.domain.models import AnnotationSession, VideoInfo
 from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
@@ -191,7 +192,32 @@ class MainWindow(QMainWindow):
             self._update_phase_shortcut_state
         )
         QApplication.instance().focusChanged.connect(self._update_history_controls)
+        self._create_annotation_menu()
+        self._update_annotation_menu()
         self.statusBar().showMessage("No video loaded")
+
+    def _create_annotation_menu(self) -> None:
+        menu = self.menuBar().addMenu("Annotation")
+        self._action_video_note = QAction("Edit video note...", self)
+        self._action_video_note.triggered.connect(self._edit_video_note)
+        menu.addAction(self._action_video_note)
+        menu.addSeparator()
+        self._action_mark_complete = QAction("Mark complete...", self)
+        self._action_mark_complete.triggered.connect(self._mark_complete)
+        menu.addAction(self._action_mark_complete)
+        self._action_reopen = QAction("Reopen for editing...", self)
+        self._action_reopen.triggered.connect(self._reopen_completed_session)
+        menu.addAction(self._action_reopen)
+
+    def _update_annotation_menu(self) -> None:
+        has_session = self._session is not None and bool(self._session.intervals)
+        completed = has_session and self._session.status == "completed"
+        self._action_video_note.setEnabled(has_session)
+        self._action_video_note.setText(
+            "View/edit video note..." if completed else "Edit video note..."
+        )
+        self._action_mark_complete.setEnabled(has_session and not completed)
+        self._action_reopen.setEnabled(bool(completed))
 
     def keyPressEvent(self, event) -> None:
         """Dispatch configured phase hotkeys and playback/navigation keys."""
@@ -284,6 +310,13 @@ class MainWindow(QMainWindow):
         for shortcut in self._redo_shortcuts:
             shortcut.setEnabled(can_redo and shortcuts_allowed)
 
+    def _ensure_session_editable(self) -> bool:
+        if self._session is None:
+            return False
+        if self._session.status != "completed":
+            return True
+        return self._reopen_completed_session()
+
     def _execute_annotation_command(
         self,
         *,
@@ -292,7 +325,7 @@ class MainWindow(QMainWindow):
         mutation: Callable[[], bool],
     ) -> bool:
         """Run one mutation through the shared history boundary."""
-        if not self._session:
+        if not self._session or not self._ensure_session_editable():
             return False
         changed = self._history.execute(
             self._session,
@@ -410,6 +443,7 @@ class MainWindow(QMainWindow):
             self._block_sidecar(load_result.message)
         self._history.clear()
         self._update_history_controls()
+        self._update_annotation_menu()
         self._select_segment(None)
         self._phase_palette.set_annotation_enabled(False)
         self._phase_palette.set_active_phase(None)
@@ -458,7 +492,14 @@ class MainWindow(QMainWindow):
 
     def _update_dirty_indicator(self) -> None:
         suffix = " [UNSAVED]" if self._persistence.is_dirty else ""
-        self.setWindowTitle(f"{self._base_window_title}{suffix}")
+        lifecycle = ""
+        if self._session is not None:
+            lifecycle = (
+                " — Completed"
+                if self._session.status == "completed"
+                else " — Draft"
+            )
+        self.setWindowTitle(f"{self._base_window_title}{lifecycle}{suffix}")
 
     def _persist_session(self) -> bool:
         """Write the current valid session to its canonical sidecar immediately."""
@@ -484,6 +525,124 @@ class MainWindow(QMainWindow):
             return False
         self._update_dirty_indicator()
         return True
+
+    def _edit_video_note(self) -> None:
+        if self._session is None:
+            return
+        dialog = SegmentNoteDialog(
+            self._session.session_notes,
+            self,
+            title="Edit video note",
+            label="Video note",
+            placeholder="Optional: record an overall observation about this video",
+        )
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            self._save_video_note(dialog.notes)
+
+    def _save_video_note(self, notes: str) -> bool:
+        """Persist a video-level note without confusing it with interval history."""
+        if self._session is None or notes == self._session.session_notes:
+            return False
+        if not self._ensure_session_editable():
+            return False
+        self._session.session_notes = notes
+        self._mark_annotation_changed()
+        saved = self._persist_session()
+        self._update_annotation_menu()
+        if saved:
+            self.statusBar().showMessage("Video note saved", 3000)
+        return saved
+
+    def _mark_complete(self) -> bool:
+        """Validate, summarize, and persist the annotator's declaration."""
+        if self._session is None or self._session.status == "completed":
+            return False
+        errors = self._persistence.validation_errors(self._session)
+        if self._persistence.is_dirty:
+            errors.append("the latest annotation changes are not saved")
+        if errors:
+            QMessageBox.warning(
+                self,
+                "Cannot mark complete",
+                "Resolve these problems first:\n\n- " + "\n- ".join(errors),
+            )
+            return False
+
+        summary = summarize_completion(
+            self._session,
+            undefined_phase_id=self._ontology.undefined_phase_id,
+        )
+        answer = QMessageBox.question(
+            self,
+            "Mark annotation complete?",
+            f"Duration: {format_timecode(summary.duration_ms)}\n"
+            f"Segments: {summary.segment_count}\n"
+            f"Undefined: {summary.undefined_segment_count} segment(s), "
+            f"{format_timecode(summary.undefined_duration_ms)}\n"
+            f"Video note: {'present' if summary.has_session_note else 'none'}\n\n"
+            "This declares that you have reviewed the annotation. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return False
+
+        self._session.status = "completed"
+        self._session.completed_at = time.time()
+        self._session.completed_by = self._active_annotator_id
+        self._mark_annotation_changed()
+        saved = self._persist_session()
+        if saved:
+            self._history.clear()
+            self._update_history_controls()
+            self._update_annotation_menu()
+            self._update_dirty_indicator()
+            self.statusBar().showMessage("Annotation marked complete", 4000)
+        return saved
+
+    def _reopen_completed_session(self, *_) -> bool:
+        """Archive the completed record before permitting any correction."""
+        if self._session is None:
+            return False
+        if self._session.status != "completed":
+            return True
+        answer = QMessageBox.question(
+            self,
+            "Reopen completed annotation?",
+            "A recovery copy of the completed annotation will be archived before "
+            "it returns to Draft. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+        if answer != QMessageBox.StandardButton.Yes:
+            return False
+        # Verify the canonical completed record is still writable/current before
+        # using it as the recovery point for a new draft revision.
+        if not self._persist_session():
+            return False
+        try:
+            self._persistence.archive_snapshot(self._session)
+        except HistorySnapshotError as error:
+            QMessageBox.warning(
+                self,
+                "Could not reopen annotation",
+                "The completed annotation was not changed because its recovery "
+                f"copy could not be written: {error}",
+            )
+            return False
+
+        self._session.status = "draft"
+        self._session.completed_at = None
+        self._session.completed_by = None
+        self._history.clear()
+        self._mark_annotation_changed()
+        saved = self._persist_session()
+        self._update_history_controls()
+        self._update_annotation_menu()
+        self._update_dirty_indicator()
+        if saved:
+            self.statusBar().showMessage("Annotation reopened as Draft", 4000)
+        return saved
 
     def _checkpoint_resume(self) -> None:
         """Persist a meaningful playback checkpoint without saving every tick."""
@@ -703,6 +862,7 @@ class MainWindow(QMainWindow):
             self._selected_segment_index = None
         self._timeline_widget.set_selected_index(self._selected_segment_index)
         self._segment_list_widget.set_selected_index(self._selected_segment_index)
+        self._update_annotation_menu()
 
     def _request_segment_selection(self, index: int, seek_ms: int) -> None:
         """Select one segment and perform its associated navigation request."""
@@ -988,7 +1148,7 @@ class MainWindow(QMainWindow):
 
     def _undo_annotation(self) -> None:
         """Restore the previous validated annotation snapshot."""
-        if not self._session:
+        if not self._session or not self._ensure_session_editable():
             return
         try:
             entry = self._history.undo(self._session, self._editor)
@@ -1007,7 +1167,7 @@ class MainWindow(QMainWindow):
 
     def _redo_annotation(self) -> None:
         """Restore the next validated annotation snapshot."""
-        if not self._session:
+        if not self._session or not self._ensure_session_editable():
             return
         try:
             entry = self._history.redo(self._session, self._editor)

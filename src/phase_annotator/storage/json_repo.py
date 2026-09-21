@@ -50,7 +50,8 @@ class JsonSessionRepository:
             {
                 "video_info", "annotator_id", "created_by", "last_edited_by",
                 "work_sessions", "ontology_id", "ontology_version",
-                "intervals", "status", "completed_at", "resume_position_ms",
+                "intervals", "status", "completed_at", "completed_by",
+                "session_notes", "resume_position_ms",
                 "schema_version", "created_at", "updated_at",
             },
             "session",
@@ -78,6 +79,12 @@ class JsonSessionRepository:
             intervals=intervals,
             status=data.get("status", "draft"),
             completed_at=data.get("completed_at"),
+            completed_by=data.get("completed_by", (
+                data["annotator_id"]
+                if data.get("status") == "completed" and data.get("completed_at") is not None
+                else None
+            )),
+            session_notes=data.get("session_notes", ""),
             resume_position_ms=data.get("resume_position_ms", 0),
             schema_version=data.get("schema_version", "1.0"),
             created_at=data.get("created_at", 0.0),
