@@ -499,3 +499,7 @@ PyInstaller's `build/` and `dist/` directories have different roles. `build/` co
 `pyproject.toml` declares the Python project: metadata, runtime/development/release dependencies, the setuptools backend, package data for Python distributions, and settings for pytest/Ruff/Mypy. Pip reads it when creating or installing the development/release environment. PyInstaller does not normally use it as the executable recipe.
 
 `PhaseAnnotator.spec` is the executable-freezing recipe. PyInstaller executes this Python file to analyze imports, create the Python module archive and bootloader executable, include explicit data/native dependencies, and collect the one-folder artifact. `scripts/build_windows.ps1` is the outer orchestration and safety layer: it selects and validates the interpreter, invokes PyInstaller with the `.spec`, checks exit status, and verifies release-critical output files.
+
+### Test the artifact through its public boundary
+
+Source tests can prove that resource loaders and windows work in a virtual environment, while a filesystem check can prove that JSON files exist under `dist/`; neither proves the frozen executable can actually load those resources. A narrow noninteractive executable argument lets release automation exercise the application from outside the bundle, using the same packaged resource APIs and real window construction, and judge success by process exit code. This complements rather than replaces manual codec and workflow acceptance.

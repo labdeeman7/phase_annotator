@@ -87,7 +87,7 @@ Learning focus: freezing Python, import analysis, native libraries, Qt plugins, 
 
 ### C10.4 — Packaged-artifact testing
 
-Status: **Not started.**
+Status: **Complete.** The frozen executable's noninteractive smoke mode loads every registered ontology through packaged resources, validates its identity, constructs the real `MainWindow`, and exits successfully. Source coverage is now 187 passing tests. Manual acceptance on 2026-09-23 used the clean CPython 3.13 artifact and an ignored disposable representative video. Both procedure startups, packaged decoding/playback, keyboard and mouse annotation, correction, Undo/Redo, automatic persistence/resume, notes, completion/reopening, history, and wrong-procedure blocking worked as specified. Inspection confirmed one canonical adjacent sidecar and one adjacent history directory; no procedure-specific parallel sidecar appeared.
 
 - Add an automated smoke check that launches or probes the packaged artifact without relying on the source checkout being importable.
 - Ensure every command, guide, and acceptance check points to `dist/PhaseAnnotator/PhaseAnnotator.exe`, never the intermediate executable under `build/`.
@@ -99,6 +99,20 @@ Status: **Not started.**
 Exit gate: the artifact—not only the source environment—passes the critical workflow checklist without annotation loss or procedure confusion.
 
 Learning focus: why source tests cannot prove that a packaged resource or native runtime was shipped.
+
+#### C10.4 manual packaged acceptance
+
+Use only `dist/PhaseAnnotator/PhaseAnnotator.exe` and the ignored disposable copy at `test_dataset/packaged_acceptance/packaged-acceptance.mp4`. Do not open the original representative video's existing sidecar during this test.
+
+1. Launch, enter a synthetic first name, select laparoscopic cholecystectomy, confirm its seven phases appear, then close without opening media.
+2. Relaunch with laparoscopic appendectomy and open the disposable video. Confirm Loaded state, positive duration, visible decoded frames, usable audio if expected, timeline coverage, and responsive play/pause plus speed/jump controls.
+3. Create transitions once by hotkey and once by clicking the palette. Confirm timeline and segment cards describe the same normalized intervals.
+4. Select a segment; add/cancel/save a note, relabel it, move one boundary, drag another boundary, convert one segment to Undefined with Delete, then exercise Undo/Redo. Confirm selection and both views remain synchronized.
+5. Pause at a recognizable location, close cleanly, and confirm the canonical adjacent JSON and history directory appear beside the disposable video.
+6. Relaunch appendectomy, reopen the video, and confirm intervals, note, status, attribution, and resume position restore. Add a video note and complete the annotation after reviewing the summary.
+7. Confirm completed work is protected, deliberately reopen it for editing, and verify the completed version was archived before the session returned to Draft.
+8. Close and relaunch with cholecystectomy, then open the same disposable video. Confirm the procedure-mismatch banner names both procedures, says nothing changed, and blocks annotation. Do not create a second sidecar.
+9. Report any visual, playback, persistence, or error-message discrepancy. After the run, inspect the sidecar/history filenames and JSON structure without committing them.
 
 ### C10.5 — Continuous integration
 
