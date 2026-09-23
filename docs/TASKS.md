@@ -104,12 +104,12 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C9.6.2: add a clinician-approved cholecystectomy JSON ontology
 - [x] C9.6.3: select appendectomy or cholecystectomy during startup
 - [x] C9.6.4: display procedure context and test ontology mismatch safety
-- [ ] C9.6.5: verify both ontology resources in the packaged application
+- [x] C9.6.5: verify both ontology resources in the packaged application
 - [x] C9.7: keep one canonical sidecar and provide a safe, actionable procedure-mismatch error
 - [ ] C10: Engineering quality, CI, and release readiness (see `C10_RELEASE_ENGINEERING.md`)
 - [x] C10.1: agree and document the first Windows release contract and staged plan
 - [x] C10.2: configure and satisfy a minimal Ruff and scoped-Mypy quality policy
-- [ ] C10.3: add and validate a maintained PyInstaller one-folder Windows build recipe
+- [x] C10.3: add and validate a maintained PyInstaller one-folder Windows build recipe
 - [ ] C10.4: validate the packaged artifact, bundled procedures, and representative media
 - [ ] C10.5: add clean-checkout CI and a deliberate Windows packaging workflow
 - [ ] C10.6: write clinician, developer, release, and limitation documentation

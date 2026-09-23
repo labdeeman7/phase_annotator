@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$PythonPath = ".\.venv\Scripts\python.exe",
+    [string]$PythonPath = ".\.release-venv\Scripts\python.exe",
     [switch]$AllowCondaForExploration
 )
 

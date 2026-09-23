@@ -61,7 +61,7 @@ Learning focus: the distinct roles of formatting, linting, static typing, compil
 
 ### C10.3 — PyInstaller one-folder build and maintained recipe
 
-Status: **In progress.** An exploratory PyInstaller 6.22.3 one-folder build succeeded, passed a controlled startup probe, and contained both ontologies plus Qt Multimedia/FFmpeg/Windows Media Foundation plugins. The maintained `.spec` and PowerShell build recipe are present. The current development environment inherits from Miniconda and produced unresolved `libcrypto-3-x64.dll`/`liblzma.dll` warnings, so it is not approved as the release build environment; rebuild and acceptance with clean standard CPython remain required.
+Status: **Complete.** An exploratory Miniconda-derived build exposed unresolved DLL warnings and was rejected as a release candidate. A separate `.release-venv` based on official 64-bit CPython 3.13.15 passed Ruff, scoped Mypy, compilation, and all 184 tests. PyInstaller 6.22.3 then produced a 242-file, 131.6 MiB one-folder artifact with no unresolved Windows DLL warnings. The build script verified the executable and both ontologies, and the packaged GUI passed a controlled startup probe. C10.4 owns deeper packaged workflow/media acceptance.
 
 - Use PyInstaller as the primary packaging path. It is a widely used freezing tool, supports one-folder applications, and exposes dependency/resource decisions through an inspectable Python `.spec` file.
 - Begin with a minimal exploratory build, inspect what PyInstaller detects, and then convert the successful configuration into a maintained `.spec` recipe. Do not start by hiding the process behind additional deployment automation.

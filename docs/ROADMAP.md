@@ -276,7 +276,7 @@ Status: **Complete pending manual acceptance.** Keep one procedure-neutral canon
 
 Goal: make the project reproducible for contributors and distributable to users.
 
-Status: **C10.1 and C10.2 complete.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `C10_RELEASE_ENGINEERING.md`. Ruff now enforces the agreed formatting/lint baseline, and Mypy gates the non-UI application layers.
+Status: **C10.1–C10.3 complete.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `C10_RELEASE_ENGINEERING.md`. Ruff enforces the agreed formatting/lint baseline, Mypy gates the non-UI application layers, and a standard-CPython PyInstaller one-folder recipe produces and verifies the Windows artifact. Packaged workflow/media testing is next.
 
 The first target is a versioned ZIP containing a portable one-folder 64-bit Windows application. It must run without a user-installed Python environment or administrator rights, retain the existing adjacent-sidecar data contract, include both packaged procedures, and pass clean-machine acceptance. Installer, one-file executable, automatic updates, code signing, and non-Windows releases are explicitly deferred pending evidence.
 
@@ -284,7 +284,7 @@ Slices:
 
 - C10.1: release contract and plan — complete.
 - C10.2: minimal formatter/linter/type-check policy — complete.
-- C10.3: PyInstaller one-folder build and maintained Windows recipe; use `pyside6-deploy` only as a justified fallback.
+- C10.3: PyInstaller one-folder build and maintained Windows recipe — complete; use `pyside6-deploy` only as a justified fallback.
 - C10.4: packaged-artifact and representative-media testing.
 - C10.5: clean-checkout continuous integration and build artifacts.
 - C10.6: clinician, developer, and release documentation.
@@ -320,4 +320,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Begin C10.3 with a minimal PyInstaller one-folder build, inspect its dependency/resource discovery, and only then turn the successful configuration into the maintained build recipe.
+Begin C10.4 packaged-artifact acceptance: exercise both procedure startups and the critical annotation/persistence lifecycle using disposable representative media, then record the evidence and remaining clean-machine gap.

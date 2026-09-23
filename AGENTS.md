@@ -4,7 +4,7 @@
 
 This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with provisional laparoscopic appendectomy and laparoscopic cholecystectomy ontologies. It is an early prototype implemented through Codex milestone C9.7, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, continuous canonical JSON persistence, attribution/history, protected completion/reopening, prominent failure feedback, playback efficiency controls, shortcut help, packaged procedure selection, and safe procedure-mismatch handling exist, while distribution and cross-platform validation do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C10_RELEASE_ENGINEERING.md` defines the active release contract and C10.1–C10.7 plan; earlier milestone documents record their respective contracts. C10.1 and C10.2 are complete; C10.3 is next. Packaging must verify both ontology resources in the executable. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C10_RELEASE_ENGINEERING.md` defines the active release contract and C10.1–C10.7 plan; earlier milestone documents record their respective contracts. C10.1–C10.3 are complete; C10.4 packaged-artifact testing is next. Packaging must verify both ontology resources in the executable. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
@@ -47,7 +47,9 @@ python -m compileall -q src tests
 python -m phase_annotator
 ```
 
-Ruff formatting/linting and scoped Mypy checks are configured. Mypy currently gates `config/`, `domain/`, `media/`, and `storage/`, not `ui/`; do not imply whole-application type coverage. No coverage threshold, CI workflow, or packaging script is configured yet.
+Ruff formatting/linting and scoped Mypy checks are configured. Mypy currently gates `config/`, `domain/`, `media/`, and `storage/`, not `ui/`; do not imply whole-application type coverage.
+
+The Windows packaging recipe is `PhaseAnnotator.spec`; `scripts/build_windows.ps1` uses `.release-venv` by default and verifies the executable plus both ontology resources. The approved local release environment is standard 64-bit CPython 3.13, not the Miniconda-derived development `.venv`. No coverage threshold or CI workflow is configured yet.
 
 Before changing behavior:
 
