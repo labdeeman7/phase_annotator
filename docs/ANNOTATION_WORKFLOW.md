@@ -2,8 +2,9 @@
 
 ## Current UI flow
 
-1. `python -m phase_annotator` creates `QApplication`, asks the operator for a non-empty annotator ID, and creates `MainWindow`. Cancelling exits. The identity is fixed for that application launch and shown unobtrusively in the window title.
+1. `python -m phase_annotator` creates `QApplication`, asks for a first name, then asks for packaged laparoscopic appendectomy or laparoscopic cholecystectomy. Cancelling either prompt exits. The lowercase identity and selected procedure are fixed for that launch and shown unobtrusively in the window title.
 2. **Open Video** selects a local MP4/AVI/MKV/MOV file. `QMediaPlayer.setSource()` receives its local URL.
+   If its canonical sidecar belongs to the other procedure, annotation is blocked, both procedures are named, and the operator is told to restart with the saved procedure. The JSON is not changed and no second sidecar is created.
 3. `MainWindow` creates a fresh in-memory `AnnotationSession` using the file basename, resolved absolute last-known path, confirmed active annotator, duration 0, and the player's 30 FPS value explicitly marked as assumed with unknown CFR/VFR status. Existing valid sidecars retain creator/last-editor attribution. The status bar shows **Loading**.
 4. A positive Qt duration signal updates the slider/timeline/session, initializes one interval using the ontology's configured `initial_phase_id` (Phase 1 for appendectomy) over `[0, duration_ms)`, refreshes both annotation views, and changes status to **Loaded**.
 5. Play/pause is available through the state-aware Play/Pause button or Space. Left/Right seek by `int(1000 / fps)` milliseconds. The slider and painted timeline seek in milliseconds.
@@ -13,13 +14,14 @@
 9. **Change phase** in the same menu relabels the complete selected interval, unlike palette/hotkey transitions at the playhead. Equal neighbouring phases coalesce, their notes are combined in order, and the resulting interval remains selected.
 10. **Set start to playhead** moves the boundary shared with the previous segment; **Set end to playhead** moves the boundary shared with the next segment. The unavailable external-video boundary action is disabled, and an invalid playhead position leaves both intervals unchanged.
 11. **Remove / merge** never creates an uncovered hole. Convert to Undefined relabels the selected interval; Merge left/right adopts the chosen neighbour's phase and coalesces. Edge directions are disabled, and closing the menu is Cancel.
+    Pressing Delete while a segment is selected is a shortcut for Convert to Undefined; it uses the same validated, undoable command and never removes timeline coverage.
 12. Every successful annotation mutation enters a 100-command in-memory history. Undo/Redo buttons and `Ctrl+Z`, `Ctrl+Shift+Z`, or `Ctrl+Y` restore exact validated snapshots. Failed operations, no-ops, playback, seeking, and selection are not recorded; loading another video clears history.
 13. Internal timeline boundaries display subtle handles. Hovering within eight pixels emphasizes the nearest handle and changes the cursor; ordinary clicks outside that area retain select/seek behavior. Pressing a handle begins a drag preview rather than immediately mutating data.
 14. Pressing and dragging a boundary displays a cyan valid or red invalid preview and seeks the video without changing intervals. One valid release invokes the shared boundary command once; invalid release or Escape restores the original playhead and records no history entry.
 
 Draggable boundaries, correction, and in-memory undo/redo are available. The canonical adjacent JSON sidecar loads and saves automatically with resume checkpoints and visible dirty-state failure handling. Clean close or video replacement creates one history snapshot only when annotation data changed since opening that video. External sidecar changes block overwrite. The **Annotation** menu provides an optional video-level note and an explicit completion declaration with an Undefined-footage summary. Completed annotations remain navigable; editing requires confirmation and archives the completed JSON before returning to Draft. Persisted command history is not implemented.
 
-The playback toolbar provides approximate frame steps, ±5-second jumps, and 0.5×–2× playback rates. The timeline can be enlarged to 2×, 4×, or 8× and horizontally scrolled; zoom is presentation-only. **Help → Shortcuts and controls...** lists the active phase, playback, correction, and history interactions. Actionable media/persistence failures appear in the dismissible top banner, while routine feedback stays in the status bar.
+The playback toolbar provides approximate frame steps, ±5-second jumps, and 1×/2×/4×/8×/12× playback rates. The timeline remains a single full-width overview. **Help → Shortcuts and controls...** opens a structured visual reference for phase, playback, correction, and history interactions. Actionable media/persistence failures appear in the dismissible top banner, while routine feedback stays in the status bar.
 
 ## Qt ownership and signal flow
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from phase_annotator.config import load_default_ontology
+from phase_annotator.config import load_default_ontology, load_procedure_ontology
 from phase_annotator.domain.models import (
     AnnotationInterval,
     AnnotationSession,
@@ -122,6 +122,24 @@ def test_conflicting_sidecar_is_blocked(tmp_path: Path):
 
     assert result.status is LoadStatus.BLOCKED
     assert "file_size_bytes" in result.message
+
+
+def test_sidecar_from_different_procedure_is_explicitly_blocked(tmp_path: Path):
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"video")
+    appendectomy = SessionPersistenceCoordinator(load_default_ontology())
+    sidecar = appendectomy.sidecar_path_for(video_path)
+    appendectomy.bind(sidecar)
+    appendectomy.save(make_session(video_path))
+
+    result = SessionPersistenceCoordinator(
+        load_procedure_ontology("cholecystectomy")
+    ).inspect(video_path, actual_metadata(video_path))
+
+    assert result.status is LoadStatus.BLOCKED
+    assert result.session is not None
+    assert result.session.ontology_id == "laparoscopic_appendectomy.default"
+    assert "different procedure" in result.message
 
 
 @pytest.mark.parametrize(

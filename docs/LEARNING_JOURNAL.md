@@ -460,8 +460,16 @@ The original interface mixed dark custom annotation widgets with Qt's default li
 
 Centralizing these tokens is more maintainable than adding unrelated style strings to every widget. Phase-specific color remains local because it represents annotation data; general application chrome belongs to the shared theme.
 
-## C9 — Separate workflow state from view state
+## C9 — Usability features still need evidence
 
-Timeline zoom changes the number of pixels used to display the same millisecond intervals; it must never rewrite interval boundaries. Playback rate and horizontal scroll position are similarly transient view/player state. Keeping these values out of `AnnotationSession` prevents convenience settings from contaminating research data or creating unnecessary saves.
+The first C9 pass added timeline zoom beside playback speed. Although zoom was presentation-only and technically correct, two nearby multiplier controls made the interface harder to understand. Manual use supplied stronger evidence than the original feature hypothesis, so timeline zoom was removed and playback speed was made more capable. Deleting a confusing feature is often a better usability improvement than refining it.
+
+Playback rate remains transient player state rather than annotation data. Keeping convenience settings out of `AnnotationSession` prevents them from contaminating research data or creating unnecessary saves.
 
 Feedback also has hierarchy. A status bar is suitable for routine, short-lived state, but write failures and blocked source associations can be missed there. A reusable banner gives actionable problems a stable visual location while lifecycle decisions continue to use explicit modal confirmation.
+
+Keyboard shortcuts should be alternate entrances to existing commands, not separate implementations. Delete calls the same Convert to Undefined resolution used by the segment menu, so validation, undo history, persistence, completed-state protection, note preservation, and view refresh remain consistent.
+
+## C9.7 — A visible filename is not the data authority
+
+Adding the procedure to sidecar filenames initially sounds clearer, but it would let an accidental procedure choice miss the existing file and create a second incorrect annotation. The safer rule is one canonical sidecar whose persisted ontology identity controls interpretation. The filename locates the annotation; validated content determines what its phase IDs mean.

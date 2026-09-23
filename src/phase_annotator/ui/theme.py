@@ -7,6 +7,7 @@ QMainWindow, QWidget {
     font-family: "Segoe UI", Arial, sans-serif;
     font-size: 12px;
 }
+QLabel { background-color: transparent; }
 
 QMenuBar {
     background-color: #18222D;
@@ -102,6 +103,36 @@ QToolTip {
     color: #FFFFFF;
     border: 1px solid #52687C;
     padding: 5px;
+}
+
+QLabel#helpTitle { font-size: 22px; font-weight: 700; color: #F8FAFC; }
+QLabel#helpSubtitle { color: #93A8BA; font-size: 12px; }
+QFrame#helpCard {
+    background-color: #1B2733;
+    border: 1px solid #34495C;
+    border-radius: 8px;
+}
+QLabel#helpSectionTitle {
+    color: #E6EDF3;
+    font-size: 14px;
+    font-weight: 700;
+    padding-bottom: 4px;
+}
+QLabel#shortcutKey {
+    background-color: #2B3D4D;
+    color: #E6EDF3;
+    border: 1px solid #52687C;
+    border-radius: 5px;
+    padding: 3px 7px;
+    font-family: "Consolas", monospace;
+    font-weight: 600;
+}
+QLabel#helpTip {
+    background-color: #102D3A;
+    color: #BFE8F7;
+    border-left: 4px solid #38BDF8;
+    border-radius: 5px;
+    padding: 9px 12px;
 }
 
 QScrollBar:vertical { background: #141D26; width: 11px; margin: 0; }

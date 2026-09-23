@@ -1,6 +1,6 @@
 # Ontology Configuration
 
-Phase definitions are loaded from versioned JSON rather than hard-coded UI logic. The packaged default is `src/phase_annotator/config/default_appendectomy.json`.
+Phase definitions are loaded from versioned JSON rather than hard-coded UI logic. Reviewed package resources currently cover laparoscopic appendectomy (`default_appendectomy.json`) and laparoscopic cholecystectomy (`cholec80_cholecystectomy.json`).
 
 ## Top-level contract
 
@@ -48,12 +48,13 @@ IDs, hotkeys, and order values must each be unique. Both role IDs must reference
 
 ## Layering
 
-`PhaseOntology.from_config()` performs pure validation/construction from an already decoded mapping. `phase_annotator.config` owns packaged-resource/path and JSON I/O through generic loaders. `__main__.py` is the composition root: it selects `load_default_ontology()` for the current application launch and injects the resulting ontology into `MainWindow`. The window and its child widgets do not know whether that object came from appendectomy, cholecystectomy, or a user-selected file.
+`PhaseOntology.from_config()` performs pure validation/construction from an already decoded mapping. `phase_annotator.config` owns packaged-resource/path and JSON I/O through generic loaders. `__main__.py` is the composition root: it asks for a packaged procedure, calls `load_procedure_ontology()`, and injects the resulting ontology into `MainWindow`. The window and its child widgets do not know whether that object came from appendectomy, cholecystectomy, or a future user-selected file.
 
 Generic entry points:
 
 - `load_ontology_from_path(path)`: future user-selected/custom JSON.
 - `load_packaged_ontology(filename)`: any ontology shipped with the application.
-- `load_default_ontology()`: current startup policy; today this selects appendectomy.
+- `load_default_ontology()`: compatibility and test convenience; it selects appendectomy, while the application startup loads the procedure chosen by the annotator.
+- `load_procedure_ontology(key)`: resolves a reviewed entry from `PACKAGED_PROCEDURES`.
 
-The default configuration displays surgical phases 1-6 in expected order and Undefined (`U`) last. The phase palette renders this metadata and routes both configured hotkeys and mouse clicks through the same transition command.
+Appendectomy displays phases 1-6 in expected order and Undefined (`U`) last. Cholecystectomy displays the supplied P1-P7 order and Undefined last. The phase palette renders this metadata and routes both configured hotkeys and mouse clicks through the same transition command.

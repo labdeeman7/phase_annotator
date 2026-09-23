@@ -5,13 +5,14 @@ from PySide6.QtCore import QPoint, Qt
 from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit, QMessageBox
 
-from phase_annotator.config import load_default_ontology
+from phase_annotator.config import load_default_ontology, load_procedure_ontology
 from phase_annotator.ui.main_window import MainWindow
 from phase_annotator.ui.player_widget import VideoPlayerWidget
 from phase_annotator.ui.timeline_widget import TimelineWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.ui.notification_banner import NotificationBanner
+from phase_annotator.ui.shortcuts_help_dialog import ShortcutsHelpDialog
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
 from phase_annotator.domain.validation import validate_contiguous_coverage
 from phase_annotator.media import MediaMetadata
@@ -33,6 +34,7 @@ def test_main_window_instantiation(qtbot):
     window = make_window()
     qtbot.addWidget(window)
     assert "Phase Annotator" in window.windowTitle()
+    assert "Laparoscopic Appendectomy" in window.windowTitle()
     assert window._btn_play.text() == "Play"
     assert not window._btn_play.isEnabled()
     assert window._timeline_widget._ontology is window._ontology
@@ -59,7 +61,14 @@ def test_main_window_instantiation(qtbot):
     assert "QMenuBar" in window.styleSheet()
     assert "#111820" in window.styleSheet()
     assert window._speed_combo.currentData() == 1.0
-    assert window._timeline_zoom_factor == 1.0
+    assert [window._speed_combo.itemData(index) for index in range(5)] == [
+        1.0,
+        2.0,
+        4.0,
+        8.0,
+        12.0,
+    ]
+    assert not hasattr(window, "_timeline_zoom_factor")
 
 
 def test_notification_banner_shows_and_dismisses(qtbot):
@@ -74,30 +83,60 @@ def test_notification_banner_shows_and_dismisses(qtbot):
     assert not banner.isVisible()
 
 
-def test_playback_speed_help_and_timeline_zoom(qtbot, monkeypatch):
+def test_playback_speed_and_help(qtbot, monkeypatch):
     window = make_window()
     qtbot.addWidget(window)
-    messages = []
+    opened = []
     monkeypatch.setattr(
-        QMessageBox,
-        "information",
-        lambda parent, title, message: messages.append((title, message)),
+        ShortcutsHelpDialog,
+        "exec",
+        lambda dialog: opened.append(dialog),
     )
 
-    window._speed_combo.setCurrentIndex(3)
-    assert window._player_widget.playback_rate == 2.0
-
-    window._change_timeline_zoom(1)
-    assert window._timeline_zoom_factor == 2.0
-    assert window._timeline_widget.width() >= 600
-    assert window._btn_zoom_reset.text() == "2×"
-    window._reset_timeline_zoom()
-    assert window._timeline_zoom_factor == 1.0
+    window._speed_combo.setCurrentIndex(4)
+    assert window._player_widget.playback_rate == 12.0
 
     window._show_shortcuts_help()
-    assert messages[0][0] == "Shortcuts and controls"
-    assert "Ctrl+Z" in messages[0][1]
-    assert "Identification of the appendix" in messages[0][1]
+    assert opened[0].windowTitle() == "Shortcuts and controls"
+    help_text = " ".join(
+        label.text() for label in opened[0].findChildren(QLabel)
+    )
+    assert "Ctrl+Z" in help_text
+    assert "Delete" in help_text
+    assert "Identification of the appendix" in help_text
+    phase_keys = [
+        label
+        for label in opened[0].findChildren(QLabel, "shortcutKey")
+        if label.text() in {"1", "2", "3", "4", "5", "6", "U"}
+    ]
+    assert len(phase_keys) == 7
+    assert all(label.width() == 34 for label in phase_keys)
+
+
+def test_delete_converts_selected_segment_to_undefined(qtbot):
+    window = make_window()
+    qtbot.addWidget(window)
+    window._session = AnnotationSession(
+        VideoInfo("case.mp4", 10_000),
+        "annotator",
+        intervals=[
+            AnnotationInterval(0, 4_000, 1),
+            AnnotationInterval(4_000, 7_000, 2),
+            AnnotationInterval(7_000, 10_000, 3),
+        ],
+    )
+    window._refresh_annotation_views()
+    window._select_segment(1)
+
+    assert window._delete_segment_shortcut.isEnabled()
+    window._convert_selected_segment_to_undefined()
+
+    assert [interval.phase_id for interval in window._session.intervals] == [
+        1,
+        0,
+        3,
+    ]
+    assert window._history.undo_description == "convert segment to Undefined"
 
 
 def test_video_note_completion_and_reopen_lifecycle(
@@ -301,6 +340,39 @@ def test_existing_matching_sidecar_is_loaded_automatically(
     # turning pytest cleanup into a simulated concurrent-editing prompt.
     first._persistence.reset_annotation_changed()
     second._persistence.reset_annotation_changed()
+
+
+def test_wrong_procedure_sidecar_names_both_procedures_and_is_not_changed(
+    qtbot, monkeypatch, tmp_path
+):
+    video_path = tmp_path / "case.mp4"
+    video_path.write_bytes(b"synthetic")
+    appendectomy_window = make_window()
+    qtbot.addWidget(appendectomy_window)
+    monkeypatch.setattr(
+        appendectomy_window._player_widget, "load_video", lambda path: None
+    )
+    appendectomy_window._load_video(video_path)
+    appendectomy_window._on_duration_changed(10_000)
+    sidecar = tmp_path / "case.mp4.phase-annotations.json"
+    original_json = sidecar.read_text(encoding="utf-8")
+
+    cholecystectomy_window = MainWindow(
+        load_procedure_ontology("cholecystectomy"), annotator_id="tosin"
+    )
+    qtbot.addWidget(cholecystectomy_window)
+    monkeypatch.setattr(
+        cholecystectomy_window._player_widget, "load_video", lambda path: None
+    )
+
+    cholecystectomy_window._load_video(video_path)
+
+    message = cholecystectomy_window._sidecar_block_message
+    assert "Laparoscopic appendectomy" in message
+    assert "Laparoscopic cholecystectomy" in message
+    assert "Nothing was changed" in message
+    assert "restart with Laparoscopic appendectomy" in message
+    assert sidecar.read_text(encoding="utf-8") == original_json
 
 
 def test_changed_run_is_attributed_and_archived_once(

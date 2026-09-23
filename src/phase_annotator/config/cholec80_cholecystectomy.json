@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "ontology_id": "laparoscopic_cholecystectomy.cholec80",
+  "ontology_version": "1.0",
+  "name": "Laparoscopic Cholecystectomy",
+  "initial_phase_id": 1,
+  "undefined_phase_id": 0,
+  "phases": [
+    {"id": 1, "name": "Preparation", "hotkey": "1", "color_hex": "#3B82F6", "order": 1, "is_optional": false, "description": "Preparation phase."},
+    {"id": 2, "name": "Calot triangle dissection", "hotkey": "2", "color_hex": "#10B981", "order": 2, "is_optional": false, "description": "Calot triangle dissection phase."},
+    {"id": 3, "name": "Clipping and cutting", "hotkey": "3", "color_hex": "#F59E0B", "order": 3, "is_optional": false, "description": "Clipping and cutting phase."},
+    {"id": 4, "name": "Gallbladder dissection", "hotkey": "4", "color_hex": "#EF4444", "order": 4, "is_optional": false, "description": "Gallbladder dissection phase."},
+    {"id": 5, "name": "Gallbladder packaging", "hotkey": "5", "color_hex": "#8B5CF6", "order": 5, "is_optional": false, "description": "Gallbladder packaging phase."},
+    {"id": 6, "name": "Cleaning and coagulation", "hotkey": "6", "color_hex": "#EC4899", "order": 6, "is_optional": false, "description": "Cleaning and coagulation phase."},
+    {"id": 7, "name": "Gallbladder retraction", "hotkey": "7", "color_hex": "#06B6D4", "order": 7, "is_optional": false, "description": "Gallbladder retraction phase."},
+    {"id": 0, "name": "Undefined", "hotkey": "U", "color_hex": "#6B7280", "order": 8, "is_optional": false, "description": "No confident surgical phase label has been assigned."}
+  ]
+}

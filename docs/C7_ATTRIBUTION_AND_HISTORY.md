@@ -8,11 +8,11 @@ Historical snapshots provide a lightweight local trail and recovery aid. They ar
 
 ## Approved product contract
 
-- Ask for a non-empty annotator ID every time the application launches.
+- Ask for the annotator's first name every time the application launches, normalize it to lowercase, and reject whitespace-separated names.
 - Keep that identity fixed for the lifetime of the application and across opened videos.
 - Do not remember the previous ID, provide in-application identity switching, or create user accounts.
 - Show the confirmed ID unobtrusively in the window title.
-- Prefer a study identifier, institutional username, or initials over unnecessary personal information.
+- Keep the requested identity deliberately minimal: first name only. Do not request surname, email, staff number, or account details.
 - Multiple annotators may work sequentially on the same canonical annotation by launching the application separately. Simultaneous editing is unsupported.
 
 ## Attribution semantics

@@ -3,7 +3,13 @@ import json
 
 import pytest
 
-from phase_annotator.config import load_default_ontology, load_ontology_from_path
+from phase_annotator.config import (
+    PACKAGED_PROCEDURES,
+    load_default_ontology,
+    load_ontology_from_path,
+    load_procedure_ontology,
+    procedure_name_for_ontology_id,
+)
 from phase_annotator.domain.ontology import OntologyConfigError, PhaseOntology
 
 
@@ -106,3 +112,46 @@ def test_load_ontology_from_user_selected_path(valid_config, tmp_path):
 
     assert ontology.ontology_id == "synthetic.procedure"
     assert ontology.initial_phase_id == 1
+
+
+def test_packaged_cholec80_config_has_supplied_seven_phases():
+    ontology = load_procedure_ontology("cholecystectomy")
+
+    assert ontology.ontology_id == "laparoscopic_cholecystectomy.cholec80"
+    assert ontology.initial_phase_id == 1
+    assert ontology.undefined_phase_id == 0
+    assert [phase.name for phase in ontology.ordered_phases] == [
+        "Preparation",
+        "Calot triangle dissection",
+        "Clipping and cutting",
+        "Gallbladder dissection",
+        "Gallbladder packaging",
+        "Cleaning and coagulation",
+        "Gallbladder retraction",
+        "Undefined",
+    ]
+    assert [phase.hotkey for phase in ontology.ordered_phases] == [
+        "1", "2", "3", "4", "5", "6", "7", "U"
+    ]
+
+
+def test_packaged_procedure_registry_loads_every_resource():
+    loaded = {
+        procedure.key: load_procedure_ontology(procedure.key)
+        for procedure in PACKAGED_PROCEDURES
+    }
+
+    assert set(loaded) == {"appendectomy", "cholecystectomy"}
+    assert loaded["appendectomy"].ontology_id != loaded["cholecystectomy"].ontology_id
+
+
+def test_unknown_packaged_procedure_is_rejected():
+    with pytest.raises(OntologyConfigError, match="Unknown packaged procedure"):
+        load_procedure_ontology("unknown")
+
+
+def test_ontology_id_maps_to_doctor_facing_procedure_name():
+    assert procedure_name_for_ontology_id(
+        "laparoscopic_cholecystectomy.cholec80"
+    ) == "Laparoscopic cholecystectomy"
+    assert procedure_name_for_ontology_id("custom.unknown") == "custom.unknown"

@@ -247,14 +247,14 @@ Goal: make sustained annotation practical after correctness is established.
 
 The focused C9.1-C9.5 interaction contract is in `C9_USABILITY_AND_EFFICIENCY.md`.
 
-Status: **Complete pending manual acceptance.** Notification hierarchy, playback efficiency controls, in-application help, and presentation-only timeline zoom are implemented and tested.
+Status: **Complete pending manual acceptance.** Notification hierarchy, playback efficiency controls, and in-application help are implemented and tested. Timeline zoom was evaluated and removed after manual feedback because it competed visually with playback speed.
 
 Candidate work, validated with actual use rather than assumed upfront:
 
 - Continue evidence-led visual and accessibility refinement after the C8.7 application-theme baseline.
 - Configurable seek/step controls and playback-speed options.
 - Keyboard shortcut reference and onboarding hints.
-- Better timeline zoom/navigation for long procedures.
+- Revisit long-video navigation only if real annotation sessions demonstrate a concrete need; the first zoom prototype was intentionally removed.
 - Status bar for persistence and media state.
 - Prominent, non-blocking top-of-window notifications for errors; keep routine state and success feedback in the status bar.
 - Layout persistence and high-DPI/accessibility review.
@@ -263,6 +263,14 @@ Candidate work, validated with actual use rather than assumed upfront:
 Exit gate: a documented end-to-end usability session completes without data loss or high-severity friction; shortcuts and behavior match documentation.
 
 Learning focus: profiling and evidence-led UX refinement.
+
+### C9.6 — Procedure selection before packaging
+
+Status: **Implemented pending manual and packaged-build acceptance.** The detailed contract is in `C9_6_PROCEDURE_SELECTION.md`. Registry, approved cholecystectomy JSON, startup selection, title context, and mismatch safety are implemented; executable resource verification remains part of C10.
+
+### C9.7 — Procedure-mismatch safety
+
+Status: **Complete pending manual acceptance.** Keep one procedure-neutral canonical sidecar, block mismatched ontology IDs, name both procedures, and guarantee that the existing JSON is not changed. See `C9_7_PROCEDURE_MISMATCH_SAFETY.md`.
 
 ### C10 — Engineering quality, CI, and release
 
@@ -307,4 +315,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Manually accept the combined C8/C9 workflow with disposable media, then begin C10 engineering quality and Windows packaging.
+Manually accept both procedure flows and the C9.7 mismatch message, then begin C10 packaging and verify both JSON resources in the executable.

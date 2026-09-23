@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
     QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox, QComboBox,
-    QDialog, QMenu, QMessageBox, QScrollArea, QFrame
+    QDialog, QMenu, QMessageBox
 )
 
 from phase_annotator.ui.player_widget import VideoPlayerWidget
@@ -18,6 +18,7 @@ from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
 from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
 from phase_annotator.ui.theme import APPLICATION_STYLESHEET
 from phase_annotator.ui.notification_banner import NotificationBanner
+from phase_annotator.ui.shortcuts_help_dialog import ShortcutsHelpDialog
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
 from phase_annotator.domain.completion import summarize_completion
@@ -33,6 +34,7 @@ from phase_annotator.storage import (
     SessionPersistenceCoordinator,
     SessionPersistenceError,
 )
+from phase_annotator.config import procedure_name_for_ontology_id
 
 
 class MainWindow(QMainWindow):
@@ -40,8 +42,9 @@ class MainWindow(QMainWindow):
 
     def __init__(self, ontology: PhaseOntology, annotator_id: str = "surgeon_01"):
         super().__init__()
+        procedure_name = ontology.name.removesuffix(" Ontology")
         self._base_window_title = (
-            f"Phase Annotator v{__version__} — {annotator_id}"
+            f"Phase Annotator v{__version__} — {annotator_id} — {procedure_name}"
         )
         self.setWindowTitle(self._base_window_title)
         self.setStyleSheet(APPLICATION_STYLESHEET)
@@ -66,7 +69,6 @@ class MainWindow(QMainWindow):
         self._loading_video = False
         # Transient UI selection; valid only for the current interval sequence.
         self._selected_segment_index: Optional[int] = None
-        self._timeline_zoom_factor = 1.0
 
         # Core UI Widgets
         self._player_widget = VideoPlayerWidget(self)
@@ -95,39 +97,7 @@ class MainWindow(QMainWindow):
         left_layout.setContentsMargins(0, 0, 0, 0)
         left_layout.addWidget(self._player_widget, stretch=1)
 
-        timeline_toolbar = QHBoxLayout()
-        timeline_toolbar.addWidget(QLabel("Timeline", self))
-        timeline_toolbar.addStretch()
-        self._btn_zoom_out = QPushButton("−", self)
-        self._btn_zoom_out.setToolTip("Zoom timeline out")
-        self._btn_zoom_reset = QPushButton("1×", self)
-        self._btn_zoom_reset.setToolTip("Reset timeline zoom")
-        self._btn_zoom_in = QPushButton("+", self)
-        self._btn_zoom_in.setToolTip("Zoom timeline in")
-        for button in (
-            self._btn_zoom_out,
-            self._btn_zoom_reset,
-            self._btn_zoom_in,
-        ):
-            button.setFixedWidth(42)
-            timeline_toolbar.addWidget(button)
-        self._btn_zoom_out.clicked.connect(lambda: self._change_timeline_zoom(-1))
-        self._btn_zoom_reset.clicked.connect(self._reset_timeline_zoom)
-        self._btn_zoom_in.clicked.connect(lambda: self._change_timeline_zoom(1))
-        left_layout.addLayout(timeline_toolbar)
-
-        self._timeline_scroll = QScrollArea(self)
-        self._timeline_scroll.setWidget(self._timeline_widget)
-        self._timeline_scroll.setWidgetResizable(False)
-        self._timeline_scroll.setFrameShape(QFrame.Shape.NoFrame)
-        self._timeline_scroll.setVerticalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
-        )
-        self._timeline_scroll.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded
-        )
-        self._timeline_scroll.setFixedHeight(66)
-        left_layout.addWidget(self._timeline_scroll)
+        left_layout.addWidget(self._timeline_widget)
 
         # Controls & Timecode
         control_layout = QVBoxLayout()
@@ -175,9 +145,15 @@ class MainWindow(QMainWindow):
 
         self._speed_combo = QComboBox(self)
         self._speed_combo.setAccessibleName("Playback speed")
-        for label, rate in (("0.5×", 0.5), ("1×", 1.0), ("1.5×", 1.5), ("2×", 2.0)):
+        for label, rate in (
+            ("1×", 1.0),
+            ("2×", 2.0),
+            ("4×", 4.0),
+            ("8×", 8.0),
+            ("12×", 12.0),
+        ):
             self._speed_combo.addItem(label, rate)
-        self._speed_combo.setCurrentIndex(1)
+        self._speed_combo.setCurrentIndex(0)
         self._speed_combo.currentIndexChanged.connect(self._set_playback_speed)
         self._speed_combo.setEnabled(False)
 
@@ -250,6 +226,7 @@ class MainWindow(QMainWindow):
         self._phase_palette.phase_selected.connect(self.record_phase_transition)
         self._create_phase_shortcuts()
         self._create_history_shortcuts()
+        self._create_segment_shortcuts()
 
         self._resume_timer = QTimer(self)
         self._resume_timer.setInterval(10_000)
@@ -259,10 +236,12 @@ class MainWindow(QMainWindow):
             self._update_phase_shortcut_state
         )
         QApplication.instance().focusChanged.connect(self._update_history_controls)
+        QApplication.instance().focusChanged.connect(
+            self._update_segment_shortcut_state
+        )
         self._create_annotation_menu()
         self._create_help_menu()
         self._update_annotation_menu()
-        QTimer.singleShot(0, self._apply_timeline_zoom)
         self.statusBar().showMessage("No video loaded")
 
     def _create_annotation_menu(self) -> None:
@@ -294,26 +273,7 @@ class MainWindow(QMainWindow):
         shortcuts.triggered.connect(self._show_shortcuts_help)
 
     def _show_shortcuts_help(self) -> None:
-        phase_lines = "\n".join(
-            f"{phase.hotkey}    {phase.name}"
-            for phase in self._ontology.ordered_phases
-        )
-        QMessageBox.information(
-            self,
-            "Shortcuts and controls",
-            "Playback\n"
-            "Space    Play / pause\n"
-            "Left / Right    Step by one estimated frame\n"
-            "Buttons    Jump ±5 seconds or change playback speed\n\n"
-            "Editing\n"
-            "Ctrl+Z    Undo\n"
-            "Ctrl+Shift+Z or Ctrl+Y    Redo\n"
-            "Click timeline/card    Select and seek\n"
-            "Drag timeline boundary    Adjust boundary\n"
-            "Right-click segment    Correction actions\n\n"
-            f"Phases\n{phase_lines}\n\n"
-            "Use the Annotation menu for video notes and completion.",
-        )
+        ShortcutsHelpDialog(self._ontology, self).exec()
 
     def _show_notification(self, message: str, *, level: str = "error") -> None:
         self._notification_banner.show_notification(message, level=level)
@@ -323,31 +283,6 @@ class MainWindow(QMainWindow):
         if rate is not None:
             self._player_widget.set_playback_rate(float(rate))
             self.statusBar().showMessage(f"Playback speed: {rate:g}×", 2500)
-
-    def _change_timeline_zoom(self, direction: int) -> None:
-        levels = (1.0, 2.0, 4.0, 8.0)
-        current = levels.index(self._timeline_zoom_factor)
-        target = max(0, min(len(levels) - 1, current + direction))
-        self._timeline_zoom_factor = levels[target]
-        self._apply_timeline_zoom()
-
-    def _reset_timeline_zoom(self) -> None:
-        self._timeline_zoom_factor = 1.0
-        self._apply_timeline_zoom()
-
-    def _apply_timeline_zoom(self) -> None:
-        viewport_width = max(300, self._timeline_scroll.viewport().width())
-        self._timeline_widget.setFixedWidth(
-            round(viewport_width * self._timeline_zoom_factor)
-        )
-        self._btn_zoom_reset.setText(f"{self._timeline_zoom_factor:g}×")
-        self._btn_zoom_out.setEnabled(self._timeline_zoom_factor > 1.0)
-        self._btn_zoom_in.setEnabled(self._timeline_zoom_factor < 8.0)
-
-    def resizeEvent(self, event) -> None:
-        super().resizeEvent(event)
-        if hasattr(self, "_timeline_scroll"):
-            self._apply_timeline_zoom()
 
     def keyPressEvent(self, event) -> None:
         """Dispatch configured phase hotkeys and playback/navigation keys."""
@@ -414,6 +349,29 @@ class MainWindow(QMainWindow):
             shortcut.activated.connect(self._redo_annotation)
             self._redo_shortcuts.append(shortcut)
         self._update_history_controls()
+
+    def _create_segment_shortcuts(self) -> None:
+        self._delete_segment_shortcut = QShortcut(QKeySequence("Delete"), self)
+        self._delete_segment_shortcut.setContext(
+            Qt.ShortcutContext.WindowShortcut
+        )
+        self._delete_segment_shortcut.activated.connect(
+            self._convert_selected_segment_to_undefined
+        )
+        self._update_segment_shortcut_state()
+
+    def _update_segment_shortcut_state(self, *_) -> None:
+        self._delete_segment_shortcut.setEnabled(
+            self._session is not None
+            and self._selected_segment_index is not None
+            and not self._text_entry_has_focus()
+        )
+
+    def _convert_selected_segment_to_undefined(self) -> None:
+        if self._selected_segment_index is not None:
+            self._resolve_segment(
+                self._selected_segment_index, resolution="undefined"
+            )
 
     def _update_history_controls(self, *_) -> None:
         """Project stack availability into buttons, tooltips, and shortcuts."""
@@ -571,7 +529,23 @@ class MainWindow(QMainWindow):
                 self._block_sidecar("Existing annotations were not confirmed.")
         else:
             self._session = new_session
-            self._block_sidecar(load_result.message)
+            if (
+                load_result.session is not None
+                and load_result.session.ontology_id != self._ontology.ontology_id
+            ):
+                saved_procedure = procedure_name_for_ontology_id(
+                    load_result.session.ontology_id
+                )
+                active_procedure = procedure_name_for_ontology_id(
+                    self._ontology.ontology_id
+                )
+                self._block_sidecar(
+                    f"Existing annotations use {saved_procedure}. This launch "
+                    f"is configured for {active_procedure}. Nothing was changed. "
+                    f"Close the application and restart with {saved_procedure}."
+                )
+            else:
+                self._block_sidecar(load_result.message)
         self._history.clear()
         self._update_history_controls()
         self._update_annotation_menu()
@@ -1003,6 +977,7 @@ class MainWindow(QMainWindow):
         self._timeline_widget.set_selected_index(self._selected_segment_index)
         self._segment_list_widget.set_selected_index(self._selected_segment_index)
         self._update_annotation_menu()
+        self._update_segment_shortcut_state()
 
     def _request_segment_selection(self, index: int, seek_ms: int) -> None:
         """Select one segment and perform its associated navigation request."""
@@ -1021,6 +996,7 @@ class MainWindow(QMainWindow):
             self._selected_segment_index = None
         self._timeline_widget.set_selected_index(self._selected_segment_index)
         self._segment_list_widget.set_selected_index(self._selected_segment_index)
+        self._update_segment_shortcut_state()
 
     def _show_segment_actions(self, index: int, screen_position) -> None:
         """Show the shared action menu for a segment card."""

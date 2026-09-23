@@ -180,9 +180,16 @@ class SegmentListWidget(QWidget):
                 border: 1px solid #333333;
                 border-radius: 4px;
                 outline: none;
+                padding-right: 8px;
             }
-            QListWidget::item { margin: 4px 6px; border-radius: 6px; }
+            QListWidget::item {
+                margin: 4px 8px 4px 6px;
+                border-radius: 6px;
+            }
             """
+        )
+        self._list_widget.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
         )
         self._list_widget.itemClicked.connect(self._on_item_clicked)
         layout.addWidget(self._list_widget)

@@ -98,8 +98,14 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C9.1: add prominent dismissible error/warning notifications
 - [x] C9.2: add playback speed and five-second navigation controls
 - [x] C9.3: add an in-application shortcuts/workflow reference
-- [x] C9.4: add presentation-only timeline zoom and horizontal navigation
+- [x] C9.4: evaluate long-video timeline zoom; remove the confusing prototype after manual feedback
 - [x] C9.5: run automated usability acceptance (representative manual acceptance pending)
+- [x] C9.6.1: add a registry for bundled procedure ontologies
+- [x] C9.6.2: add a clinician-approved cholecystectomy JSON ontology
+- [x] C9.6.3: select appendectomy or cholecystectomy during startup
+- [x] C9.6.4: display procedure context and test ontology mismatch safety
+- [ ] C9.6.5: verify both ontology resources in the packaged application
+- [x] C9.7: keep one canonical sidecar and provide a safe, actionable procedure-mismatch error
 - [ ] C10: Packaging, documentation, and release readiness
 
 ## Known cleanup (do not confuse with feature work)

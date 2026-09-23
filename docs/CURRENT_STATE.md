@@ -20,7 +20,11 @@ C8 advances the persisted model to schema 1.4. It adds optional video-level `ses
 
 C8.7 pulls visual consistency forward from C9. `ui/theme.py` gives the application shell, menu, controls, dialogs, status bar, splitter, tooltips, and scrollbars one dark high-contrast workstation theme. Existing phase colors and selected/playhead distinctions remain intact.
 
-C9 adds a dismissible high-visibility banner for actionable media/persistence failures, fixed playback rates from 0.5× to 2×, ±5-second jumps, an in-application shortcut reference, and presentation-only 1×/2×/4×/8× timeline zoom with horizontal scrolling. These controls do not alter annotation timestamps or schema data.
+C9 adds a dismissible high-visibility banner for actionable media/persistence failures, fixed playback rates of 1×, 2×, 4×, 8×, and 12×, ±5-second jumps, and a structured in-application shortcut reference. Delete converts the selected segment to Undefined through the existing undoable resolution command. A trial timeline zoom was removed after manual feedback because its multiplier controls were confused with playback speed. These controls do not alter annotation timestamps or schema data.
+
+C9.6 exposes the generic ontology architecture at startup. After entering a lowercase first name, the annotator chooses packaged laparoscopic appendectomy or laparoscopic cholecystectomy. The selected procedure appears in the window title, drives all phase metadata, and remains protected by persisted ontology identity/version checks. The cholecystectomy JSON contains the supplied seven classes plus Undefined.
+
+C9.7 retains one procedure-neutral canonical sidecar per video. If the operator selects a different procedure from the sidecar's stored ontology, loading is blocked with both friendly procedure names, confirmation that nothing changed, and an instruction to restart with the saved procedure. The application never silently creates a second wrong-procedure annotation.
 
 Codex milestone C0 adds a pure-Python transactional `AnnotationEditor`. It initializes full-video coverage and safely applies playhead transitions using half-open intervals, validation, same-class no-ops, backward-local splitting, and adjacent-label coalescing. `MainWindow` now uses it and refreshes the timeline and segment list from the same normalized session state.
 
@@ -67,8 +71,8 @@ Codex then stabilized and extended the application through C0-C7. The historical
 
 ## Validation baseline
 
-On 2026-09-21, the repository-local Python 3.11.5 environment passed all 174 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. The combined C8/C9 workflow requires manual acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
+On 2026-09-23, the repository-local Python 3.11.5 environment passed all 184 tests with PySide6/Qt 6.11.1, pytest 9.1.1, and pytest-qt 4.5.0. `python -m compileall -q src tests` and `git diff --check` also passed. An earlier offscreen smoke test loaded the local ignored representative H.264/AAC MP4, obtained a positive duration, initialized exactly one Phase 1 interval over the full duration, stored `laparoscopic_appendectomy.default@1.0`, showed Loaded status, and reported no media errors. The combined C8/C9.7 workflow requires manual acceptance against disposable media. This verifies the current machine/backend, not every deployment codec or platform. No project lint or type-check command is configured.
 
 ## Recommended next increment
 
-Manually accept the combined C8/C9 workflow using disposable media, then begin C10 release engineering and Windows packaging.
+Manually accept both packaged procedure workflows and the procedure-mismatch message using disposable media, then begin C10 release engineering and verify both ontology resources in the Windows executable.

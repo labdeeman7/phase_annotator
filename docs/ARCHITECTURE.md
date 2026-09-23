@@ -27,10 +27,10 @@ The domain package currently has no Qt or IO imports. Preserve that boundary.
 
 ### Configuration (`src/phase_annotator/config/`)
 
-- `default_appendectomy.json`: versioned default ontology, expected order, hotkeys, colors, and explicit initial/Undefined roles.
+- `default_appendectomy.json` and `cholec80_cholecystectomy.json`: versioned bundled ontologies with expected order, hotkeys, colors, and explicit initial/Undefined roles.
 - `__init__.py`: generic packaged-resource/path JSON adapters that pass decoded data to the pure `PhaseOntology.from_config()` validator.
 
-`__main__.py` is the composition root: it selects the current default ontology and injects one instance into `MainWindow`, which passes that same instance to the annotation views and phase palette. UI components depend on `PhaseOntology`, not on appendectomy-specific loader names or resources.
+`__main__.py` is the composition root: it asks for a packaged procedure, loads its registry-selected ontology, and injects one instance into `MainWindow`, which passes that same instance to the annotation views and phase palette. UI components depend on `PhaseOntology`, not on procedure-specific loader names or resources.
 
 The `PhasePaletteWidget` renders the configured phase order, names, colors, hotkeys, and optional flags. It emits only a phase ID. `MainWindow` routes that signal and configured window-scoped `QShortcut` objects through the same `record_phase_transition()` command, then derives the active palette selection from the interval under the playhead. Shortcut availability follows keyboard focus: text inputs and the segment list reserve their keys, while clicking the focusable timeline returns to annotation mode.
 
@@ -54,7 +54,7 @@ The media layer never hashes video contents or searches `PATH` for external exec
 ### UI (`src/phase_annotator/ui/`)
 
 - `main_window.py`: constructs the window and controls, owns session/selection state, delegates annotation mutation to `AnnotationEditor`, and refreshes the synchronized views.
-- `annotator_identity.py`: validates/prompt-confirms active application identity and provides the local last-ID settings adapter.
+- `annotator_identity.py`: asks for one first name per launch and normalizes it to lowercase for attribution; no identity is remembered between launches.
 - `domain/annotation_history.py`: Qt-free bounded command history. It captures isolated before/after interval snapshots around successful mutations and restores them through `AnnotationEditor` validation.
 - `player_widget.py`: wraps `QMediaPlayer`, `QAudioOutput`, and `QVideoWidget`.
 - `timeline_widget.py`: paints phase intervals, selection, playhead, internal-boundary handles, and transient drag preview; it emits preview seek, commit, and cancellation intent but never mutates the annotation session.

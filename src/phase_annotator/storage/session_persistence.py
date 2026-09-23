@@ -102,6 +102,17 @@ class SessionPersistenceCoordinator:
                 message=f"The annotation sidecar is invalid: {exc}",
             )
 
+        # Preserve the loaded session only for this explicit mismatch so the
+        # composition/UI layer can translate both ontology IDs into friendly
+        # procedure names without coupling storage to packaged configuration.
+        if session.ontology_id != self._ontology.ontology_id:
+            return LoadResult(
+                LoadStatus.BLOCKED,
+                sidecar_path,
+                session=session,
+                message="The annotation sidecar uses a different procedure.",
+            )
+
         errors = self.validation_errors(session)
         if errors:
             return LoadResult(
