@@ -1,9 +1,10 @@
 from pathlib import Path
 from typing import Optional
-from PySide6.QtCore import Signal, QUrl
-from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
+
+from PySide6.QtCore import QUrl, Signal
+from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from phase_annotator.media.qt_metadata import read_qt_media_metadata
 
@@ -119,9 +120,7 @@ class VideoPlayerWidget(QWidget):
         target_ms = max(0, min(self.duration_ms, target_ms))
         self.seek_ms(target_ms)
 
-    def _forward_playback_state(
-        self, state: QMediaPlayer.PlaybackState
-    ) -> None:
+    def _forward_playback_state(self, state: QMediaPlayer.PlaybackState) -> None:
         self.playback_state_changed.emit(
             state == QMediaPlayer.PlaybackState.PlayingState
         )

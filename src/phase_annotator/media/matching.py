@@ -92,9 +92,7 @@ def _exact_evidence(field: str, expected: object, actual: object) -> SourceEvide
     if expected is None or actual is None:
         status = EvidenceStatus.UNKNOWN
     else:
-        status = (
-            EvidenceStatus.MATCH if expected == actual else EvidenceStatus.MISMATCH
-        )
+        status = EvidenceStatus.MATCH if expected == actual else EvidenceStatus.MISMATCH
     return SourceEvidence(field, status, expected, actual)
 
 

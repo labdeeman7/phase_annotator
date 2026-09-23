@@ -1,8 +1,10 @@
 import sys
+
 from PySide6.QtWidgets import QApplication
+
 from phase_annotator.config import load_procedure_ontology
-from phase_annotator.ui.main_window import MainWindow
 from phase_annotator.ui.annotator_identity import prompt_for_annotator_id
+from phase_annotator.ui.main_window import MainWindow
 from phase_annotator.ui.procedure_selection import prompt_for_procedure
 from phase_annotator.ui.theme import APPLICATION_STYLESHEET
 

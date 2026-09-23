@@ -1,18 +1,19 @@
 from typing import List
+
 from phase_annotator.domain.models import AnnotationInterval
 
 
 def validate_no_overlaps(intervals: List[AnnotationInterval]) -> List[str]:
     """
     Validates that no two intervals overlap temporally.
-    
+
     Returns a list of human-readable error messages for any detected overlaps.
     """
     errors = []
     sorted_intervals = sorted(intervals, key=lambda x: x.start_ms)
     for i in range(1, len(sorted_intervals)):
         current_interval = sorted_intervals[i]
-        previous_interval = sorted_intervals[i-1]
+        previous_interval = sorted_intervals[i - 1]
         if current_interval.start_ms < previous_interval.end_ms:
             errors.append(
                 f"Overlap detected between Phase {previous_interval.phase_id} "
@@ -36,13 +37,13 @@ def validate_contiguous_coverage(
     if intervals[0].start_ms != 0:
         errors.append("Coverage must start at 0ms.")
 
-    for previous, current in zip(intervals, intervals[1:]):
+    # The shifted slice is intentionally one item shorter; strict pairing would
+    # reject the adjacent-pair construction rather than protect it.
+    for previous, current in zip(intervals, intervals[1:], strict=False):
         if current.start_ms < previous.start_ms:
             errors.append("Intervals must be ordered by start time.")
         if current.start_ms < previous.end_ms:
-            errors.append(
-                f"Intervals overlap at {current.start_ms}ms."
-            )
+            errors.append(f"Intervals overlap at {current.start_ms}ms.")
         elif current.start_ms > previous.end_ms:
             errors.append(
                 f"Coverage gap from {previous.end_ms}ms to {current.start_ms}ms."

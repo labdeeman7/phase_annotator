@@ -2,7 +2,6 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping
 
-
 SUPPORTED_ONTOLOGY_SCHEMA_VERSION = "1.0"
 COLOR_HEX_PATTERN = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
@@ -39,7 +38,9 @@ class PhaseOntology:
     def get_phase_by_id(self, phase_id: int) -> Phase:
         """Looks up a Phase by its integer ID. Raises KeyError if not found."""
         if phase_id not in self.phases:
-            raise KeyError(f"Phase ID {phase_id} is not defined in ontology '{self.name}'.")
+            raise KeyError(
+                f"Phase ID {phase_id} is not defined in ontology '{self.name}'."
+            )
         return self.phases[phase_id]
 
     @property
@@ -82,7 +83,9 @@ class PhaseOntology:
                 raise OntologyConfigError(f"Duplicate phase id {phase_id}.")
 
             phase_name = cls._required_string(item, "name", context=f"phase[{index}]")
-            hotkey = cls._required_string(item, "hotkey", context=f"phase[{index}]").upper()
+            hotkey = cls._required_string(
+                item, "hotkey", context=f"phase[{index}]"
+            ).upper()
             if len(hotkey) != 1 or not hotkey.isprintable():
                 raise OntologyConfigError(
                     f"phase[{index}].hotkey must be one printable character."

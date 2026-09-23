@@ -174,9 +174,9 @@ def test_validation_rejects_inconsistent_lifecycle_metadata(tmp_path: Path):
     session = make_session(video_path)
     session.completed_by = "reviewer"
 
-    errors = SessionPersistenceCoordinator(
-        load_default_ontology()
-    ).validation_errors(session)
+    errors = SessionPersistenceCoordinator(load_default_ontology()).validation_errors(
+        session
+    )
 
     assert "draft session contains completion metadata" in errors
 

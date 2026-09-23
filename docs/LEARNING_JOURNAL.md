@@ -473,3 +473,29 @@ Keyboard shortcuts should be alternate entrances to existing commands, not separ
 ## C9.7 — A visible filename is not the data authority
 
 Adding the procedure to sidecar filenames initially sounds clearer, but it would let an accidental procedure choice miss the existing file and create a second incorrect annotation. The safer rule is one canonical sidecar whose persisted ontology identity controls interpretation. The filename locates the annotation; validated content determines what its phase IDs mean.
+
+## C10.2 — Tool output is evidence, not a command
+
+A linter can report hundreds of findings when broad rule families are enabled, but the count is not a defect count. Many findings are mechanical modernization or stylistic preferences. A useful baseline selects rules whose purpose the team understands, reviews behavior-sensitive findings manually, and expands deliberately rather than rewriting the repository to satisfy a tool.
+
+Formatting, linting, type checking, and tests answer different questions. Ruff formatting makes layout deterministic; Ruff linting detects selected suspicious source patterns; Mypy checks declared type relationships; pytest exercises observable behavior. Passing one layer does not substitute for the others.
+
+Static typing can be adopted by architectural boundary. The pure domain and persistence layers have predictable values and are a strong initial target. Qt APIs expose dynamic objects and GUI state changes over time, so the UI needs deliberate narrowing rather than blanket `ignore` comments. At a genuinely dynamic adapter boundary, `cast(Any, value)` documents where static knowledge ends while runtime validation and exception handling remain authoritative.
+
+### TOML, `pyproject.toml`, and build systems
+
+TOML is a general configuration-data format, like JSON or YAML; a `.toml` file is not inherently a build script. `pyproject.toml` is the standardized Python project configuration file. Its `[build-system]` table chooses a build backend such as setuptools, while other tables describe package metadata, dependencies, tests, formatting, linting, and type checking.
+
+This overlaps with what `CMakeLists.txt` does for a C/C++ project, but they are not direct equivalents. CMake is a build-system generator with its own command language. `pyproject.toml` is declarative configuration read by multiple independent Python tools; the selected backend performs the package build, and tools such as pytest, Ruff, and Mypy read only their own tables.
+
+### A successful build is not necessarily a releasable build
+
+PyInstaller successfully produced and launched the first one-folder application, but its build log also reported unresolved DLLs inherited from the Miniconda base interpreter. The artifact is useful evidence that entry-point, Qt-hook, and resource discovery work, but it is not an approved release candidate. Build provenance and warnings are part of correctness: release automation should distinguish an exploratory artifact from one created in the supported clean environment.
+
+PyInstaller's `build/` and `dist/` directories have different roles. `build/` contains intermediate analysis, archives, warnings, and a partially assembled executable used by the build pipeline. That intermediate executable is not expected to run alone because its collected Python/Qt runtime is absent. `dist/` contains the deliverable layout; for one-folder mode, the runnable executable and its `_internal` directory must remain together.
+
+### Project metadata, packaging recipe, and build orchestration are separate layers
+
+`pyproject.toml` declares the Python project: metadata, runtime/development/release dependencies, the setuptools backend, package data for Python distributions, and settings for pytest/Ruff/Mypy. Pip reads it when creating or installing the development/release environment. PyInstaller does not normally use it as the executable recipe.
+
+`PhaseAnnotator.spec` is the executable-freezing recipe. PyInstaller executes this Python file to analyze imports, create the Python module archive and bootloader executable, include explicit data/native dependencies, and collect the one-folder artifact. `scripts/build_windows.ps1` is the outer orchestration and safety layer: it selects and validates the interpreter, invokes PyInstaller with the `.spec`, checks exit status, and verifies release-critical output files.

@@ -1,40 +1,59 @@
+import time
 from dataclasses import replace
 from pathlib import Path
-import time
 from typing import Callable, Optional
+
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QAction, QCloseEvent, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QSlider, QLabel, QFileDialog, QStyle, QSplitter, QApplication,
-    QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox, QComboBox,
-    QDialog, QMenu, QMessageBox
+    QAbstractSpinBox,
+    QApplication,
+    QComboBox,
+    QDialog,
+    QFileDialog,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QMenu,
+    QMessageBox,
+    QPlainTextEdit,
+    QPushButton,
+    QSlider,
+    QSplitter,
+    QStyle,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
 
-from phase_annotator.ui.player_widget import VideoPlayerWidget
-from phase_annotator.ui.timeline_widget import TimelineWidget
-from phase_annotator.ui.segment_list_widget import SegmentListWidget
-from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
-from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
-from phase_annotator.ui.theme import APPLICATION_STYLESHEET
-from phase_annotator.ui.notification_banner import NotificationBanner
-from phase_annotator.ui.shortcuts_help_dialog import ShortcutsHelpDialog
+from phase_annotator import __version__
+from phase_annotator.config import procedure_name_for_ontology_id
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
 from phase_annotator.domain.completion import summarize_completion
-from phase_annotator.domain.models import AnnotationSession, VideoInfo
+from phase_annotator.domain.models import (
+    CURRENT_SESSION_SCHEMA_VERSION,
+    AnnotationSession,
+    VideoInfo,
+)
 from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
 from phase_annotator.media import MediaMetadata, probe_local_file
-from phase_annotator import __version__
-from phase_annotator.domain.models import CURRENT_SESSION_SCHEMA_VERSION
 from phase_annotator.storage import (
     HistorySnapshotError,
     LoadStatus,
     SessionPersistenceCoordinator,
     SessionPersistenceError,
 )
-from phase_annotator.config import procedure_name_for_ontology_id
+from phase_annotator.ui.notification_banner import NotificationBanner
+from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
+from phase_annotator.ui.player_widget import VideoPlayerWidget
+from phase_annotator.ui.segment_list_widget import SegmentListWidget
+from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
+from phase_annotator.ui.shortcuts_help_dialog import ShortcutsHelpDialog
+from phase_annotator.ui.theme import APPLICATION_STYLESHEET
+from phase_annotator.ui.timeline_widget import TimelineWidget
 
 
 class MainWindow(QMainWindow):
@@ -73,9 +92,7 @@ class MainWindow(QMainWindow):
         # Core UI Widgets
         self._player_widget = VideoPlayerWidget(self)
         self._timeline_widget = TimelineWidget(self, ontology=self._ontology)
-        self._segment_list_widget = SegmentListWidget(
-            self, ontology=self._ontology
-        )
+        self._segment_list_widget = SegmentListWidget(self, ontology=self._ontology)
         self._phase_palette = PhasePaletteWidget(self, ontology=self._ontology)
         self._phase_shortcuts = []
 
@@ -119,7 +136,9 @@ class MainWindow(QMainWindow):
 
         self._btn_play = QPushButton("Play", self)
         self._btn_play.setObjectName("playButton")
-        self._btn_play.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
+        self._btn_play.setIcon(
+            self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay)
+        )
         self._btn_play.clicked.connect(self._player_widget.toggle_play)
         self._btn_play.setEnabled(False)
 
@@ -128,13 +147,13 @@ class MainWindow(QMainWindow):
         self._btn_step_back.setEnabled(False)
 
         self._btn_step_forward = QPushButton("+1 Frame", self)
-        self._btn_step_forward.clicked.connect(lambda: self._player_widget.step_frames(1))
+        self._btn_step_forward.clicked.connect(
+            lambda: self._player_widget.step_frames(1)
+        )
         self._btn_step_forward.setEnabled(False)
 
         self._btn_jump_back = QPushButton("−5 sec", self)
-        self._btn_jump_back.clicked.connect(
-            lambda: self._player_widget.jump_ms(-5_000)
-        )
+        self._btn_jump_back.clicked.connect(lambda: self._player_widget.jump_ms(-5_000))
         self._btn_jump_back.setEnabled(False)
 
         self._btn_jump_forward = QPushButton("+5 sec", self)
@@ -232,9 +251,7 @@ class MainWindow(QMainWindow):
         self._resume_timer.setInterval(10_000)
         self._resume_timer.timeout.connect(self._checkpoint_resume_during_playback)
         self._resume_timer.start()
-        QApplication.instance().focusChanged.connect(
-            self._update_phase_shortcut_state
-        )
+        QApplication.instance().focusChanged.connect(self._update_phase_shortcut_state)
         QApplication.instance().focusChanged.connect(self._update_history_controls)
         QApplication.instance().focusChanged.connect(
             self._update_segment_shortcut_state
@@ -304,7 +321,9 @@ class MainWindow(QMainWindow):
     @staticmethod
     def _text_entry_has_focus() -> bool:
         focused = QApplication.focusWidget()
-        if isinstance(focused, (QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox)):
+        if isinstance(
+            focused, (QLineEdit, QTextEdit, QPlainTextEdit, QAbstractSpinBox)
+        ):
             return True
         return isinstance(focused, QComboBox) and focused.isEditable()
 
@@ -352,9 +371,7 @@ class MainWindow(QMainWindow):
 
     def _create_segment_shortcuts(self) -> None:
         self._delete_segment_shortcut = QShortcut(QKeySequence("Delete"), self)
-        self._delete_segment_shortcut.setContext(
-            Qt.ShortcutContext.WindowShortcut
-        )
+        self._delete_segment_shortcut.setContext(Qt.ShortcutContext.WindowShortcut)
         self._delete_segment_shortcut.activated.connect(
             self._convert_selected_segment_to_undefined
         )
@@ -369,9 +386,7 @@ class MainWindow(QMainWindow):
 
     def _convert_selected_segment_to_undefined(self) -> None:
         if self._selected_segment_index is not None:
-            self._resolve_segment(
-                self._selected_segment_index, resolution="undefined"
-            )
+            self._resolve_segment(self._selected_segment_index, resolution="undefined")
 
     def _update_history_controls(self, *_) -> None:
         """Project stack availability into buttons, tooltips, and shortcuts."""
@@ -453,15 +468,13 @@ class MainWindow(QMainWindow):
             self._refresh_annotation_views()
             phase = self._ontology.get_phase_by_id(phase_id)
             self.statusBar().showMessage(
-                f"Assigned {phase.name} at "
-                f"{format_timecode(position_ms)}",
+                f"Assigned {phase.name} at {format_timecode(position_ms)}",
                 3000,
             )
         else:
             phase = self._ontology.get_phase_by_id(phase_id)
             self.statusBar().showMessage(
-                f"Already {phase.name} at "
-                f"{format_timecode(position_ms)}",
+                f"Already {phase.name} at {format_timecode(position_ms)}",
                 3000,
             )
         self._update_active_phase(position_ms)
@@ -471,7 +484,7 @@ class MainWindow(QMainWindow):
             self,
             "Open Surgical Video",
             "",
-            "Video Files (*.mp4 *.avi *.mkv *.mov);;All Files (*)"
+            "Video Files (*.mp4 *.avi *.mkv *.mov);;All Files (*)",
         )
         if file_path:
             self._load_video(Path(file_path))
@@ -601,9 +614,7 @@ class MainWindow(QMainWindow):
         lifecycle = ""
         if self._session is not None:
             lifecycle = (
-                " — Completed"
-                if self._session.status == "completed"
-                else " — Draft"
+                " — Completed" if self._session.status == "completed" else " — Draft"
             )
         self.setWindowTitle(f"{self._base_window_title}{lifecycle}{suffix}")
 
@@ -754,11 +765,7 @@ class MainWindow(QMainWindow):
 
     def _checkpoint_resume(self) -> None:
         """Persist a meaningful playback checkpoint without saving every tick."""
-        if (
-            self._loading_video
-            or self._session is None
-            or not self._session.intervals
-        ):
+        if self._loading_video or self._session is None or not self._session.intervals:
             return
         position_ms = min(
             max(self._player_widget.position_ms, 0),
@@ -839,18 +846,16 @@ class MainWindow(QMainWindow):
 
     def _on_media_metadata_available(self, metadata: MediaMetadata) -> None:
         """Apply late Qt metadata only when it belongs to the current video."""
-        if (
-            self._media_load_failed
-            or self._session is None
-            or self._video_path is None
-        ):
+        if self._media_load_failed or self._session is None or self._video_path is None:
             return
         if metadata.source_path != str(self._video_path.resolve()):
             return
 
         current = self._session.video_info
         fps = metadata.fps if metadata.fps is not None else current.fps
-        fps_source = metadata.fps_source if metadata.fps is not None else current.fps_source
+        fps_source = (
+            metadata.fps_source if metadata.fps is not None else current.fps_source
+        )
         self._session.video_info = replace(
             current,
             duration_ms=(
@@ -869,9 +874,7 @@ class MainWindow(QMainWindow):
         if metadata.fps is not None:
             self._player_widget.fps = metadata.fps
         self._refresh_annotation_views()
-        self._update_time_label(
-            self._player_widget.position_ms, self._slider.maximum()
-        )
+        self._update_time_label(self._player_widget.position_ms, self._slider.maximum())
 
     def _on_position_changed(self, position_ms: int) -> None:
         if not self._slider.isSliderDown():
@@ -911,9 +914,7 @@ class MainWindow(QMainWindow):
                 self._refresh_annotation_views()
                 self._persist_session()
             elif self._loaded_existing_session:
-                self._timeline_widget.set_duration(
-                    self._session.video_info.duration_ms
-                )
+                self._timeline_widget.set_duration(self._session.video_info.duration_ms)
                 self._persist_session()
                 self._player_widget.seek_ms(self._session.resume_position_ms)
             self._phase_palette.set_annotation_enabled(bool(self._session.intervals))
@@ -1022,9 +1023,7 @@ class MainWindow(QMainWindow):
         undefined_phase = self._ontology.get_phase_by_id(
             self._ontology.undefined_phase_id
         )
-        undefined_action = resolve_menu.addAction(
-            f"Convert to {undefined_phase.name}"
-        )
+        undefined_action = resolve_menu.addAction(f"Convert to {undefined_phase.name}")
         merge_left_action = resolve_menu.addAction("Merge left")
         merge_left_action.setEnabled(index > 0)
         merge_right_action = resolve_menu.addAction("Merge right")
@@ -1068,9 +1067,7 @@ class MainWindow(QMainWindow):
             changed = self._execute_annotation_command(
                 description="edit segment note",
                 anchor_ms=self._session.intervals[index].start_ms,
-                mutation=lambda: self._editor.update_notes(
-                    self._session, index, notes
-                ),
+                mutation=lambda: self._editor.update_notes(self._session, index, notes),
             )
         except ValueError as error:
             self.statusBar().showMessage(f"Note not saved: {error}", 5000)
@@ -1101,9 +1098,7 @@ class MainWindow(QMainWindow):
 
         phase = self._ontology.get_phase_by_id(phase_id)
         if not changed:
-            self.statusBar().showMessage(
-                f"Segment is already {phase.name}", 3000
-            )
+            self.statusBar().showMessage(f"Segment is already {phase.name}", 3000)
             return False
 
         self._select_interval_containing(anchor_ms)
@@ -1134,10 +1129,7 @@ class MainWindow(QMainWindow):
         boundary_name: str,
     ) -> bool:
         """Move a selected segment boundary to the current playhead."""
-        if (
-            not self._session
-            or not 0 <= segment_index < len(self._session.intervals)
-        ):
+        if not self._session or not 0 <= segment_index < len(self._session.intervals):
             return False
         return self._move_boundary_to_position(
             segment_index,
@@ -1157,16 +1149,11 @@ class MainWindow(QMainWindow):
         history_description: str,
     ) -> bool:
         """Commit one boundary position through validation and history."""
-        if (
-            not self._session
-            or not 0 <= segment_index < len(self._session.intervals)
-        ):
+        if not self._session or not 0 <= segment_index < len(self._session.intervals):
             return False
         selected = self._session.intervals[segment_index]
         anchor_ms = (
-            selected.end_ms - 1
-            if boundary_name == "start"
-            else selected.start_ms
+            selected.end_ms - 1 if boundary_name == "start" else selected.start_ms
         )
         try:
             changed = self._execute_annotation_command(
@@ -1219,7 +1206,9 @@ class MainWindow(QMainWindow):
             "invalid": "Boundary drag cancelled: position would invalidate a segment",
             "cancelled": "Boundary drag cancelled",
         }
-        self.statusBar().showMessage(messages.get(reason, "Boundary drag cancelled"), 3000)
+        self.statusBar().showMessage(
+            messages.get(reason, "Boundary drag cancelled"), 3000
+        )
 
     def _resolve_segment(self, index: int, *, resolution: str) -> bool:
         """Apply one explicit no-gap resolution for a selected segment."""
@@ -1337,7 +1326,5 @@ class MainWindow(QMainWindow):
             )
         else:
             tooltip = "Frame mapping uses measured constant-frame-rate metadata."
-        self._time_label.setText(
-            f"{current_str} / {duration_str} (Frame {frame_idx})"
-        )
+        self._time_label.setText(f"{current_str} / {duration_str} (Frame {frame_idx})")
         self._time_label.setToolTip(tooltip)

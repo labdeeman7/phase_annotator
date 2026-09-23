@@ -115,3 +115,16 @@
   - Keep canonical dirty state, changed-since-open state, and resume-only changes separate.
   - Detect an externally changed canonical sidecar before overwrite and block rather than merge automatically.
 - **Consequences**: Sequential users gain useful attribution and a lightweight local trail without an account/session-management interface. The trail is not tamper-proof and simultaneous editing remains unsupported.
+
+## ADR 012: PyInstaller One-Folder Windows Release
+
+- **Status**: Approved for the first release; clean-environment acceptance pending
+- **Context**: Clinicians need to run the application without installing Python or using a terminal. The first release also needs an inspectable recipe that teaches and exposes dependency, Qt plugin, and ontology-resource collection. A one-file executable or installer would add extraction, startup, and diagnostic complexity before deployment evidence requires it.
+- **Decision**:
+  - Use PyInstaller as the primary freezing tool and retain Qt's `pyside6-deploy` only as a fallback for a demonstrated unresolved problem.
+  - Build a windowed one-folder `PhaseAnnotator` application and distribute the complete folder in a versioned ZIP.
+  - Maintain `PhaseAnnotator.spec` as the authoritative recipe and invoke it through `scripts/build_windows.ps1`.
+  - List both ontology JSON files explicitly and fail the build script's verification if either resource or the executable is absent.
+  - Keep generated `build/`, `dist/`, and ZIP artifacts out of Git.
+  - Build the release candidate from a clean standard CPython environment. The successful exploratory Miniconda-derived build is evidence for the recipe, not an acceptable release artifact, because PyInstaller reported unresolved Conda DLL dependencies.
+- **Consequences**: The first artifact is larger than a single executable and users must keep its folder intact. Native Qt/codec behavior still requires representative-media and clean-machine testing. An installer, one-file mode, signing, and automatic updates remain separate future decisions.

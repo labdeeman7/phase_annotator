@@ -28,9 +28,7 @@ class ShortcutsHelpDialog(QDialog):
 
         title = QLabel("Shortcuts and controls", self)
         title.setObjectName("helpTitle")
-        subtitle = QLabel(
-            "Fast navigation and safe annotation correction", self
-        )
+        subtitle = QLabel("Fast navigation and safe annotation correction", self)
         subtitle.setObjectName("helpSubtitle")
         layout.addWidget(title)
         layout.addWidget(subtitle)
@@ -78,9 +76,7 @@ class ShortcutsHelpDialog(QDialog):
             key.setObjectName("shortcutKey")
             key.setFixedWidth(34)
             key.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            key.setStyleSheet(
-                f"background-color: {phase.color_hex}; color: white;"
-            )
+            key.setStyleSheet(f"background-color: {phase.color_hex}; color: white;")
             name = QLabel(phase.name, phase_card)
             name.setWordWrap(True)
             phase_layout.addWidget(key, row, column)

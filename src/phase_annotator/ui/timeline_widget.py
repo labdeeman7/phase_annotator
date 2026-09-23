@@ -1,6 +1,7 @@
 from typing import List, Optional
-from PySide6.QtCore import Signal, Qt
-from PySide6.QtGui import QPainter, QColor, QPen
+
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor, QPainter, QPen
 from PySide6.QtWidgets import QWidget
 
 from phase_annotator.domain.models import AnnotationInterval
@@ -125,10 +126,14 @@ class TimelineWidget(QWidget):
                 # coincide so the timeline does not hide either state.
                 if index == self._active_index:
                     painter.setPen(QPen(QColor("#FFFFFF"), 2))
-                    painter.drawRect(start_x + 1, 5, max(0, block_width - 2), height - 11)
+                    painter.drawRect(
+                        start_x + 1, 5, max(0, block_width - 2), height - 11
+                    )
                 if index == self._selected_index:
                     painter.setPen(QPen(QColor("#00D1FF"), 3))
-                    painter.drawRect(start_x + 2, 6, max(0, block_width - 4), height - 13)
+                    painter.drawRect(
+                        start_x + 2, 6, max(0, block_width - 4), height - 13
+                    )
 
             # Internal boundaries are shared by two intervals. Keep their
             # resting treatment subtle, then make the active handle obvious.
@@ -151,9 +156,7 @@ class TimelineWidget(QWidget):
             # Draw transient preview last so the playhead cannot hide whether
             # the proposed release is valid (cyan) or invalid (red).
             if self._drag_preview_ms is not None:
-                preview_x = round(
-                    (self._drag_preview_ms / self._duration_ms) * width
-                )
+                preview_x = round((self._drag_preview_ms / self._duration_ms) * width)
                 preview_color = QColor(
                     "#00D1FF" if self._drag_preview_valid else "#FF3B30"
                 )
@@ -204,9 +207,7 @@ class TimelineWidget(QWidget):
             preview_ms = self._drag_preview_ms
             preview_valid = self._drag_preview_valid
             self._reset_drag_state()
-            self._set_hovered_boundary(
-                self.boundary_index_at_x(event.position().x())
-            )
+            self._set_hovered_boundary(self.boundary_index_at_x(event.position().x()))
             if preview_ms == original_ms:
                 self.boundary_drag_cancelled.emit("unchanged", original_ms)
             elif preview_valid:
@@ -231,10 +232,7 @@ class TimelineWidget(QWidget):
         super().leaveEvent(event)
 
     def keyPressEvent(self, event) -> None:
-        if (
-            event.key() == Qt.Key.Key_Escape
-            and self._drag_boundary_index is not None
-        ):
+        if event.key() == Qt.Key.Key_Escape and self._drag_boundary_index is not None:
             original_ms = self._drag_original_ms
             self._reset_drag_state()
             self._set_hovered_boundary(None)

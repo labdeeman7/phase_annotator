@@ -50,6 +50,9 @@ Windows PowerShell:
 py -3.10 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
+python -m ruff format src tests scripts --check
+python -m ruff check src tests scripts
+python -m mypy
 $env:QT_QPA_PLATFORM = "offscreen"
 python -m pytest -v tests
 Remove-Item Env:QT_QPA_PLATFORM
@@ -75,6 +78,7 @@ This is an early prototype implemented through project milestone C9.7, with pack
 * [Continuous Persistence Plan](docs/C6_CONTINUOUS_PERSISTENCE.md)
 * [Annotator Attribution and History Plan](docs/C7_ATTRIBUTION_AND_HISTORY.md)
 * [Completion and Trustworthy JSON Plan](docs/C8_COMPLETION_AND_TRUST.md)
+* [C10 Release Engineering Plan](docs/C10_RELEASE_ENGINEERING.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)

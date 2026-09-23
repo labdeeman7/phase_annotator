@@ -1,5 +1,6 @@
 import pytest
-from phase_annotator.domain.time_utils import ms_to_frame, frame_to_ms, format_timecode
+
+from phase_annotator.domain.time_utils import format_timecode, frame_to_ms, ms_to_frame
 
 
 def test_ms_to_frame():

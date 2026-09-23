@@ -57,7 +57,9 @@ def main() -> int:
     def finish_error(message: str) -> None:
         # Avoid printing absolute local paths that a backend may include.
         safe_message = message.replace(str(args.video.resolve()), "<video>")
-        print(f"Media load failed for {args.video.name}: {safe_message}", file=sys.stderr)
+        print(
+            f"Media load failed for {args.video.name}: {safe_message}", file=sys.stderr
+        )
         result["exit_code"] = 1
         app.quit()
 

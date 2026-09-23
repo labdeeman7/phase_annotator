@@ -1,6 +1,11 @@
 from pathlib import Path
+
 from phase_annotator.config import load_default_ontology
-from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
+from phase_annotator.domain.models import (
+    AnnotationInterval,
+    AnnotationSession,
+    VideoInfo,
+)
 from phase_annotator.domain.validation import validate_no_overlaps
 from phase_annotator.storage.json_repo import JsonSessionRepository
 
@@ -11,13 +16,27 @@ def test_full_session_lifecycle(tmp_path: Path):
     assert len(ontology.phases) == 7  # Undefined plus six surgical phases
 
     # 2. Create session for a video case
-    video = VideoInfo(video_id="appendectomy_case_101.mp4", duration_ms=300000, fps=30.0)
+    video = VideoInfo(
+        video_id="appendectomy_case_101.mp4", duration_ms=300000, fps=30.0
+    )
     session = AnnotationSession(video_info=video, annotator_id="dr_surgeon")
 
     # 3. Add valid phase intervals
-    session.add_interval(AnnotationInterval(start_ms=0, end_ms=15000, phase_id=1, notes="App. identified"))
-    session.add_interval(AnnotationInterval(start_ms=15000, end_ms=45000, phase_id=2, notes="Adhesions dissected"))
-    session.add_interval(AnnotationInterval(start_ms=45000, end_ms=120000, phase_id=3, notes="Mesoappendix coagulated"))
+    session.add_interval(
+        AnnotationInterval(
+            start_ms=0, end_ms=15000, phase_id=1, notes="App. identified"
+        )
+    )
+    session.add_interval(
+        AnnotationInterval(
+            start_ms=15000, end_ms=45000, phase_id=2, notes="Adhesions dissected"
+        )
+    )
+    session.add_interval(
+        AnnotationInterval(
+            start_ms=45000, end_ms=120000, phase_id=3, notes="Mesoappendix coagulated"
+        )
+    )
 
     # 4. Validate no overlaps
     errors = validate_no_overlaps(session.intervals)

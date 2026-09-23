@@ -40,7 +40,9 @@ class AnnotationEditor:
         """Covers an empty session with its configured initial phase."""
         duration_ms = session.video_info.duration_ms
         if duration_ms <= 0:
-            raise ValueError("Video duration must be positive before coverage is initialized.")
+            raise ValueError(
+                "Video duration must be positive before coverage is initialized."
+            )
         if session.intervals:
             raise ValueError("Coverage can only be initialized for an empty session.")
 
@@ -209,19 +211,13 @@ class AnnotationEditor:
         self, session: AnnotationSession, interval_index: int
     ) -> bool:
         """Relabel one interval as the configured Undefined phase."""
-        return self.relabel_interval(
-            session, interval_index, self.undefined_phase_id
-        )
+        return self.relabel_interval(session, interval_index, self.undefined_phase_id)
 
-    def merge_left(
-        self, session: AnnotationSession, interval_index: int
-    ) -> bool:
+    def merge_left(self, session: AnnotationSession, interval_index: int) -> bool:
         """Absorb an interval into its left neighbour."""
         return self._merge_with_neighbour(session, interval_index, offset=-1)
 
-    def merge_right(
-        self, session: AnnotationSession, interval_index: int
-    ) -> bool:
+    def merge_right(self, session: AnnotationSession, interval_index: int) -> bool:
         """Absorb an interval into its right neighbour."""
         return self._merge_with_neighbour(session, interval_index, offset=1)
 

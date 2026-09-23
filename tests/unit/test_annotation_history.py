@@ -4,7 +4,11 @@ import pytest
 
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
-from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
+from phase_annotator.domain.models import (
+    AnnotationInterval,
+    AnnotationSession,
+    VideoInfo,
+)
 
 
 @pytest.fixture

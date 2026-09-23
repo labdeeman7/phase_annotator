@@ -131,7 +131,14 @@ def test_packaged_cholec80_config_has_supplied_seven_phases():
         "Undefined",
     ]
     assert [phase.hotkey for phase in ontology.ordered_phases] == [
-        "1", "2", "3", "4", "5", "6", "7", "U"
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "U",
     ]
 
 
@@ -151,7 +158,8 @@ def test_unknown_packaged_procedure_is_rejected():
 
 
 def test_ontology_id_maps_to_doctor_facing_procedure_name():
-    assert procedure_name_for_ontology_id(
-        "laparoscopic_cholecystectomy.cholec80"
-    ) == "Laparoscopic cholecystectomy"
+    assert (
+        procedure_name_for_ontology_id("laparoscopic_cholecystectomy.cholec80")
+        == "Laparoscopic cholecystectomy"
+    )
     assert procedure_name_for_ontology_id("custom.unknown") == "custom.unknown"

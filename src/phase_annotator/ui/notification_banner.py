@@ -1,5 +1,5 @@
 from PySide6.QtCore import QTimer, Signal
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QPushButton, QFrame
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton
 
 
 class NotificationBanner(QFrame):

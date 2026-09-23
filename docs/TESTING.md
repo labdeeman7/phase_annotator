@@ -29,6 +29,15 @@ python -m pytest -v tests/integration/
 # Run complete suite
 python -m pytest -v tests/
 
+# Verify deterministic formatting without modifying files
+python -m ruff format src tests scripts --check
+
+# Run the configured correctness/import/bug-risk lint baseline
+python -m ruff check src tests scripts
+
+# Type-check the configured non-UI application layers
+python -m mypy
+
 # Syntax/import-independent compilation check
 python -m compileall -q src tests
 
@@ -36,7 +45,7 @@ python -m compileall -q src tests
 python scripts/smoke_test_media.py test_dataset/<local-video>.mp4
 ```
 
-On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless Qt tests. There is currently no configured linter, formatter, type checker, coverage threshold, or CI job.
+On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless Qt tests. Mypy is deliberately scoped in `pyproject.toml` to configuration, domain, media, and storage; the Qt UI is not yet part of the type-check gate. There is currently no coverage threshold or CI job.
 
 ## Testing Contracts
 

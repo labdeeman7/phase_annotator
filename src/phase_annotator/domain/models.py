@@ -3,7 +3,6 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-
 CURRENT_SESSION_SCHEMA_VERSION = "1.4"
 SESSION_STATUSES = frozenset({"draft", "completed"})
 FPS_SOURCES = frozenset({"unknown", "assumed", "qt", "ffprobe"})
@@ -58,9 +57,7 @@ class VideoInfo:
                     f"{field_name} must be a non-negative integer or None."
                 )
         if self.fps_source not in FPS_SOURCES:
-            raise ValueError(
-                f"fps_source must be one of {sorted(FPS_SOURCES)}."
-            )
+            raise ValueError(f"fps_source must be one of {sorted(FPS_SOURCES)}.")
         if self.frame_rate_mode not in FRAME_RATE_MODES:
             raise ValueError(
                 f"frame_rate_mode must be one of {sorted(FRAME_RATE_MODES)}."
@@ -135,8 +132,7 @@ class AnnotationSession:
         if not isinstance(self.created_by, str) or not self.created_by.strip():
             raise ValueError("created_by must be non-empty text.")
         if self.last_edited_by is not None and (
-            not isinstance(self.last_edited_by, str)
-            or not self.last_edited_by.strip()
+            not isinstance(self.last_edited_by, str) or not self.last_edited_by.strip()
         ):
             raise ValueError("last_edited_by must be non-empty text or None.")
         if self.status not in SESSION_STATUSES:

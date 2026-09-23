@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Any, Iterable, Optional, cast
 
 from PySide6.QtCore import QSize
 from PySide6.QtMultimedia import QMediaMetaData
@@ -42,7 +42,9 @@ def _positive_int(value: object) -> Optional[int]:
     if isinstance(value, bool):
         return None
     try:
-        converted = int(value)
+        # Qt metadata is intentionally dynamic at this adapter boundary. The
+        # conversion remains runtime-checked by the exception handling below.
+        converted = int(cast(Any, value))
     except (TypeError, ValueError, OverflowError):
         return None
     return converted if converted > 0 else None
@@ -52,7 +54,7 @@ def _positive_float(value: object) -> Optional[float]:
     if isinstance(value, bool):
         return None
     try:
-        converted = float(value)
+        converted = float(cast(Any, value))
     except (TypeError, ValueError, OverflowError):
         return None
     return converted if converted > 0 else None

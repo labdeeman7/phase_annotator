@@ -1,4 +1,5 @@
 import pytest
+
 from phase_annotator.config import load_default_ontology
 from phase_annotator.domain.ontology import Phase
 

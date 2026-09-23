@@ -1,4 +1,5 @@
 import pytest
+
 from phase_annotator.domain.models import (
     AnnotationInterval,
     AnnotationSession,
@@ -7,7 +8,9 @@ from phase_annotator.domain.models import (
 
 
 def test_annotation_interval_duration():
-    interval = AnnotationInterval(start_ms=1000, end_ms=5000, phase_id=1, notes="Initial view")
+    interval = AnnotationInterval(
+        start_ms=1000, end_ms=5000, phase_id=1, notes="Initial view"
+    )
     assert interval.duration_ms == 4000
     assert interval.phase_id == 1
 

@@ -1,19 +1,33 @@
 from typing import List, Optional
+
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem, QFrame
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QVBoxLayout,
+    QWidget,
 )
+
 from phase_annotator.domain.models import AnnotationInterval
-from phase_annotator.domain.ontology import PhaseOntology, Phase
+from phase_annotator.domain.ontology import Phase, PhaseOntology
 from phase_annotator.domain.time_utils import format_timecode, ms_to_frame
 
 
 class SegmentCardWidget(QFrame):
     """Custom styled card widget representing a single surgical segment (LosslessCut style)."""
 
-    def __init__(self, interval: AnnotationInterval, phase: Optional[Phase], fps: float = 30.0, parent=None):
+    def __init__(
+        self,
+        interval: AnnotationInterval,
+        phase: Optional[Phase],
+        fps: float = 30.0,
+        parent=None,
+    ):
         super().__init__(parent)
-        
+
         color_hex = phase.color_hex if phase else "#3B82F6"
         phase_name = phase.name if phase else f"Phase {interval.phase_id}"
 
@@ -59,7 +73,9 @@ class SegmentCardWidget(QFrame):
         start_code = format_timecode(interval.start_ms)
         end_code = format_timecode(interval.end_ms)
         timecode_label = QLabel(f"{start_code}  ➔  {end_code}", self)
-        timecode_label.setStyleSheet("color: #00D1FF; font-family: monospace; font-size: 12px; font-weight: 500;")
+        timecode_label.setStyleSheet(
+            "color: #00D1FF; font-family: monospace; font-size: 12px; font-weight: 500;"
+        )
         layout.addWidget(timecode_label)
 
         # Subtext Row: Duration & Frames
@@ -67,13 +83,18 @@ class SegmentCardWidget(QFrame):
         start_frame = ms_to_frame(interval.start_ms, fps)
         end_frame = ms_to_frame(interval.end_ms, fps)
         total_frames = max(0, end_frame - start_frame)
-        subtext_label = QLabel(f"Duration: {duration_sec:.3f}s  |  {interval.duration_ms} ms, {total_frames} frames", self)
+        subtext_label = QLabel(
+            f"Duration: {duration_sec:.3f}s  |  {interval.duration_ms} ms, {total_frames} frames",
+            self,
+        )
         subtext_label.setStyleSheet("color: #AAAAAA; font-size: 11px;")
         layout.addWidget(subtext_label)
 
         if interval.notes:
             notes_label = QLabel(f"Note: {interval.notes}", self)
-            notes_label.setStyleSheet("color: #F59E0B; font-size: 11px; font-style: italic;")
+            notes_label.setStyleSheet(
+                "color: #F59E0B; font-size: 11px; font-style: italic;"
+            )
             layout.addWidget(notes_label)
 
 
@@ -91,7 +112,9 @@ class IntervalTableWidget(QWidget):
 
         # Header Title
         title_label = QLabel("Annotated Segments", self)
-        title_label.setStyleSheet("color: #EEEEEE; font-weight: bold; font-size: 14px; padding: 4px;")
+        title_label.setStyleSheet(
+            "color: #EEEEEE; font-weight: bold; font-size: 14px; padding: 4px;"
+        )
         layout.addWidget(title_label)
 
         # List Widget
@@ -137,10 +160,10 @@ class IntervalTableWidget(QWidget):
                 phase = None
 
             card_widget = SegmentCardWidget(interval, phase, fps=self._fps, parent=self)
-            
+
             list_item = QListWidgetItem(self._list_widget)
             list_item.setSizeHint(card_widget.sizeHint())
-            
+
             self._list_widget.addItem(list_item)
             self._list_widget.setItemWidget(list_item, card_widget)
 

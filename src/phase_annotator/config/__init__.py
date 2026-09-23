@@ -7,7 +7,6 @@ from pathlib import Path
 
 from phase_annotator.domain.ontology import OntologyConfigError, PhaseOntology
 
-
 DEFAULT_APPENDECTOMY_FILENAME = "default_appendectomy.json"
 CHOLEC80_FILENAME = "cholec80_cholecystectomy.json"
 

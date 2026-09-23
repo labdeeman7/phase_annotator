@@ -4,7 +4,6 @@ from typing import Callable, List, Optional, Tuple
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession
 
-
 IntervalSnapshot = Tuple[AnnotationInterval, ...]
 
 
@@ -71,7 +70,9 @@ class AnnotationHistory:
 
         after = _snapshot(session.intervals)
         if before == after:
-            raise RuntimeError("Mutation reported a change but intervals are unchanged.")
+            raise RuntimeError(
+                "Mutation reported a change but intervals are unchanged."
+            )
         self._undo_stack.append(
             AnnotationHistoryEntry(description, anchor_ms, before, after)
         )

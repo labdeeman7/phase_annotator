@@ -10,10 +10,13 @@ from phase_annotator.domain.models import (
 )
 from phase_annotator.domain.ontology import PhaseOntology
 from phase_annotator.domain.validation import validate_contiguous_coverage
-from phase_annotator.media import MediaMetadata, SourceComparison, SourceMatchStatus
-from phase_annotator.media import compare_video_source
+from phase_annotator.media import (
+    MediaMetadata,
+    SourceComparison,
+    SourceMatchStatus,
+    compare_video_source,
+)
 from phase_annotator.storage.json_repo import JsonSessionRepository
-
 
 SUPPORTED_SESSION_SCHEMA_VERSIONS = frozenset(
     {"1.0", "1.1", "1.2", "1.3", CURRENT_SESSION_SCHEMA_VERSION}
@@ -118,7 +121,8 @@ class SessionPersistenceCoordinator:
             return LoadResult(
                 LoadStatus.BLOCKED,
                 sidecar_path,
-                message="The annotation sidecar failed validation: " + "; ".join(errors),
+                message="The annotation sidecar failed validation: "
+                + "; ".join(errors),
             )
 
         comparison = compare_video_source(session.video_info, actual)
@@ -135,7 +139,9 @@ class SessionPersistenceCoordinator:
             if comparison.status is SourceMatchStatus.MATCH
             else LoadStatus.UNKNOWN_SOURCE
         )
-        return LoadResult(status, sidecar_path, session=session, source_comparison=comparison)
+        return LoadResult(
+            status, sidecar_path, session=session, source_comparison=comparison
+        )
 
     def bind(self, sidecar_path: Path) -> None:
         self._sidecar_path = sidecar_path
@@ -168,7 +174,9 @@ class SessionPersistenceCoordinator:
         try:
             self._repository.save(session, self._sidecar_path)
         except OSError as exc:
-            raise SessionPersistenceError(f"Could not write annotation sidecar: {exc}") from exc
+            raise SessionPersistenceError(
+                f"Could not write annotation sidecar: {exc}"
+            ) from exc
         self._expected_revision = self._revision(self._sidecar_path)
         self._dirty = False
 
@@ -225,10 +233,7 @@ class SessionPersistenceCoordinator:
             ):
                 errors.append("completed session has no completer attribution")
         elif session.status == "draft":
-            if (
-                session.completed_at is not None
-                or session.completed_by is not None
-            ):
+            if session.completed_at is not None or session.completed_by is not None:
                 errors.append("draft session contains completion metadata")
         else:
             errors.append(f"unsupported session status {session.status!r}")

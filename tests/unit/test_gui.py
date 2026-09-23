@@ -6,17 +6,21 @@ from PySide6.QtMultimedia import QMediaPlayer
 from PySide6.QtWidgets import QDialog, QLabel, QLineEdit, QMessageBox
 
 from phase_annotator.config import load_default_ontology, load_procedure_ontology
-from phase_annotator.ui.main_window import MainWindow
-from phase_annotator.ui.player_widget import VideoPlayerWidget
-from phase_annotator.ui.timeline_widget import TimelineWidget
-from phase_annotator.ui.segment_list_widget import SegmentListWidget
-from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
-from phase_annotator.ui.notification_banner import NotificationBanner
-from phase_annotator.ui.shortcuts_help_dialog import ShortcutsHelpDialog
-from phase_annotator.domain.models import AnnotationInterval, AnnotationSession, VideoInfo
+from phase_annotator.domain.models import (
+    AnnotationInterval,
+    AnnotationSession,
+    VideoInfo,
+)
 from phase_annotator.domain.validation import validate_contiguous_coverage
 from phase_annotator.media import MediaMetadata
 from phase_annotator.storage import JsonSessionRepository
+from phase_annotator.ui.main_window import MainWindow
+from phase_annotator.ui.notification_banner import NotificationBanner
+from phase_annotator.ui.player_widget import VideoPlayerWidget
+from phase_annotator.ui.segment_list_widget import SegmentListWidget
+from phase_annotator.ui.segment_note_dialog import SegmentNoteDialog
+from phase_annotator.ui.shortcuts_help_dialog import ShortcutsHelpDialog
+from phase_annotator.ui.timeline_widget import TimelineWidget
 
 
 def make_window() -> MainWindow:
@@ -39,9 +43,7 @@ def test_main_window_instantiation(qtbot):
     assert not window._btn_play.isEnabled()
     assert window._timeline_widget._ontology is window._ontology
     assert window._segment_list_widget._ontology is window._ontology
-    assert [
-        button.text() for button in window._phase_palette.phase_buttons
-    ] == [
+    assert [button.text() for button in window._phase_palette.phase_buttons] == [
         "1  Identification of the appendix",
         "2  Dissection of adhesions of the appendix (optional)",
         "3  Coagulation/release of mesoappendix",
@@ -98,9 +100,7 @@ def test_playback_speed_and_help(qtbot, monkeypatch):
 
     window._show_shortcuts_help()
     assert opened[0].windowTitle() == "Shortcuts and controls"
-    help_text = " ".join(
-        label.text() for label in opened[0].findChildren(QLabel)
-    )
+    help_text = " ".join(label.text() for label in opened[0].findChildren(QLabel))
     assert "Ctrl+Z" in help_text
     assert "Delete" in help_text
     assert "Identification of the appendix" in help_text
@@ -139,9 +139,7 @@ def test_delete_converts_selected_segment_to_undefined(qtbot):
     assert window._history.undo_description == "convert segment to Undefined"
 
 
-def test_video_note_completion_and_reopen_lifecycle(
-    qtbot, monkeypatch, tmp_path
-):
+def test_video_note_completion_and_reopen_lifecycle(qtbot, monkeypatch, tmp_path):
     window = MainWindow(load_default_ontology(), annotator_id="doctor_A")
     qtbot.addWidget(window)
     monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
@@ -173,9 +171,7 @@ def test_video_note_completion_and_reopen_lifecycle(
     assert reopened.status == "draft"
     assert reopened.completed_at is None
     assert reopened.completed_by is None
-    snapshots = list(
-        (tmp_path / "case.mp4.phase-annotations-history").glob("*.json")
-    )
+    snapshots = list((tmp_path / "case.mp4.phase-annotations-history").glob("*.json"))
     assert len(snapshots) == 1
     archived = JsonSessionRepository().load(snapshots[0])
     assert archived.status == "completed"
@@ -207,9 +203,7 @@ def test_completed_annotation_edit_cancel_preserves_completed_state(
 
     assert window._session.status == "completed"
     assert window._session.intervals[0].notes == ""
-    saved = JsonSessionRepository().load(
-        tmp_path / "case.mp4.phase-annotations.json"
-    )
+    saved = JsonSessionRepository().load(tmp_path / "case.mp4.phase-annotations.json")
     assert saved.status == "completed"
     assert saved.intervals[0].notes == ""
 
@@ -264,9 +258,7 @@ def test_load_status_changes_when_duration_becomes_available(
     assert window._btn_play.isEnabled()
     assert window._session.ontology_id == "laparoscopic_appendectomy.default"
     assert window._session.ontology_version == "1.0"
-    assert window._session.video_info.source_path == str(
-        video_path.resolve()
-    )
+    assert window._session.video_info.source_path == str(video_path.resolve())
     assert window._session.video_info.fps_source == "assumed"
     assert window._session.video_info.frame_rate_mode == "unknown"
     assert window._session.video_info.frame_numbers_are_estimated
@@ -286,9 +278,7 @@ def test_annotation_mutation_and_undo_are_immediately_persisted(
     window = make_window()
     qtbot.addWidget(window)
     monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
-    monkeypatch.setattr(
-        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
-    )
+    monkeypatch.setattr(VideoPlayerWidget, "position_ms", property(lambda self: 4_000))
     video_path = tmp_path / "case.mp4"
     video_path.write_bytes(b"synthetic")
     sidecar = tmp_path / "case.mp4.phase-annotations.json"
@@ -297,7 +287,9 @@ def test_annotation_mutation_and_undo_are_immediately_persisted(
     window._on_duration_changed(10_000)
     window.record_phase_transition(2)
 
-    assert [item.phase_id for item in JsonSessionRepository().load(sidecar).intervals] == [
+    assert [
+        item.phase_id for item in JsonSessionRepository().load(sidecar).intervals
+    ] == [
         1,
         2,
     ]
@@ -310,9 +302,7 @@ def test_annotation_mutation_and_undo_are_immediately_persisted(
 def test_existing_matching_sidecar_is_loaded_automatically(
     qtbot, monkeypatch, tmp_path
 ):
-    monkeypatch.setattr(
-        VideoPlayerWidget, "position_ms", property(lambda self: 6_000)
-    )
+    monkeypatch.setattr(VideoPlayerWidget, "position_ms", property(lambda self: 6_000))
     video_path = tmp_path / "case.mp4"
     video_path.write_bytes(b"synthetic")
 
@@ -375,15 +365,11 @@ def test_wrong_procedure_sidecar_names_both_procedures_and_is_not_changed(
     assert sidecar.read_text(encoding="utf-8") == original_json
 
 
-def test_changed_run_is_attributed_and_archived_once(
-    qtbot, monkeypatch, tmp_path
-):
+def test_changed_run_is_attributed_and_archived_once(qtbot, monkeypatch, tmp_path):
     window = MainWindow(load_default_ontology(), annotator_id="doctor_A")
     qtbot.addWidget(window)
     monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
-    monkeypatch.setattr(
-        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
-    )
+    monkeypatch.setattr(VideoPlayerWidget, "position_ms", property(lambda self: 4_000))
     video_path = tmp_path / "case.mp4"
     video_path.write_bytes(b"synthetic")
 
@@ -395,9 +381,7 @@ def test_changed_run_is_attributed_and_archived_once(
     assert window._session.last_edited_by == "doctor_A"
     assert window._prepare_to_leave_current_session("test close")
 
-    snapshots = list(
-        (tmp_path / "case.mp4.phase-annotations-history").glob("*.json")
-    )
+    snapshots = list((tmp_path / "case.mp4.phase-annotations-history").glob("*.json"))
     assert len(snapshots) == 1
     archived = JsonSessionRepository().load(snapshots[0])
     assert archived.last_edited_by == "doctor_A"
@@ -418,9 +402,7 @@ def test_resume_only_run_creates_no_snapshot(qtbot, monkeypatch, tmp_path):
     assert not (tmp_path / "case.mp4.phase-annotations-history").exists()
 
 
-def test_late_qt_metadata_updates_only_the_current_video(
-    qtbot, monkeypatch, tmp_path
-):
+def test_late_qt_metadata_updates_only_the_current_video(qtbot, monkeypatch, tmp_path):
     window = make_window()
     qtbot.addWidget(window)
     monkeypatch.setattr(window._player_widget, "load_video", lambda path: None)
@@ -500,9 +482,7 @@ def test_backend_error_disables_controls_and_preserves_actionable_message(
     video_path.write_bytes(b"invalid")
     window._load_video(video_path)
 
-    window._on_media_error(
-        "The video format is invalid or its codec is unsupported."
-    )
+    window._on_media_error("The video format is invalid or its codec is unsupported.")
 
     assert window._media_load_failed
     assert not window._btn_play.isEnabled()
@@ -523,7 +503,7 @@ def test_segment_list_widget_population(qtbot):
     qtbot.addWidget(segment_list)
     intervals = [
         AnnotationInterval(start_ms=0, end_ms=5000, phase_id=1, notes="Incision"),
-        AnnotationInterval(start_ms=5000, end_ms=12000, phase_id=2, notes="Dissection")
+        AnnotationInterval(start_ms=5000, end_ms=12000, phase_id=2, notes="Dissection"),
     ]
     segment_list.set_intervals(intervals)
     assert segment_list._list_widget.count() == 2
@@ -767,9 +747,7 @@ def test_committed_timeline_drag_is_one_undoable_command(qtbot):
     assert window._selected_segment_index == 1
 
 
-def test_mouse_drag_runs_complete_preview_commit_and_history_flow(
-    qtbot, monkeypatch
-):
+def test_mouse_drag_runs_complete_preview_commit_and_history_flow(qtbot, monkeypatch):
     window = make_window()
     qtbot.addWidget(window)
     window._session = AnnotationSession(
@@ -831,9 +809,7 @@ def test_cancelled_boundary_preview_restores_playhead_without_history(
     assert seeks == [7_000, 4_000]
     assert window._session.intervals == intervals
     assert not window._history.can_undo
-    assert window.statusBar().currentMessage().startswith(
-        "Boundary drag cancelled"
-    )
+    assert window.statusBar().currentMessage().startswith("Boundary drag cancelled")
 
 
 def test_repeated_boundary_drags_preserve_coverage_and_undo_individually(qtbot):
@@ -1044,13 +1020,9 @@ def test_move_selected_segment_start_to_playhead_updates_shared_boundary(
     window._timeline_widget.set_duration(10_000)
     window._refresh_annotation_views()
     window._select_segment(1)
-    monkeypatch.setattr(
-        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
-    )
+    monkeypatch.setattr(VideoPlayerWidget, "position_ms", property(lambda self: 4_000))
 
-    changed = window._move_segment_boundary(
-        1, boundary_index=1, boundary_name="start"
-    )
+    changed = window._move_segment_boundary(1, boundary_index=1, boundary_name="start")
 
     assert changed is True
     assert window._session.intervals == [
@@ -1077,13 +1049,9 @@ def test_invalid_boundary_move_leaves_gui_state_unchanged(qtbot, monkeypatch):
     )
     window._refresh_annotation_views()
     window._select_segment(1)
-    monkeypatch.setattr(
-        VideoPlayerWidget, "position_ms", property(lambda self: 8_000)
-    )
+    monkeypatch.setattr(VideoPlayerWidget, "position_ms", property(lambda self: 8_000))
 
-    changed = window._move_segment_boundary(
-        1, boundary_index=1, boundary_name="start"
-    )
+    changed = window._move_segment_boundary(1, boundary_index=1, boundary_name="start")
 
     assert changed is False
     assert window._session.intervals == [
@@ -1141,9 +1109,7 @@ def test_annotation_command_undo_and_redo_restore_exact_state(qtbot, monkeypatch
     )
     window._timeline_widget.set_duration(10_000)
     window._refresh_annotation_views()
-    monkeypatch.setattr(
-        VideoPlayerWidget, "position_ms", property(lambda self: 4_000)
-    )
+    monkeypatch.setattr(VideoPlayerWidget, "position_ms", property(lambda self: 4_000))
 
     window.record_phase_transition(2)
     changed_state = list(window._session.intervals)
@@ -1375,9 +1341,7 @@ def test_phase_hotkey_is_reserved_while_segment_list_has_focus(qtbot, monkeypatc
     window.activateWindow()
     window._segment_list_widget._list_widget.setCurrentRow(0)
     window._segment_list_widget._list_widget.setFocus(Qt.OtherFocusReason)
-    qtbot.waitUntil(
-        lambda: window._segment_list_widget._list_widget.hasFocus()
-    )
+    qtbot.waitUntil(lambda: window._segment_list_widget._list_widget.hasFocus())
 
     qtbot.keyClick(window._segment_list_widget._list_widget, Qt.Key_3)
 
@@ -1401,9 +1365,7 @@ def test_clicking_timeline_restores_annotation_hotkeys(qtbot, monkeypatch):
     window.activateWindow()
     window._segment_list_widget._list_widget.setCurrentRow(0)
     window._segment_list_widget._list_widget.setFocus(Qt.OtherFocusReason)
-    qtbot.waitUntil(
-        lambda: window._segment_list_widget._list_widget.hasFocus()
-    )
+    qtbot.waitUntil(lambda: window._segment_list_widget._list_widget.hasFocus())
 
     qtbot.mouseClick(window._timeline_widget, Qt.LeftButton)
     assert window._timeline_widget.hasFocus()

@@ -2,7 +2,7 @@ import json
 import os
 from dataclasses import asdict
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 from phase_annotator.domain.models import (
     AnnotationInterval,
@@ -16,12 +16,12 @@ class JsonSessionRepository:
 
     def save(self, session: AnnotationSession, filepath: Path) -> None:
         """
-        Saves session data atomically. Writes to a temporary file first, 
+        Saves session data atomically. Writes to a temporary file first,
         then replaces the target file to prevent partial file corruption.
         """
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        
+
         data = asdict(session)
         legacy_work_sessions = data.pop("_legacy_work_sessions", None)
         if legacy_work_sessions is not None:
@@ -48,11 +48,22 @@ class JsonSessionRepository:
         self._reject_unknown_fields(
             data,
             {
-                "video_info", "annotator_id", "created_by", "last_edited_by",
-                "work_sessions", "ontology_id", "ontology_version",
-                "intervals", "status", "completed_at", "completed_by",
-                "session_notes", "resume_position_ms",
-                "schema_version", "created_at", "updated_at",
+                "video_info",
+                "annotator_id",
+                "created_by",
+                "last_edited_by",
+                "work_sessions",
+                "ontology_id",
+                "ontology_version",
+                "intervals",
+                "status",
+                "completed_at",
+                "completed_by",
+                "session_notes",
+                "resume_position_ms",
+                "schema_version",
+                "created_at",
+                "updated_at",
             },
             "session",
         )
@@ -67,7 +78,9 @@ class JsonSessionRepository:
             )
 
         video_info = VideoInfo(**data["video_info"])
-        intervals = [AnnotationInterval(**interval_data) for interval_data in data["intervals"]]
+        intervals = [
+            AnnotationInterval(**interval_data) for interval_data in data["intervals"]
+        ]
 
         session = AnnotationSession(
             video_info=video_info,
@@ -79,11 +92,15 @@ class JsonSessionRepository:
             intervals=intervals,
             status=data.get("status", "draft"),
             completed_at=data.get("completed_at"),
-            completed_by=data.get("completed_by", (
-                data["annotator_id"]
-                if data.get("status") == "completed" and data.get("completed_at") is not None
-                else None
-            )),
+            completed_by=data.get(
+                "completed_by",
+                (
+                    data["annotator_id"]
+                    if data.get("status") == "completed"
+                    and data.get("completed_at") is not None
+                    else None
+                ),
+            ),
             session_notes=data.get("session_notes", ""),
             resume_position_ms=data.get("resume_position_ms", 0),
             schema_version=data.get("schema_version", "1.0"),

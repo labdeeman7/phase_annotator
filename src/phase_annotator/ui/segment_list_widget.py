@@ -47,9 +47,7 @@ class SegmentCardWidget(QFrame):
             "font-weight: bold; border-radius: 10px; padding: 2px 6px;"
         )
         title_label = QLabel(phase_name, self)
-        title_label.setStyleSheet(
-            "color: #FFFFFF; font-weight: bold; font-size: 13px;"
-        )
+        title_label.setStyleSheet("color: #FFFFFF; font-weight: bold; font-size: 13px;")
         self._actions_button = QToolButton(self)
         self._actions_button.setText("⋮")
         self._actions_button.setToolTip("Segment actions")
@@ -93,8 +91,7 @@ class SegmentCardWidget(QFrame):
         end_code = format_timecode(interval.end_ms)
         timecode_label = QLabel(f"{start_code}  →  {end_code}", self)
         timecode_label.setStyleSheet(
-            "color: #00D1FF; font-family: monospace; font-size: 12px; "
-            "font-weight: 500;"
+            "color: #00D1FF; font-family: monospace; font-size: 12px; font-weight: 500;"
         )
         layout.addWidget(timecode_label)
 
@@ -169,7 +166,9 @@ class SegmentListWidget(QWidget):
         )
         layout.addWidget(title_label)
         legend_label = QLabel("Cyan: selected  •  White: under playhead", self)
-        legend_label.setStyleSheet("color: #AAAAAA; font-size: 11px; padding: 0 4px 4px;")
+        legend_label.setStyleSheet(
+            "color: #AAAAAA; font-size: 11px; padding: 0 4px 4px;"
+        )
         layout.addWidget(legend_label)
 
         self._list_widget = QListWidget(self)
@@ -275,6 +274,4 @@ class SegmentListWidget(QWidget):
         """Publish user intent; MainWindow owns the resulting selection."""
         row = self._list_widget.row(item)
         if 0 <= row < len(self._intervals):
-            self.segment_selection_requested.emit(
-                row, self._intervals[row].start_ms
-            )
+            self.segment_selection_requested.emit(row, self._intervals[row].start_ms)

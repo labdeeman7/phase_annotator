@@ -276,14 +276,19 @@ Status: **Complete pending manual acceptance.** Keep one procedure-neutral canon
 
 Goal: make the project reproducible for contributors and distributable to users.
 
-Implementation:
+Status: **C10.1 and C10.2 complete.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `C10_RELEASE_ENGINEERING.md`. Ruff now enforces the agreed formatting/lint baseline, and Mypy gates the non-UI application layers.
 
-- Add a minimal formatter/linter/type-check policy after choosing tools deliberately.
-- Add GitHub Actions for supported Python versions, domain/storage tests, and headless Qt tests.
-- Add test coverage for critical workflows rather than pursuing a vanity percentage.
-- Package a Windows build and document Qt Multimedia/runtime considerations.
-- Perform clean-machine install, launch, annotate, save/resume, and completion acceptance tests.
-- Reconcile package/window versioning and write release notes/user guide.
+The first target is a versioned ZIP containing a portable one-folder 64-bit Windows application. It must run without a user-installed Python environment or administrator rights, retain the existing adjacent-sidecar data contract, include both packaged procedures, and pass clean-machine acceptance. Installer, one-file executable, automatic updates, code signing, and non-Windows releases are explicitly deferred pending evidence.
+
+Slices:
+
+- C10.1: release contract and plan — complete.
+- C10.2: minimal formatter/linter/type-check policy — complete.
+- C10.3: PyInstaller one-folder build and maintained Windows recipe; use `pyside6-deploy` only as a justified fallback.
+- C10.4: packaged-artifact and representative-media testing.
+- C10.5: clean-checkout continuous integration and build artifacts.
+- C10.6: clinician, developer, and release documentation.
+- C10.7: exact-artifact clean-machine acceptance and release candidate.
 
 Exit gate: CI is green from a clean checkout; a versioned artifact passes the release checklist on a clean supported machine.
 
@@ -315,4 +320,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Manually accept both procedure flows and the C9.7 mismatch message, then begin C10 packaging and verify both JSON resources in the executable.
+Begin C10.3 with a minimal PyInstaller one-folder build, inspect its dependency/resource discovery, and only then turn the successful configuration into the maintained build recipe.
