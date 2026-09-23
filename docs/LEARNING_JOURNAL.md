@@ -503,3 +503,9 @@ PyInstaller's `build/` and `dist/` directories have different roles. `build/` co
 ### Test the artifact through its public boundary
 
 Source tests can prove that resource loaders and windows work in a virtual environment, while a filesystem check can prove that JSON files exist under `dist/`; neither proves the frozen executable can actually load those resources. A narrow noninteractive executable argument lets release automation exercise the application from outside the bundle, using the same packaged resource APIs and real window construction, and judge success by process exit code. This complements rather than replaces manual codec and workflow acceptance.
+
+### CI is a clean-room execution of repository knowledge
+
+Continuous integration is not merely “run the tests somewhere else.” A hosted runner begins without the project's virtual environment or local shell history, so every dependency, Python version, environment variable, command, and build input must be declared in the repository. A green CI run is evidence that the project can be reconstructed from versioned knowledge rather than undocumented machine state.
+
+Validation and artifact production have different costs and triggers. Fast source checks should run on every push and pull request. A large Windows application artifact can be built intentionally through manual dispatch after validation succeeds, avoiding unnecessary build time and storage while keeping the release recipe automated.

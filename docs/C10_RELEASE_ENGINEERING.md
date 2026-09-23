@@ -116,7 +116,7 @@ Use only `dist/PhaseAnnotator/PhaseAnnotator.exe` and the ignored disposable cop
 
 ### C10.5 — Continuous integration
 
-Status: **Not started.**
+Status: **Implemented locally; remote execution pending.** `.github/workflows/windows-ci.yml` validates every push, pull request, and manual run on 64-bit CPython 3.13.15. A packaging job runs only on manual dispatch after validation, builds through the maintained PowerShell recipe, executes the frozen-artifact smoke test, and uploads the complete application folder for 14 days. C10.5 is not complete until the committed workflow runs green on GitHub's clean Windows runner.
 
 - Add GitHub Actions for a clean Windows checkout and the supported Python version.
 - Install declared dependencies; run formatting/lint checks, the complete test suite with headless Qt, and compilation checks.

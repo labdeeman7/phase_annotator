@@ -45,7 +45,13 @@ python -m compileall -q src tests
 python scripts/smoke_test_media.py test_dataset/<local-video>.mp4
 ```
 
-On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless Qt tests. Mypy is deliberately scoped in `pyproject.toml` to configuration, domain, media, and storage; the Qt UI is not yet part of the type-check gate. There is currently no coverage threshold or CI job.
+On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless Qt tests. Mypy is deliberately scoped in `pyproject.toml` to configuration, domain, media, and storage; the Qt UI is not yet part of the type-check gate. There is currently no coverage threshold.
+
+## Continuous integration
+
+`.github/workflows/windows-ci.yml` reproduces the configured checks on a clean GitHub-hosted Windows runner using 64-bit CPython 3.13.15. Pushes and pull requests run source validation only. A manually dispatched workflow also builds the PyInstaller one-folder application, runs `scripts/test_packaged_windows.ps1` against the frozen executable, and uploads the complete `dist/PhaseAnnotator/` folder as a 14-day workflow artifact.
+
+The workflow is considered implemented but not validated until GitHub reports a green run. Local success cannot prove YAML syntax, action compatibility, hosted-runner Qt behavior, permissions, or artifact upload behavior.
 
 ## Testing Contracts
 

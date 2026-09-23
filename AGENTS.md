@@ -49,7 +49,7 @@ python -m phase_annotator
 
 Ruff formatting/linting and scoped Mypy checks are configured. Mypy currently gates `config/`, `domain/`, `media/`, and `storage/`, not `ui/`; do not imply whole-application type coverage.
 
-The Windows packaging recipe is `PhaseAnnotator.spec`; `scripts/build_windows.ps1` uses `.release-venv` by default and verifies the executable plus both ontology resources. The approved local release environment is standard 64-bit CPython 3.13, not the Miniconda-derived development `.venv`. No coverage threshold or CI workflow is configured yet.
+The Windows packaging recipe is `PhaseAnnotator.spec`; `scripts/build_windows.ps1` uses `.release-venv` by default and verifies the executable plus both ontology resources. The approved local release environment is standard 64-bit CPython 3.13, not the Miniconda-derived development `.venv`. `.github/workflows/windows-ci.yml` defines source validation on pushes/pull requests and a manually dispatched packaging artifact; do not call C10.5 complete until both jobs run green remotely. No coverage threshold is configured.
 
 Before changing behavior:
 

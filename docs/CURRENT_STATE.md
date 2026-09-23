@@ -76,3 +76,4 @@ On 2026-09-23, both the repository-local Miniconda-derived Python 3.11.5 develop
 ## Recommended next increment
 
 C10.1–C10.4 are complete. The release contract and staged plan are in `C10_RELEASE_ENGINEERING.md`; the quality baseline, clean standard-CPython build, automated artifact smoke test, and manual packaged lifecycle acceptance pass. Begin C10.5 by adding clean Windows continuous integration, followed by a deliberate packaging artifact workflow.
+C10.5 is implemented locally in `.github/workflows/windows-ci.yml`: pushes and pull requests run the Windows source gates, while manual dispatch additionally builds, smoke-tests, and uploads the application folder. It remains pending until the committed workflow completes both jobs on GitHub's clean runner.

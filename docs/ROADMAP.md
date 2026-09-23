@@ -320,4 +320,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Begin C10.5 continuous integration: reproduce the quality gates on a clean Windows GitHub Actions runner, then add an intentional packaging workflow/artifact only after the validation job is stable.
+Commit and push the C10.5 workflow, confirm the automatic validation job is green, then manually dispatch it and confirm the packaging job plus downloadable application artifact are green.
