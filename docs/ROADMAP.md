@@ -287,7 +287,7 @@ Slices:
 - C10.3: PyInstaller one-folder build and maintained Windows recipe — complete; use `pyside6-deploy` only as a justified fallback.
 - C10.4: packaged-artifact and representative-media testing — complete.
 - C10.5: clean-checkout continuous integration and build artifacts.
-- C10.6: clinician, developer, and release documentation.
+- C10.6: clinician, developer, release, and limitation documentation specified in `C10_6_DOCUMENTATION_PLAN.md`.
 - C10.7: exact-artifact clean-machine acceptance and release candidate.
 
 Exit gate: CI is green from a clean checkout; a versioned artifact passes the release checklist on a clean supported machine.
@@ -320,4 +320,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Commit and push the C10.5 workflow, confirm the automatic validation job is green, then manually dispatch it and confirm the packaging job plus downloadable application artifact are green.
+Complete the software user, developer, release, and limitation guides in `C10_6_DOCUMENTATION_PLAN.md`, then perform C10.7 clean-machine acceptance. After the release candidate is established, begin the 15-case extended self-use validation and later clinical training/protocol work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.

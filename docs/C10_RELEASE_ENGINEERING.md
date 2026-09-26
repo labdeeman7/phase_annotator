@@ -116,7 +116,7 @@ Use only `dist/PhaseAnnotator/PhaseAnnotator.exe` and the ignored disposable cop
 
 ### C10.5 — Continuous integration
 
-Status: **Implemented locally; remote execution pending.** `.github/workflows/windows-ci.yml` validates every push, pull request, and manual run on 64-bit CPython 3.13.15. A packaging job runs only on manual dispatch after validation, builds through the maintained PowerShell recipe, executes the frozen-artifact smoke test, and uploads the complete application folder for 14 days. C10.5 is not complete until the committed workflow runs green on GitHub's clean Windows runner.
+Status: **Complete.** `.github/workflows/windows-ci.yml` validates every push, pull request, and manual run on 64-bit CPython 3.13.15. A packaging job runs only on manual dispatch after validation, builds through the maintained PowerShell recipe, executes the frozen-artifact smoke test, and uploads the complete application folder for 14 days. On 2026-09-23, the first push-triggered validation and manually dispatched validation/package jobs all passed on GitHub's clean Windows runner, including artifact upload.
 
 - Add GitHub Actions for a clean Windows checkout and the supported Python version.
 - Install declared dependencies; run formatting/lint checks, the complete test suite with headless Qt, and compilation checks.
@@ -130,7 +130,7 @@ Learning focus: workflow triggers, runners, jobs, steps, clean environments, cac
 
 ### C10.6 — User, developer, and release documentation
 
-Status: **Not started.**
+Status: **Planned.** The user, developer, release, and limitation guides are specified in `C10_6_DOCUMENTATION_PLAN.md`. Extended Cholec80 validation and clinical training/protocol development are intentionally separate post-release work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
 
 - Write a short clinician guide covering extraction, launch, identity/procedure choice, annotation, corrections, autosave, completion, and common errors.
 - Document where canonical JSON and history live and how they must travel with the video.

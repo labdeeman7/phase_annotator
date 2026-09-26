@@ -4,7 +4,7 @@
 
 This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with provisional laparoscopic appendectomy and laparoscopic cholecystectomy ontologies. It is an early prototype implemented through Codex milestone C9.7, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, continuous canonical JSON persistence, attribution/history, protected completion/reopening, prominent failure feedback, playback efficiency controls, shortcut help, packaged procedure selection, and safe procedure-mismatch handling exist, while distribution and cross-platform validation do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C10_RELEASE_ENGINEERING.md` defines the active release contract and C10.1–C10.7 plan; earlier milestone documents record their respective contracts. C10.1–C10.4 are complete; C10.5 continuous integration is next. Packaging must verify both ontology resources in the executable. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C10_RELEASE_ENGINEERING.md` defines the active release contract and C10.1–C10.7 plan; `docs/C10_6_DOCUMENTATION_PLAN.md` covers the remaining software guides. `docs/REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md` separately plans extended Cholec80 self-use validation and later clinical training/protocol work. Earlier milestone documents record their respective contracts. C10.1–C10.5 are complete; C10.6 documentation is next. Packaging must verify both ontology resources in the executable. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
@@ -49,7 +49,7 @@ python -m phase_annotator
 
 Ruff formatting/linting and scoped Mypy checks are configured. Mypy currently gates `config/`, `domain/`, `media/`, and `storage/`, not `ui/`; do not imply whole-application type coverage.
 
-The Windows packaging recipe is `PhaseAnnotator.spec`; `scripts/build_windows.ps1` uses `.release-venv` by default and verifies the executable plus both ontology resources. The approved local release environment is standard 64-bit CPython 3.13, not the Miniconda-derived development `.venv`. `.github/workflows/windows-ci.yml` defines source validation on pushes/pull requests and a manually dispatched packaging artifact; do not call C10.5 complete until both jobs run green remotely. No coverage threshold is configured.
+The Windows packaging recipe is `PhaseAnnotator.spec`; `scripts/build_windows.ps1` uses `.release-venv` by default and verifies the executable plus both ontology resources. The approved local release environment is standard 64-bit CPython 3.13, not the Miniconda-derived development `.venv`. `.github/workflows/windows-ci.yml` defines source validation on pushes/pull requests and a manually dispatched packaging artifact; its first automatic validation and manual packaging runs passed on GitHub's Windows runner on 2026-09-23. No coverage threshold is configured.
 
 Before changing behavior:
 

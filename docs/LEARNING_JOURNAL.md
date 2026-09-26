@@ -509,3 +509,15 @@ Source tests can prove that resource loaders and windows work in a virtual envir
 Continuous integration is not merely “run the tests somewhere else.” A hosted runner begins without the project's virtual environment or local shell history, so every dependency, Python version, environment variable, command, and build input must be declared in the repository. A green CI run is evidence that the project can be reconstructed from versioned knowledge rather than undocumented machine state.
 
 Validation and artifact production have different costs and triggers. Fast source checks should run on every push and pull request. A large Windows application artifact can be built intentionally through manual dispatch after validation succeeds, avoiding unnecessary build time and storage while keeping the release recipe automated.
+
+### GitHub Actions: platform, workflow, and action are different concepts
+
+GitHub Actions is GitHub's event-driven automation platform. A repository normally configures it with YAML workflow files under `.github/workflows/`. When an event such as a push occurs, GitHub examines the workflow files in that pushed revision, compares the event with each workflow's `on:` declaration, and schedules every matching workflow.
+
+A workflow contains jobs; each job runs on a selected runner and contains ordered steps. A step can use `run:` to execute an ordinary shell command or `uses:` to invoke a reusable **action** such as `actions/checkout`. Therefore, an action is a reusable building block inside the larger GitHub Actions platform, not a synonym for the entire workflow. Workflows can test and package code, publish releases, deploy applications, run scheduled maintenance, respond to issues, or automate other repository events, subject to their permissions.
+
+### Separate release acceptance, usability validation, and domain protocol work
+
+Related activities can still have different success criteria. Release acceptance asks whether the documented artifact installs and behaves as specified. Extended self-use validation asks whether repeated realistic work reveals defects or friction. A clinical annotation protocol asks how domain experts should interpret ambiguous transitions. Keeping these as separate workstreams prevents an open-ended study from blocking a software release and prevents software behavior from being mistaken for clinical truth.
+
+Loading existing reference annotations and annotating from scratch also test different things. Reference walkthroughs exercise compatibility, rendering, navigation, and correction over realistic data; blind practice exercises learnability, speed, correction burden, and decision uncertainty. A balanced evaluation needs both, with reference answers kept separate until practice is complete.

@@ -111,9 +111,18 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C10.2: configure and satisfy a minimal Ruff and scoped-Mypy quality policy
 - [x] C10.3: add and validate a maintained PyInstaller one-folder Windows build recipe
 - [x] C10.4: validate the packaged artifact, bundled procedures, and representative media
-- [ ] C10.5: add clean-checkout CI and a deliberate Windows packaging workflow (workflow implemented; first remote green run pending)
+- [x] C10.5: add clean-checkout CI and a deliberate Windows packaging workflow
 - [ ] C10.6: write clinician, developer, release, and limitation documentation
 - [ ] C10.7: pass and record clean-machine acceptance for the exact release candidate
+
+## Post-release real-video validation and training
+
+- [ ] V1: inspect Cholec80 terms/layout and reproducibly select 15 cases
+- [ ] V2: specify and implement a provenance-preserving converter with synthetic tests
+- [ ] V3: validate the conversion contract on one reference case
+- [ ] V4: complete 10 packaged-application reference walkthroughs
+- [ ] V5: complete 5 blind practice annotations and compare afterwards
+- [ ] V6: clinically review and publish the versioned training/protocol material
 
 ## Known cleanup (do not confuse with feature work)
 

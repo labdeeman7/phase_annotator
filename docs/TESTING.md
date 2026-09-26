@@ -51,7 +51,7 @@ On Linux, use `QT_QPA_PLATFORM=offscreen python -m pytest -v tests` for headless
 
 `.github/workflows/windows-ci.yml` reproduces the configured checks on a clean GitHub-hosted Windows runner using 64-bit CPython 3.13.15. Pushes and pull requests run source validation only. A manually dispatched workflow also builds the PyInstaller one-folder application, runs `scripts/test_packaged_windows.ps1` against the frozen executable, and uploads the complete `dist/PhaseAnnotator/` folder as a 14-day workflow artifact.
 
-The workflow is considered implemented but not validated until GitHub reports a green run. Local success cannot prove YAML syntax, action compatibility, hosted-runner Qt behavior, permissions, or artifact upload behavior.
+The first push-triggered validation and manually dispatched validation/package runs passed on GitHub's Windows runner on 2026-09-23, including frozen-executable smoke testing and artifact upload. Future release candidates must still pass a fresh workflow run; one successful run does not permanently validate later changes.
 
 ## Testing Contracts
 
