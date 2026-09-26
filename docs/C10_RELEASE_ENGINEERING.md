@@ -130,7 +130,7 @@ Learning focus: workflow triggers, runners, jobs, steps, clean environments, cac
 
 ### C10.6 — User, developer, and release documentation
 
-Status: **Planned.** The user, developer, release, and limitation guides are specified in `C10_6_DOCUMENTATION_PLAN.md`. Extended Cholec80 validation and clinical training/protocol development are intentionally separate post-release work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
+Status: **Complete.** `USER_GUIDE.md`, `DEVELOPER_GUIDE.md`, `RELEASE_GUIDE.md`, `LIMITATIONS.md`, `RELEASE_NOTES.md`, and `CLEAN_MACHINE_ACCEPTANCE.md` cover their distinct audiences and are linked from the README. The user guide includes a repository-safe annotated interface map. Extended Cholec80 validation and clinical training/protocol development remain separate post-release work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
 
 - Write a short clinician guide covering extraction, launch, identity/procedure choice, annotation, corrections, autosave, completion, and common errors.
 - Document where canonical JSON and history live and how they must travel with the video.
@@ -145,7 +145,7 @@ Learning focus: writing for users, maintainers, and release operators as distinc
 
 ### C10.7 — Clean-machine acceptance and release candidate
 
-Status: **Not started.**
+Status: **Ready for manual execution.** The exact-artifact checklist and evidence record are in `CLEAN_MACHINE_ACCEPTANCE.md`. Automated clean-runner validation, packaging, frozen-resource/window smoke testing, and local representative-media lifecycle acceptance pass; the final exact downloaded artifact still requires the recorded GUI/media run on a clean Windows machine or VM.
 
 - Copy only the versioned release ZIP to another Windows machine or clean VM that does not have the repository or project virtual environment.
 - Extract the whole folder and launch without Python or administrator privileges.

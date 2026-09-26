@@ -276,7 +276,7 @@ Status: **Complete pending manual acceptance.** Keep one procedure-neutral canon
 
 Goal: make the project reproducible for contributors and distributable to users.
 
-Status: **C10.1–C10.4 complete.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `C10_RELEASE_ENGINEERING.md`. Ruff enforces the agreed formatting/lint baseline, Mypy gates the non-UI application layers, and a standard-CPython PyInstaller one-folder artifact passed automated frozen-resource/window checks plus manual representative-media and lifecycle acceptance. Continuous integration is next.
+Status: **C10.1–C10.6 complete; C10.7 manual acceptance pending.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `C10_RELEASE_ENGINEERING.md`. Ruff enforces the agreed formatting/lint baseline, Mypy gates the non-UI application layers, and a standard-CPython PyInstaller one-folder artifact passed automated frozen-resource/window checks plus manual representative-media and lifecycle acceptance. Clean Windows CI and audience-specific release documentation are complete.
 
 The first target is a versioned ZIP containing a portable one-folder 64-bit Windows application. It must run without a user-installed Python environment or administrator rights, retain the existing adjacent-sidecar data contract, include both packaged procedures, and pass clean-machine acceptance. Installer, one-file executable, automatic updates, code signing, and non-Windows releases are explicitly deferred pending evidence.
 
@@ -287,7 +287,7 @@ Slices:
 - C10.3: PyInstaller one-folder build and maintained Windows recipe — complete; use `pyside6-deploy` only as a justified fallback.
 - C10.4: packaged-artifact and representative-media testing — complete.
 - C10.5: clean-checkout continuous integration and build artifacts.
-- C10.6: clinician, developer, release, and limitation documentation specified in `C10_6_DOCUMENTATION_PLAN.md`.
+- C10.6: clinician, developer, release, and limitation documentation — complete; see `C10_6_DOCUMENTATION_PLAN.md`.
 - C10.7: exact-artifact clean-machine acceptance and release candidate.
 
 Exit gate: CI is green from a clean checkout; a versioned artifact passes the release checklist on a clean supported machine.
@@ -320,4 +320,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Complete the software user, developer, release, and limitation guides in `C10_6_DOCUMENTATION_PLAN.md`, then perform C10.7 clean-machine acceptance. After the release candidate is established, begin the 15-case extended self-use validation and later clinical training/protocol work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
+Download the exact GitHub Actions artifact and execute `CLEAN_MACHINE_ACCEPTANCE.md` on a clean Windows machine or VM. Record the artifact identity and result. After acceptance, begin the 15-case extended self-use validation and later clinical training/protocol work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.

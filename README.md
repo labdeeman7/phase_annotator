@@ -1,6 +1,6 @@
 # Phase Annotator
 
-A configurable desktop application for creating and correcting temporal phase annotations in surgical videos. It currently ships with a provisional laparoscopic appendectomy ontology, while the annotation engine and UI consume generic ontology configuration.
+A configurable desktop application for creating and correcting temporal phase annotations in surgical videos. It currently ships with provisional laparoscopic appendectomy and laparoscopic cholecystectomy ontologies, while the annotation engine and UI consume generic ontology configuration.
 
 ## Project Goals
 
@@ -64,7 +64,7 @@ The application entry point is:
 python -m phase_annotator
 ```
 
-This is an early prototype implemented through project milestone C9.7, with packaged laparoscopic appendectomy and laparoscopic cholecystectomy selection plus safe procedure-mismatch handling. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, attribution/history, protected completion/reopening, prominent failures, playback-speed/jump controls, and shortcut help work. Distribution and broader platform validation remain planned.
+This is an early research prototype implemented through release-engineering milestone C10.6. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, attribution/history, protected completion/reopening, prominent failures, playback-speed/jump controls, procedure selection, and shortcut help work. A reproducible Windows one-folder build and GitHub Actions artifact workflow exist; final clean-machine release-candidate acceptance and broader platform validation remain pending.
 
 ## Documentation
 
@@ -79,6 +79,13 @@ This is an early prototype implemented through project milestone C9.7, with pack
 * [Annotator Attribution and History Plan](docs/C7_ATTRIBUTION_AND_HISTORY.md)
 * [Completion and Trustworthy JSON Plan](docs/C8_COMPLETION_AND_TRUST.md)
 * [C10 Release Engineering Plan](docs/C10_RELEASE_ENGINEERING.md)
+* [Clinician User Guide](docs/USER_GUIDE.md)
+* [Developer Guide](docs/DEVELOPER_GUIDE.md)
+* [Windows Release Guide](docs/RELEASE_GUIDE.md)
+* [Known Limitations](docs/LIMITATIONS.md)
+* [Clean-Machine Acceptance](docs/CLEAN_MACHINE_ACCEPTANCE.md)
+* [Release Notes](docs/RELEASE_NOTES.md)
+* [Real-Video Validation and Training Plan](docs/REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md)
 * [Architecture Decisions](docs/DECISIONS.md)
 * [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
 * [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)

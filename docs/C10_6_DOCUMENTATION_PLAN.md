@@ -1,5 +1,7 @@
 # C10.6 Documentation Plan
 
+Status: **Complete.** The clinician, developer, release, limitations, release-notes, and clean-machine acceptance documents are linked from the repository README. The clinician guide contains a repository-safe annotated interface map; governed clinical examples remain part of the separate post-release training work.
+
 ## Purpose
 
 C10.6 documents the software and its release. It does not require completion of the proposed Cholec80 evaluation or a clinical annotation protocol. Keeping that boundary allows the application release to finish before the larger research and training work begins.

@@ -112,7 +112,7 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C10.3: add and validate a maintained PyInstaller one-folder Windows build recipe
 - [x] C10.4: validate the packaged artifact, bundled procedures, and representative media
 - [x] C10.5: add clean-checkout CI and a deliberate Windows packaging workflow
-- [ ] C10.6: write clinician, developer, release, and limitation documentation
+- [x] C10.6: write clinician, developer, release, and limitation documentation
 - [ ] C10.7: pass and record clean-machine acceptance for the exact release candidate
 
 ## Post-release real-video validation and training
