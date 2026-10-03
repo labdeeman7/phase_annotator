@@ -26,6 +26,10 @@ The 5 **blind practice cases** begin without a canonical sidecar. They test the 
 
 This first pass is an **extended self-use validation**, not yet a formal multi-participant usability study. A formal study would additionally require agreed participants, outcomes, procedures, ethics/consent considerations, and an analysis plan.
 
+## Agreed annotation rule
+
+Label only what is observable in the available recording. Every available millisecond must be covered, but every expected surgical phase does not need to appear. Use Undefined for footage that cannot be assigned confidently; never fabricate an absent phase or an unrecorded continuation. A recording may start during a later phase or end before the procedure is complete. Full timeline coverage does not mean full procedure coverage.
+
 ## What happens if we find problems
 
 - A reproducible software defect becomes a focused application issue, with severity and data-integrity impact recorded.

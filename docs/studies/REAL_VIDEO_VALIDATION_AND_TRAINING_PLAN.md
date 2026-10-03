@@ -119,6 +119,21 @@ The actual videos and labels remain governed dataset material. A distributable t
 
 ## Clinical annotation protocol
 
+### Agreed coverage rule
+
+Annotators label only what is observable in the available recording. Every available millisecond must be covered, but every expected surgical phase does not need to appear. Use Undefined for footage that cannot be assigned confidently; never fabricate an absent phase or an unrecorded continuation.
+
+Apply the rule as follows:
+
+- If recording starts during a confidently identifiable phase, that phase may begin at `0ms` even if earlier procedural phases are absent.
+- If the opening footage is not confidently classifiable, use Undefined until the first defensible phase.
+- If recording ends during an observable phase, that phase may continue to the video end; do not invent the phase that would normally follow.
+- If final footage is unclassifiable or no longer depicts assignable surgical activity, use Undefined to the video end.
+- A clinically absent phase is valid and receives no interval. Missing/corrupt source-label rows are instead a conversion-data error and must not be silently treated as clinical absence.
+- Expected ontology order is guidance. Phases may repeat or occur out of order when supported by the recording.
+
+In short: **full timeline coverage does not mean full procedure coverage.**
+
 Develop the protocol only after reviewing real transitions. For each configured phase, document:
 
 - operational definition;

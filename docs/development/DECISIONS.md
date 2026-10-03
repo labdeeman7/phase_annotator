@@ -28,6 +28,8 @@
 - **Decision**:
   - The full video timeline is covered by annotation segments.
   - `Undefined` is a real configured class, selected with `U`, and represents footage without a confident phase label.
+  - Continuous timeline coverage does not require complete procedure coverage. Annotators label only observable footage, do not invent absent phases or unrecorded continuations, and use Undefined where available footage cannot be assigned confidently.
+  - A recording may begin during a later identifiable phase or end during an ongoing phase. A clinically absent phase receives no interval; missing/corrupt source annotation data is a separate validation error.
   - Gaps and overlaps are invalid.
   - Adjacent segments share a boundary; moving it lengthens one segment and shortens the other.
   - Phases may repeat or appear outside nominal ontology order because real procedures are not strictly linear.
