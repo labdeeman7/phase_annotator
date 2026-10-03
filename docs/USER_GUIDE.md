@@ -20,6 +20,8 @@ This guide is for clinicians and research annotators using the Windows one-folde
 5. Enter your first name. It is stored in lowercase as the identity for this application run.
 6. Select the required procedure. The selection remains fixed until the application is restarted.
 
+Version 0.1.0 is not code-signed. Windows may therefore display **Windows protected your PC** and **Unknown publisher** when the downloaded application is launched. If—and only if—the ZIP came through the approved project distribution route, choose **More info → Run anyway**. Do not disable SmartScreen globally. Stop and contact the project team if Windows reports a named malware threat, quarantines the file, or the download source is unexpected.
+
 Do not select a different procedure merely to bypass an error. A video with an existing sidecar must be opened using the ontology named by that sidecar.
 
 ## Start or resume a video

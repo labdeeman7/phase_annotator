@@ -1,6 +1,6 @@
 # Release Notes
 
-## 0.1.0 — Release candidate
+## 0.1.0 — Accepted release candidate (2026-10-03)
 
 Phase Annotator 0.1.0 is the first Windows release candidate of the configurable surgical phase annotation prototype.
 
@@ -25,3 +25,7 @@ Phase Annotator 0.1.0 is the first Windows release candidate of the configurable
 - This remains research software, not a regulated clinical system.
 
 See `LIMITATIONS.md` and `USER_GUIDE.md` before use.
+
+### Acceptance
+
+The exact GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed Windows 11 Sandbox acceptance. The unsigned executable produced the expected SmartScreen warning, and the optional unwritable-location scenario was not manually exercised. Full evidence is in `releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`.

@@ -118,7 +118,7 @@
 
 ## ADR 012: PyInstaller One-Folder Windows Release
 
-- **Status**: Approved for the first release; exact-artifact clean-machine acceptance pending
+- **Status**: Accepted for 0.1.0; exact-artifact Windows 11 Sandbox acceptance passed on 2026-10-03 with documented limitations
 - **Context**: Clinicians need to run the application without installing Python or using a terminal. The first release also needs an inspectable recipe that teaches and exposes dependency, Qt plugin, and ontology-resource collection. A one-file executable or installer would add extraction, startup, and diagnostic complexity before deployment evidence requires it.
 - **Decision**:
   - Use PyInstaller as the primary freezing tool and retain Qt's `pyside6-deploy` only as a fallback for a demonstrated unresolved problem.

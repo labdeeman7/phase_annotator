@@ -8,7 +8,7 @@ This is a learning milestone. Work should proceed in small slices, with the buil
 
 ## C10.1 release contract
 
-Status: **Agreed and documented.** Implementation and acceptance remain pending.
+Status: **Complete.** The contract was implemented and the exact 0.1.0 artifact passed recorded clean-machine acceptance on 2026-10-03.
 
 The first supported release will have these properties:
 
@@ -145,7 +145,7 @@ Learning focus: writing for users, maintainers, and release operators as distinc
 
 ### C10.7 — Clean-machine acceptance and release candidate
 
-Status: **Ready for manual execution.** The exact-artifact checklist and evidence record are in `CLEAN_MACHINE_ACCEPTANCE.md`. Automated clean-runner validation, packaging, frozen-resource/window smoke testing, and local representative-media lifecycle acceptance pass; the final exact downloaded artifact still requires the recorded GUI/media run on a clean Windows machine or VM.
+Status: **Complete.** The exact GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed the recorded GUI/media workflow in Windows 11 Sandbox on 2026-10-03. The result is **PASS WITH ACCEPTED LIMITATIONS**: the unsigned executable produced the expected SmartScreen warning, and the optional unwritable-location scenario was not manually exercised. See `releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`.
 
 - Copy only the versioned release ZIP to another Windows machine or clean VM that does not have the repository or project virtual environment.
 - Extract the whole folder and launch without Python or administrator privileges.

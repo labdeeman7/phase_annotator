@@ -58,7 +58,7 @@ The project intentionally does not hash source videos. Release-file checksums, i
 
 ## Acceptance and release
 
-Use `CLEAN_MACHINE_ACCEPTANCE.md` on a Windows machine or VM without the repository, virtual environment, or developer tools. Test the exact extracted GitHub artifact, not a later local rebuild. Record failures; fix them or accept them explicitly in `LIMITATIONS.md`, then rebuild and restart acceptance if the artifact changes.
+Copy `CLEAN_MACHINE_ACCEPTANCE.md` to `docs/releases/<version>/CLEAN_MACHINE_ACCEPTANCE.md`, then complete that version-specific record on a Windows machine or VM without the repository, virtual environment, or developer tools. Test the exact extracted GitHub artifact, not a later local rebuild. Record failures; fix them or accept them explicitly in `LIMITATIONS.md`, then rebuild and restart acceptance if the artifact changes. Preserve previous version records rather than overwriting the template or relying only on Git history.
 
 After acceptance:
 

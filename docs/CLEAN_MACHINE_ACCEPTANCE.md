@@ -1,6 +1,6 @@
-# C10.7 Clean-Machine Acceptance Record
+# Clean-Machine Acceptance Template
 
-Status: **Ready to execute; final manual clean-machine result pending.**
+Status: **Reusable template.** Copy this file to `docs/releases/<version>/CLEAN_MACHINE_ACCEPTANCE.md` and complete that version-specific record without overwriting prior release evidence.
 
 Test the exact GitHub Actions artifact produced from the intended release commit. A clean machine means a Windows computer or fresh VM without this repository, its virtual environments, or a developer Python installation being used by the application.
 
@@ -23,6 +23,7 @@ Use disposable/de-identified representative media. Do not record a patient ident
 
 - [ ] Download the artifact on the clean machine.
 - [ ] Extract the complete folder; do not run inside the ZIP.
+- [ ] Record whether SmartScreen shows **Windows protected your PC / Unknown publisher** and whether the project's approved response remains available. Treat a named malware detection or quarantine as a separate blocking failure.
 - [ ] Launch `PhaseAnnotator.exe` without Python or administrator rights.
 - [ ] Enter a first name and confirm it appears lowercase in the title.
 - [ ] Select appendectomy and confirm the correct phase palette/title.

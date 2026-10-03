@@ -522,6 +522,12 @@ Related activities can still have different success criteria. Release acceptance
 
 Loading existing reference annotations and annotating from scratch also test different things. Reference walkthroughs exercise compatibility, rendering, navigation, and correction over realistic data; blind practice exercises learnability, speed, correction burden, and decision uncertainty. A balanced evaluation needs both, with reference answers kept separate until practice is complete.
 
+### Code signing and SmartScreen reputation are separate from functional correctness
+
+Windows SmartScreen evaluates a downloaded executable's publisher signature and reputation in addition to antivirus evidence. A new unsigned PyInstaller executable therefore commonly shows “Windows protected your PC” or “Unknown publisher” even when its source tests, package smoke test, and malware scan pass. This warning is not proof of malware, but neither should users bypass it for an unexpected or unverifiable download.
+
+Authenticode signing binds a verified publisher identity to the executable and lets publisher reputation carry across releases; a self-signed certificate does not provide the same public trust. Signing can improve the prompt and trust story, but a newly signed application may still need to build SmartScreen reputation. Distribution through the Microsoft Store is another route because Microsoft signs Store-delivered applications. Until a trusted signing/distribution route is adopted, the warning must be documented as a release limitation and early users should verify the approved source before choosing **Run anyway**.
+
 ### A release is a chain of evidence, not one build command
 
 A small desktop release commonly combines automated CI, a reproducible package build, audience-specific documentation, release notes, and acceptance of the exact candidate artifact. These pieces answer different questions: CI checks that committed source reconstructs and passes declared gates; the build creates the deliverable; guides explain use, maintenance, and reproduction; release notes identify what changed and remains limited; and clean-machine acceptance demonstrates that the exact downloadable artifact works without hidden developer state. Larger products may add signing, installers, security scans, staged rollout, and formal approvals, but the underlying separation of evidence remains useful.

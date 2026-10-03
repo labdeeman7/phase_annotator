@@ -64,7 +64,7 @@ The application entry point is:
 python -m phase_annotator
 ```
 
-This is an early research prototype implemented through release-engineering milestone C10.6. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, attribution/history, protected completion/reopening, prominent failures, playback-speed/jump controls, procedure selection, and shortcut help work. A reproducible Windows one-folder build and GitHub Actions artifact workflow exist; final clean-machine release-candidate acceptance and broader platform validation remain pending.
+This is an early research prototype with release-engineering milestone C10 complete. Playback, mouse/hotkey annotation, correction tools, undo/redo, media checks, automatic canonical JSON persistence, attribution/history, protected completion/reopening, prominent failures, playback-speed/jump controls, procedure selection, and shortcut help work. The 0.1.0 GitHub Actions artifact passed recorded Windows 11 Sandbox acceptance with documented limitations; broader platform and real-video validation remain planned.
 
 ## Documentation
 
@@ -84,6 +84,7 @@ This is an early research prototype implemented through release-engineering mile
 * [Windows Release Guide](docs/RELEASE_GUIDE.md)
 * [Known Limitations](docs/LIMITATIONS.md)
 * [Clean-Machine Acceptance](docs/CLEAN_MACHINE_ACCEPTANCE.md)
+* [0.1.0 Clean-Machine Acceptance Record](docs/releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md)
 * [Release Notes](docs/RELEASE_NOTES.md)
 * [Real-Video Validation and Training Plan](docs/REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md)
 * [Architecture Decisions](docs/DECISIONS.md)
