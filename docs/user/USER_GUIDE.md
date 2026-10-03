@@ -31,6 +31,8 @@ Do not select a different procedure merely to bypass an error. A video with an e
 3. For a new video, the timeline begins with the configured first phase covering the whole duration.
 4. For a previously annotated video, the adjacent JSON sidecar loads automatically and playback resumes near its saved checkpoint.
 
+The selected video filename appears directly above the video and in the window title, so confirm it before annotating or reviewing a reference.
+
 The canonical annotation is named:
 
 ```text
@@ -43,7 +45,7 @@ For example, `case01.mp4` uses `case01.mp4.phase-annotations.json`. Keep the vid
 
 | Control | Behavior |
 | --- | --- |
-| **Play/Pause** or Space | Start or pause playback |
+| **Play/Pause**, Space, or click the video | Start or pause playback |
 | Left/Right arrow | Step by an estimated frame interval |
 | **−5 sec / +5 sec** | Jump five seconds |
 | Speed | Select 1×, 2×, 4×, 8×, or 12× |

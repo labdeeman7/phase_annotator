@@ -71,6 +71,7 @@ def test_main_window_instantiation(qtbot):
         12.0,
     ]
     assert not hasattr(window, "_timeline_zoom_factor")
+    assert window._video_name_label.text() == "No video loaded"
 
 
 def test_notification_banner_shows_and_dismisses(qtbot):
@@ -217,6 +218,20 @@ def test_player_widget_exposes_public_playback_state(qtbot):
     assert player_widget.is_playing is False
 
 
+def test_clicking_loaded_video_surface_toggles_playback(qtbot, monkeypatch, tmp_path):
+    player_widget = VideoPlayerWidget()
+    qtbot.addWidget(player_widget)
+    calls = []
+    monkeypatch.setattr(player_widget, "toggle_play", lambda: calls.append("toggle"))
+
+    qtbot.mouseClick(player_widget._video_widget, Qt.MouseButton.LeftButton)
+    assert calls == []
+
+    player_widget._video_path = tmp_path / "case.mp4"
+    qtbot.mouseClick(player_widget._video_widget, Qt.MouseButton.LeftButton)
+    assert calls == ["toggle"]
+
+
 def test_player_widget_translates_qt_format_error(qtbot):
     player_widget = VideoPlayerWidget()
     qtbot.addWidget(player_widget)
@@ -262,6 +277,8 @@ def test_load_status_changes_when_duration_becomes_available(
     assert window._session.video_info.fps_source == "assumed"
     assert window._session.video_info.frame_rate_mode == "unknown"
     assert window._session.video_info.frame_numbers_are_estimated
+    assert window._video_name_label.text() == "synthetic_case.mp4"
+    assert "synthetic_case.mp4" in window.windowTitle()
 
     window._on_duration_changed(10_000)
     assert window.statusBar().currentMessage() == "Loaded: synthetic_case.mp4"

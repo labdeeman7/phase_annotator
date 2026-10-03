@@ -531,3 +531,11 @@ Authenticode signing binds a verified publisher identity to the executable and l
 ### A release is a chain of evidence, not one build command
 
 A small desktop release commonly combines automated CI, a reproducible package build, audience-specific documentation, release notes, and acceptance of the exact candidate artifact. These pieces answer different questions: CI checks that committed source reconstructs and passes declared gates; the build creates the deliverable; guides explain use, maintenance, and reproduction; release notes identify what changed and remains limited; and clean-machine acceptance demonstrates that the exact downloadable artifact works without hidden developer state. Larger products may add signing, installers, security scans, staged rollout, and formal approvals, but the underlying separation of evidence remains useful.
+
+### Convert semantics at the boundary, not merely file syntax
+
+Data conversion is correct only when both systems' meanings agree. Cholec80 labels inclusive frame indices, while Phase Annotator stores half-open millisecond intervals. At 25 FPS, inclusive frames `a..b` therefore become `[a × 40 ms, (b + 1) × 40 ms)`. Writing syntactically valid JSON without defining that endpoint rule could shift every transition or lose the final frame.
+
+Provenance is also part of correctness. An imported reference should not claim that a human created it in the GUI. Deterministic conversion, explicit machine attribution, a separate provenance record, overwrite refusal, and validation through the application's existing rules make the transformation inspectable and repeatable.
+
+One implementation trap is that `dataclasses.asdict()` serializes every dataclass field, including private compatibility fields. Persistence formats are contracts, so a converter should reuse or deliberately mirror the repository's serialization policy rather than treating raw dataclass output as the schema.

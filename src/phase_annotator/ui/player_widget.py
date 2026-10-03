@@ -1,12 +1,25 @@
 from pathlib import Path
 from typing import Optional
 
-from PySide6.QtCore import QUrl, Signal
+from PySide6.QtCore import Qt, QUrl, Signal
 from PySide6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PySide6.QtMultimediaWidgets import QVideoWidget
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 from phase_annotator.media.qt_metadata import read_qt_media_metadata
+
+
+class ClickableVideoWidget(QVideoWidget):
+    """Video surface that exposes the familiar click-to-play interaction."""
+
+    clicked = Signal()
+
+    def mouseReleaseEvent(self, event) -> None:
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit()
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
 
 
 class VideoPlayerWidget(QWidget):
@@ -26,7 +39,7 @@ class VideoPlayerWidget(QWidget):
         self._audio_output = QAudioOutput(self)
         self._player.setAudioOutput(self._audio_output)
 
-        self._video_widget = QVideoWidget(self)
+        self._video_widget = ClickableVideoWidget(self)
         self._player.setVideoOutput(self._video_widget)
 
         self._fps: float = 30.0  # Default FPS assumption until loaded
@@ -44,6 +57,7 @@ class VideoPlayerWidget(QWidget):
         self._player.metaDataChanged.connect(self._emit_metadata)
         self._player.tracksChanged.connect(self._emit_metadata)
         self._player.errorOccurred.connect(self._forward_media_error)
+        self._video_widget.clicked.connect(self._toggle_from_video_click)
 
     @property
     def fps(self) -> float:
@@ -96,6 +110,11 @@ class VideoPlayerWidget(QWidget):
             self.pause()
         else:
             self.play()
+
+    def _toggle_from_video_click(self) -> None:
+        """Ignore clicks on the empty surface until a video has been selected."""
+        if self._video_path is not None:
+            self.toggle_play()
 
     def seek_ms(self, position_ms: int) -> None:
         """Seeks to a specific timestamp in milliseconds."""

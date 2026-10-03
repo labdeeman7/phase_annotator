@@ -112,6 +112,12 @@ class MainWindow(QMainWindow):
         left_panel = QWidget(self)
         left_layout = QVBoxLayout(left_panel)
         left_layout.setContentsMargins(0, 0, 0, 0)
+        self._video_name_label = QLabel("No video loaded", self)
+        self._video_name_label.setObjectName("videoNameLabel")
+        self._video_name_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
+        left_layout.addWidget(self._video_name_label)
         left_layout.addWidget(self._player_widget, stretch=1)
 
         left_layout.addWidget(self._timeline_widget)
@@ -495,6 +501,9 @@ class MainWindow(QMainWindow):
             return False
         self._notification_banner.hide_notification()
         self._video_path = path
+        self._video_name_label.setText(path.name)
+        self._video_name_label.setToolTip(path.name)
+        self._update_dirty_indicator()
         self._loading_video = True
         self._media_load_failed = False
         self._sidecar_load_blocked = False
@@ -616,7 +625,8 @@ class MainWindow(QMainWindow):
             lifecycle = (
                 " — Completed" if self._session.status == "completed" else " — Draft"
             )
-        self.setWindowTitle(f"{self._base_window_title}{lifecycle}{suffix}")
+        video_name = f" — {self._video_path.name}" if self._video_path else ""
+        self.setWindowTitle(f"{self._base_window_title}{video_name}{lifecycle}{suffix}")
 
     def _persist_session(self) -> bool:
         """Write the current valid session to its canonical sidecar immediately."""

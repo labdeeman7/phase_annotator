@@ -8,6 +8,12 @@ QMainWindow, QWidget {
     font-size: 12px;
 }
 QLabel { background-color: transparent; }
+QLabel#videoNameLabel {
+    color: #E2E8F0;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 4px;
+}
 
 QMenuBar {
     background-color: #18222D;

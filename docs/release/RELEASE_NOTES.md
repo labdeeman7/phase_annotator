@@ -1,5 +1,20 @@
 # Release Notes
 
+## 0.1.1 — Candidate under validation (2026-10-03)
+
+This usability release is not accepted or distributed yet.
+
+### Changed
+
+- Show the selected video filename above the video and in the window title.
+- Toggle Play/Pause by clicking the video surface, matching a familiar media-player interaction.
+- Protect imported Cholec80 training references as Completed while retaining explicit machine-import attribution and provenance.
+- Add the tested Cholec80 conversion contract and a structured working clinical-protocol evidence log.
+
+### Release gate
+
+The source checks, manual interaction checks, Windows artifact build, and clean-machine acceptance must pass before this section is marked accepted.
+
 ## 0.1.0 — Accepted release candidate (2026-10-03)
 
 Phase Annotator 0.1.0 is the first Windows release candidate of the configurable surgical phase annotation prototype.

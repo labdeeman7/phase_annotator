@@ -159,6 +159,8 @@ Status: **Complete.** The authorised DGX copy contained 80 valid MP4/TXT pairs. 
 
 ### V2 — Converter contract and synthetic tests
 
+Status: **Implemented; pending V3 real-case acceptance.** See `V2_CONVERSION_CONTRACT.md`.
+
 - Inspect representative source annotations and video metadata.
 - Write expected conversions for boundary edge cases.
 - Implement a path-agnostic converter under `scripts/` with synthetic tests and overwrite protection.

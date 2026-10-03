@@ -1,6 +1,6 @@
 # Post-Release Validation and Training Programme
 
-Status: **V1 complete; V2 next.** Phase Annotator 0.1.0 has completed C10 release engineering and clean-machine acceptance. The DGX Cholec80 copy has been inventoried read-only and a reproducible 15-case cohort has been selected. This programme now asks how the accepted application behaves during sustained use on those real cholecystectomy videos and how reviewed cases should support clinician training.
+Status: **V2 implemented; V3 one-case trial next.** Phase Annotator 0.1.0 has completed C10 release engineering and clean-machine acceptance. The DGX Cholec80 copy has been inventoried read-only, a reproducible 15-case cohort selected, and a provenance-preserving converter tested synthetically. This programme now asks how the accepted application behaves during sustained use on those real cholecystectomy videos and how reviewed cases should support clinician training.
 
 ## The sequence we agreed
 
@@ -41,8 +41,10 @@ Label only what is observable in the available recording. Every available millis
 
 The existing DGX copy was inspected without modifying or copying video. All 80 MP4/TXT pairs passed filename, header, contiguous-frame, and vocabulary checks. Seed `20261003` reproducibly selected 10 reference and 5 blind cases. See [`V1_INTAKE_AND_SELECTION.md`](V1_INTAKE_AND_SELECTION.md) and the machine-readable cohort manifest under `cohorts/`.
 
-## Immediate next session: V2
+## Completed V2 and immediate next session: V3
 
-Define the exact 25 FPS source-frame to half-open millisecond interval contract, final-duration handling, label-to-ontology mapping, converter provenance, and overwrite/reference separation. Write synthetic expected cases before implementing the converter. Do not copy all 15 videos until the converter and one-case V3 trial establish what local inputs are actually required.
+The exact 25 FPS source-frame to half-open millisecond interval contract, final-duration handling, label-to-ontology mapping, converter provenance, and overwrite/reference separation are implemented and synthetically tested. See [`V2_CONVERSION_CONTRACT.md`](V2_CONVERSION_CONTRACT.md). V3 stages only one reference case, obtains its Qt duration, converts it, and visually checks real boundaries before any batch conversion.
 
 See [`REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`](REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md) for the complete contract, evidence fields, and governance boundaries.
+
+The evolving phase definitions and per-boundary evidence log live in [`protocol.md`](protocol.md). It is an observational working draft, not yet an approved student protocol.
