@@ -10,7 +10,7 @@ One-file packaging, an installer, signing, automatic updates, and non-Windows re
 
 1. Confirm the intended version in `pyproject.toml` and `src/phase_annotator/__init__.py` matches the release notes and window title.
 2. Ensure the working tree contains only intended changes.
-3. Run all source quality gates from `DEVELOPER_GUIDE.md`.
+3. Run all source quality gates from `../development/DEVELOPER_GUIDE.md`.
 4. Use a standard 64-bit CPython 3.13 environment—not the Conda-derived development environment.
 
 Create or refresh the release environment:
@@ -58,7 +58,7 @@ The project intentionally does not hash source videos. Release-file checksums, i
 
 ## Acceptance and release
 
-Copy `CLEAN_MACHINE_ACCEPTANCE.md` to `docs/releases/<version>/CLEAN_MACHINE_ACCEPTANCE.md`, then complete that version-specific record on a Windows machine or VM without the repository, virtual environment, or developer tools. Test the exact extracted GitHub artifact, not a later local rebuild. Record failures; fix them or accept them explicitly in `LIMITATIONS.md`, then rebuild and restart acceptance if the artifact changes. Preserve previous version records rather than overwriting the template or relying only on Git history.
+Copy `CLEAN_MACHINE_ACCEPTANCE_TEMPLATE.md` to `docs/release/versions/<version>/CLEAN_MACHINE_ACCEPTANCE.md`, then complete that version-specific record on a Windows machine or VM without the repository, virtual environment, or developer tools. Test the exact extracted GitHub artifact, not a later local rebuild. Record failures; fix them or accept them explicitly in `../user/LIMITATIONS.md`, then rebuild and restart acceptance if the artifact changes. Preserve previous version records rather than overwriting the template or relying only on Git history.
 
 After acceptance:
 

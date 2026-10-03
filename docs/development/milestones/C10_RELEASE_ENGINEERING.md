@@ -67,7 +67,7 @@ Status: **Complete.** An exploratory Miniconda-derived build exposed unresolved 
 - Begin with a minimal exploratory build, inspect what PyInstaller detects, and then convert the successful configuration into a maintained `.spec` recipe. Do not start by hiding the process behind additional deployment automation.
 - Verify PySide6/Qt Multimedia support, resource inclusion, output size/startup, licensing implications, reproducibility, and CI suitability on this application.
 - Keep Qt's `pyside6-deploy` as a documented fallback, not a parallel implementation. Reconsider it only if PyInstaller presents a concrete unresolved Qt deployment problem.
-- Record the packaging decision and fallback in `DECISIONS.md`.
+- Record the packaging decision and fallback in `../DECISIONS.md`.
 - Add the selected build dependency in an explicit packaging/release dependency group.
 - Create a maintained build recipe and PowerShell build script; do not rely on an undocumented command from shell history.
 - Reject Conda-derived release environments by default because the exploratory build exposed unresolved base-interpreter DLLs; retain an explicitly named exploration-only override that cannot be mistaken for release approval.
@@ -130,7 +130,7 @@ Learning focus: workflow triggers, runners, jobs, steps, clean environments, cac
 
 ### C10.6 — User, developer, and release documentation
 
-Status: **Complete.** `USER_GUIDE.md`, `DEVELOPER_GUIDE.md`, `RELEASE_GUIDE.md`, `LIMITATIONS.md`, `RELEASE_NOTES.md`, and `CLEAN_MACHINE_ACCEPTANCE.md` cover their distinct audiences and are linked from the README. The user guide includes a repository-safe annotated interface map. Extended Cholec80 validation and clinical training/protocol development remain separate post-release work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
+Status: **Complete.** `../../user/USER_GUIDE.md`, `../DEVELOPER_GUIDE.md`, `../../release/RELEASE_GUIDE.md`, `../../user/LIMITATIONS.md`, `../../release/RELEASE_NOTES.md`, and `../../release/CLEAN_MACHINE_ACCEPTANCE_TEMPLATE.md` cover their distinct audiences. The user guide includes a repository-safe annotated interface map. Extended Cholec80 validation and clinical training/protocol development remain separate post-release work under `../../studies/`.
 
 - Write a short clinician guide covering extraction, launch, identity/procedure choice, annotation, corrections, autosave, completion, and common errors.
 - Document where canonical JSON and history live and how they must travel with the video.
@@ -145,7 +145,7 @@ Learning focus: writing for users, maintainers, and release operators as distinc
 
 ### C10.7 — Clean-machine acceptance and release candidate
 
-Status: **Complete.** The exact GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed the recorded GUI/media workflow in Windows 11 Sandbox on 2026-10-03. The result is **PASS WITH ACCEPTED LIMITATIONS**: the unsigned executable produced the expected SmartScreen warning, and the optional unwritable-location scenario was not manually exercised. See `releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`.
+Status: **Complete.** The exact GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed the recorded GUI/media workflow in Windows 11 Sandbox on 2026-10-03. The result is **PASS WITH ACCEPTED LIMITATIONS**: the unsigned executable produced the expected SmartScreen warning, and the optional unwritable-location scenario was not manually exercised. See `../../release/versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`.
 
 - Copy only the versioned release ZIP to another Windows machine or clean VM that does not have the repository or project virtual environment.
 - Extract the whole folder and launch without Python or administrator privileges.

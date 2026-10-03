@@ -24,8 +24,8 @@ Phase Annotator 0.1.0 is the first Windows release candidate of the configurable
 - No concurrent collaboration, CSV export, persisted Undo/Redo, installer, signing, or automatic updates.
 - This remains research software, not a regulated clinical system.
 
-See `LIMITATIONS.md` and `USER_GUIDE.md` before use.
+See `../user/LIMITATIONS.md` and `../user/USER_GUIDE.md` before use.
 
 ### Acceptance
 
-The exact GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed Windows 11 Sandbox acceptance. The unsigned executable produced the expected SmartScreen warning, and the optional unwritable-location scenario was not manually exercised. Full evidence is in `releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`.
+The exact GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed Windows 11 Sandbox acceptance. The unsigned executable produced the expected SmartScreen warning, and the optional unwritable-location scenario was not manually exercised. Full evidence is in `versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`.

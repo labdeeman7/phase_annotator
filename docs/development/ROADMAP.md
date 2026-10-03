@@ -133,7 +133,7 @@ Goal: enable realistic annotation, not only append-at-playhead transitions.
 
 Status: **Completed and manually accepted on 2026-09-05.**
 
-The agreed C3.1-C3.5 interaction and data-integrity contract is detailed in `C3_CORRECTION_WORKFLOW.md`.
+The agreed C3.1-C3.5 interaction and data-integrity contract is detailed in `milestones/C3_CORRECTION_WORKFLOW.md`.
 
 Implementation:
 
@@ -155,7 +155,7 @@ Learning focus: model/view synchronization, editing context, and UI state owners
 
 Goal: make temporal correction fast while keeping every edit safe and reversible.
 
-The agreed C4.1-C4.4 design, history semantics, and deep-review reading map are detailed in `C4_HISTORY_AND_DRAGGING.md`.
+The agreed C4.1-C4.4 design, history semantics, and deep-review reading map are detailed in `milestones/C4_HISTORY_AND_DRAGGING.md`.
 
 Status: **Completed on 2026-09-07; user-visible workflow manually accepted.**
 
@@ -178,7 +178,7 @@ Goal: make timing claims explicit and playback failures understandable.
 
 Status: **Completed on 2026-09-09; representative Windows-backend smoke check passed.**
 
-The completed C5.1-C5.6 plan, no-hash source-descriptor policy, Qt-only metadata decision, and timing-confidence rules are detailed in `C5_MEDIA_RELIABILITY.md`.
+The completed C5.1-C5.6 plan, no-hash source-descriptor policy, Qt-only metadata decision, and timing-confidence rules are detailed in `milestones/C5_MEDIA_RELIABILITY.md`.
 
 Implementation:
 
@@ -196,7 +196,7 @@ Learning focus: media time bases, metadata trust, and platform decoder boundarie
 
 Goal: automatically save and safely resume one canonical JSON annotation sidecar per video without routine Save/Save As interaction.
 
-The detailed C6.1-C6.7 contract, dirty-state meaning, source-safety behavior, and sidecar policy are in `C6_CONTINUOUS_PERSISTENCE.md`.
+The detailed C6.1-C6.7 contract, dirty-state meaning, source-safety behavior, and sidecar policy are in `milestones/C6_CONTINUOUS_PERSISTENCE.md`.
 
 Status: **Complete.** The sidecar workflow is integrated and covered by domain, coordinator, repository, and lightweight GUI tests. A read-only-folder fallback was deliberately not added without demonstrated need.
 
@@ -208,7 +208,7 @@ Learning focus: repository versus coordinator boundaries, dirty state, atomicity
 
 Goal: support safe sequential use by identifiable annotators while retaining one lightweight historical snapshot per changed video run.
 
-The agreed identity, attribution, snapshot, and conflict-safety contract is in `C7_ATTRIBUTION_AND_HISTORY.md`.
+The agreed identity, attribution, snapshot, and conflict-safety contract is in `milestones/C7_ATTRIBUTION_AND_HISTORY.md`.
 
 Status: **Complete pending revised manual acceptance.** Schema 1.3, one identity per launch, changed-run snapshots, and optimistic external-change detection are integrated and tested.
 
@@ -226,7 +226,7 @@ Post-milestone C8.7 pulled the first C9 usability concern forward: the previousl
 
 Goal: distinguish valid draft work from explicitly completed annotation while keeping JSON canonical.
 
-The detailed C8.1-C8.6 lifecycle, notes, validation, and reopening contract is in `C8_COMPLETION_AND_TRUST.md`.
+The detailed C8.1-C8.6 lifecycle, notes, validation, and reopening contract is in `milestones/C8_COMPLETION_AND_TRUST.md`.
 
 Implementation:
 
@@ -245,7 +245,7 @@ Learning focus: validation boundaries, lifecycle state, and trustworthy research
 
 Goal: make sustained annotation practical after correctness is established.
 
-The focused C9.1-C9.5 interaction contract is in `C9_USABILITY_AND_EFFICIENCY.md`.
+The focused C9.1-C9.5 interaction contract is in `milestones/C9_USABILITY_AND_EFFICIENCY.md`.
 
 Status: **Complete pending manual acceptance.** Notification hierarchy, playback efficiency controls, and in-application help are implemented and tested. Timeline zoom was evaluated and removed after manual feedback because it competed visually with playback speed.
 
@@ -266,17 +266,17 @@ Learning focus: profiling and evidence-led UX refinement.
 
 ### C9.6 — Procedure selection before packaging
 
-Status: **Implemented pending manual and packaged-build acceptance.** The detailed contract is in `C9_6_PROCEDURE_SELECTION.md`. Registry, approved cholecystectomy JSON, startup selection, title context, and mismatch safety are implemented; executable resource verification remains part of C10.
+Status: **Complete.** The detailed contract is in `milestones/C9_6_PROCEDURE_SELECTION.md`. Registry, approved cholecystectomy JSON, startup selection, title context, mismatch safety, and packaged-resource verification passed through C10.
 
 ### C9.7 — Procedure-mismatch safety
 
-Status: **Complete pending manual acceptance.** Keep one procedure-neutral canonical sidecar, block mismatched ontology IDs, name both procedures, and guarantee that the existing JSON is not changed. See `C9_7_PROCEDURE_MISMATCH_SAFETY.md`.
+Status: **Complete.** Keep one procedure-neutral canonical sidecar, block mismatched ontology IDs, name both procedures, and guarantee that the existing JSON is not changed. See `milestones/C9_7_PROCEDURE_MISMATCH_SAFETY.md` and the accepted 0.1.0 release evidence.
 
 ### C10 — Engineering quality, CI, and release
 
 Goal: make the project reproducible for contributors and distributable to users.
 
-Status: **Complete.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `C10_RELEASE_ENGINEERING.md`. The exact 0.1.0 GitHub Actions artifact passed Windows 11 Sandbox acceptance on 2026-10-03 with accepted limitations recorded under `releases/0.1.0/`.
+Status: **Complete.** The release contract, staged exit gates, constraints, and learning-mode reading map are in `milestones/C10_RELEASE_ENGINEERING.md`. The exact 0.1.0 GitHub Actions artifact passed Windows 11 Sandbox acceptance on 2026-10-03 with accepted limitations recorded under `../release/versions/0.1.0/`.
 
 The first target is a versioned ZIP containing a portable one-folder 64-bit Windows application. It must run without a user-installed Python environment or administrator rights, retain the existing adjacent-sidecar data contract, include both packaged procedures, and pass clean-machine acceptance. Installer, one-file executable, automatic updates, code signing, and non-Windows releases are explicitly deferred pending evidence.
 
@@ -287,7 +287,7 @@ Slices:
 - C10.3: PyInstaller one-folder build and maintained Windows recipe — complete; use `pyside6-deploy` only as a justified fallback.
 - C10.4: packaged-artifact and representative-media testing — complete.
 - C10.5: clean-checkout continuous integration and build artifacts.
-- C10.6: clinician, developer, release, and limitation documentation — complete; see `C10_6_DOCUMENTATION_PLAN.md`.
+- C10.6: clinician, developer, release, and limitation documentation — complete; see `milestones/C10_6_DOCUMENTATION_PLAN.md`.
 - C10.7: exact-artifact clean-machine acceptance and release candidate — complete.
 
 Exit gate: CI is green from a clean checkout; a versioned artifact passes the release checklist on a clean supported machine.
@@ -320,4 +320,4 @@ Each milestone follows the same collaboration loop:
 
 ## Immediate next step
 
-Begin V1 in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`: inspect one authorised Cholec80 source read-only, retain the applicable dataset terms, inventory video/label pairs, and reproducibly select the 15-case cohort before implementing conversion.
+The C0–C10 application-development roadmap is complete. New post-release validation and training work is tracked separately in `../studies/README.md` and `../studies/TASKS.md`. Findings may create focused future application issues, but V1–V6 are not extensions of C10.

@@ -106,7 +106,7 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C9.6.4: display procedure context and test ontology mismatch safety
 - [x] C9.6.5: verify both ontology resources in the packaged application
 - [x] C9.7: keep one canonical sidecar and provide a safe, actionable procedure-mismatch error
-- [ ] C10: Engineering quality, CI, and release readiness (see `C10_RELEASE_ENGINEERING.md`)
+- [x] C10: Engineering quality, CI, and release readiness (see `milestones/C10_RELEASE_ENGINEERING.md`)
 - [x] C10.1: agree and document the first Windows release contract and staged plan
 - [x] C10.2: configure and satisfy a minimal Ruff and scoped-Mypy quality policy
 - [x] C10.3: add and validate a maintained PyInstaller one-folder Windows build recipe
@@ -114,15 +114,6 @@ Accepted rules: full timeline coverage, configurable expected initial phase, exp
 - [x] C10.5: add clean-checkout CI and a deliberate Windows packaging workflow
 - [x] C10.6: write clinician, developer, release, and limitation documentation
 - [x] C10.7: pass and record clean-machine acceptance for the exact release candidate
-
-## Post-release real-video validation and training
-
-- [ ] V1: inspect Cholec80 terms/layout and reproducibly select 15 cases
-- [ ] V2: specify and implement a provenance-preserving converter with synthetic tests
-- [ ] V3: validate the conversion contract on one reference case
-- [ ] V4: complete 10 packaged-application reference walkthroughs
-- [ ] V5: complete 5 blind practice annotations and compare afterwards
-- [ ] V6: clinically review and publish the versioned training/protocol material
 
 ## Known cleanup (do not confuse with feature work)
 

@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-09-21 after implementation of C9, based on C8.7 commit `010441f`.
+Last verified on 2026-10-03 after completion of C10 and recorded 0.1.0 Windows Sandbox acceptance.
 
 ## What Phase Annotator currently does
 
@@ -44,18 +44,18 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 
 ## Planned but absent
 
-- Distribution/installer work and Windows/Linux media-backend verification.
-- Continuous integration.
+- A signed installer, automatic updates, and broader Windows/Linux/macOS media-backend validation.
 - A real presenter/controller layer. `MainWindow` currently combines orchestration, session creation, and annotation mutations.
 - User-configurable ontology/configuration loading.
+- Formal multi-participant usability evaluation, gold-label comparison, and clinical-protocol approval.
 
 ## Technical debt and inconsistencies
 
 - `ui/table_widget.py` is an unused near-duplicate of `ui/segment_list_widget.py`; both were added in M3, but only the latter is imported.
-- `docs/DECISIONS.md` previously described a `QTableWidget`/`IntervalTableView`; the implementation uses custom cards in a `QListWidget`.
+- `DECISIONS.md` previously described a `QTableWidget`/`IntervalTableView`; the implementation uses custom cards in a `QListWidget`.
 - Package metadata, `phase_annotator.__version__`, and the window title now consistently report `0.1.0`; release versioning remains manual.
 - Historical docs described Clean Architecture/MVP and a storage/export layer more fully than implemented. There is no presenter, repository interface, or CSV adapter yet.
-- Several imports are unused, and no lint/type-check configuration exists to catch them.
+- Ruff formatting/linting and scoped Mypy are configured, but the Qt UI remains outside the type-check gate and some historical cleanup remains.
 
 ## Git evolution and latest Antigravity work
 
@@ -75,4 +75,4 @@ On 2026-09-23, both the repository-local Miniconda-derived Python 3.11.5 develop
 
 ## Recommended next increment
 
-C10.1–C10.7 are complete. The release contract and staged evidence are in `C10_RELEASE_ENGINEERING.md`. The exact 0.1.0 GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed Windows 11 Sandbox acceptance on 2026-10-03 with two recorded limitations: the expected SmartScreen warning for an unsigned executable and no manual unwritable-folder exercise. See `releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`. The next work is the 15-case Cholec80 extended self-use validation, followed by the separate clinical training/protocol work in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
+C10.1–C10.7 are complete. The release contract and staged evidence are in `milestones/C10_RELEASE_ENGINEERING.md`. The exact 0.1.0 GitHub Actions artifact for commit `4fce4f55300c99bb748ea8ff845ea8dc8b2472ad` passed Windows 11 Sandbox acceptance on 2026-10-03 with two recorded limitations: the expected SmartScreen warning for an unsigned executable and no manual unwritable-folder exercise. See `../release/versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`. The new work is owned separately by `../studies/README.md`: 15-case Cholec80 extended self-use validation followed by clinical training/protocol development.

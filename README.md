@@ -68,27 +68,12 @@ This is an early research prototype with release-engineering milestone C10 compl
 
 ## Documentation
 
-* [Architecture](docs/ARCHITECTURE.md)
-* [Current State and Handover](docs/CURRENT_STATE.md)
-* [Project Roadmap](docs/ROADMAP.md)
-* [Annotation and Video Workflow](docs/ANNOTATION_WORKFLOW.md)
-* [Annotation Data Model](docs/DATA_MODEL.md)
-* [Ontology Configuration](docs/ONTOLOGY_CONFIGURATION.md)
-* [Media Reliability Contract](docs/C5_MEDIA_RELIABILITY.md)
-* [Continuous Persistence Plan](docs/C6_CONTINUOUS_PERSISTENCE.md)
-* [Annotator Attribution and History Plan](docs/C7_ATTRIBUTION_AND_HISTORY.md)
-* [Completion and Trustworthy JSON Plan](docs/C8_COMPLETION_AND_TRUST.md)
-* [C10 Release Engineering Plan](docs/C10_RELEASE_ENGINEERING.md)
-* [Clinician User Guide](docs/USER_GUIDE.md)
-* [Developer Guide](docs/DEVELOPER_GUIDE.md)
-* [Windows Release Guide](docs/RELEASE_GUIDE.md)
-* [Known Limitations](docs/LIMITATIONS.md)
-* [Clean-Machine Acceptance](docs/CLEAN_MACHINE_ACCEPTANCE.md)
-* [0.1.0 Clean-Machine Acceptance Record](docs/releases/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md)
-* [Release Notes](docs/RELEASE_NOTES.md)
-* [Real-Video Validation and Training Plan](docs/REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md)
-* [Architecture Decisions](docs/DECISIONS.md)
-* [Software Patterns & Learning Journal](docs/LEARNING_JOURNAL.md)
-* [Video Encoding Fundamentals Guide](docs/VIDEO_ENCODING_GUIDE.md)
-* [Task Backlog](docs/TASKS.md)
-* [Testing Contract](docs/TESTING.md)
+Start with the [documentation map](docs/README.md). It separates clinician guidance, current development/reference material, release evidence, completed milestone history, and the new post-release validation/training programme.
+
+Current entry points:
+
+* [Clinician User Guide](docs/user/USER_GUIDE.md)
+* [Developer Guide](docs/development/DEVELOPER_GUIDE.md)
+* [Current State](docs/development/CURRENT_STATE.md)
+* [0.1.0 Release Evidence](docs/release/versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md)
+* [Post-Release Validation and Training](docs/studies/README.md)

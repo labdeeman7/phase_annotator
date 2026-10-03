@@ -4,7 +4,7 @@
 
 This repository is a configurable desktop tool for producing temporal phase annotations for surgical videos. It currently ships with provisional laparoscopic appendectomy and laparoscopic cholecystectomy ontologies. It is an early prototype implemented through Codex milestone C9.7, not yet a production annotation system: playback, annotation/correction, undo/redo, media checks, continuous canonical JSON persistence, attribution/history, protected completion/reopening, prominent failure feedback, playback efficiency controls, shortcut help, packaged procedure selection, and safe procedure-mismatch handling exist, while distribution and cross-platform validation do not.
 
-Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITECTURE.md`, `docs/ANNOTATION_WORKFLOW.md`, and `docs/DATA_MODEL.md` for deeper context. `docs/C10_RELEASE_ENGINEERING.md` records the completed C10.1–C10.7 release-engineering milestone; the clinician, developer, release, limitation, release-note, and acceptance documents are linked from the README. The accepted 0.1.0 evidence is under `docs/releases/0.1.0/`. `docs/REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md` plans the next extended Cholec80 self-use validation and later clinical training/protocol work. Packaging must verify both ontology resources in the executable. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
+Start with `docs/README.md`, `docs/development/CURRENT_STATE.md`, and `docs/studies/README.md`. Use `docs/development/ARCHITECTURE.md`, `docs/development/ANNOTATION_WORKFLOW.md`, and `docs/development/DATA_MODEL.md` for deeper implementation context. `docs/development/milestones/C10_RELEASE_ENGINEERING.md` records the completed C10.1–C10.7 release milestone; accepted 0.1.0 evidence is under `docs/release/versions/0.1.0/`. `docs/studies/REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md` owns the new V1–V6 Cholec80 validation and later clinical training/protocol work. Packaging must verify both ontology resources in the executable. `GEMINI.md`, if added later, and `.gemini/rules/` are historical Antigravity context rather than authoritative Codex instructions.
 
 ## Repository map
 
@@ -16,7 +16,10 @@ Start with `docs/CURRENT_STATE.md` and `docs/ROADMAP.md`, then use `docs/ARCHITE
 - `src/phase_annotator/ui/`: PySide6 main window, Qt Multimedia player, timeline, and segment cards.
 - `tests/unit/`, `tests/integration/`: domain/storage tests plus lightweight Qt widget tests.
 - `scripts/`: explicit local validation utilities; representative videos remain ignored.
-- `docs/`: architecture, schema/workflow, decisions, status/backlog, testing, and learning notes.
+- `docs/user/`: clinician-facing use and limitation guidance.
+- `docs/development/`: current engineering context, architecture, tests, learning notes, and completed milestone history.
+- `docs/release/`: release procedure, reusable acceptance template, notes, and immutable version evidence.
+- `docs/studies/`: post-release real-video validation, training, and clinical-protocol programme.
 
 ## Architectural constraints
 
@@ -55,23 +58,23 @@ Before changing behavior:
 
 1. Read the relevant implementation and tests, not only the backlog or historical docs.
 2. Check `git status --short` and preserve unrelated user changes.
-3. Reconcile the requested behavior with `docs/CURRENT_STATE.md` and update that document if the implementation status changes.
+3. Reconcile the requested behavior with `docs/development/CURRENT_STATE.md` and update that document if the implementation status changes.
 4. Add tests first where practical, especially for domain rules and persistence failure cases.
 5. Run the narrow tests while iterating and the complete suite before handoff. Report environment blockers explicitly.
 
-Keep changes small and explain non-obvious Qt signal flow or domain decisions. This is also a learning project: whenever the user learns or asks about an important reusable software-engineering concept, help capture the explanation concisely in `docs/LEARNING_JOURNAL.md`; do not wait only for milestone completion. Leave the code understandable for a developer to inspect, and avoid filling the journal with routine or project-specific trivia.
+Keep changes small and explain non-obvious Qt signal flow or domain decisions. This is also a learning project: whenever the user learns or asks about an important reusable software-engineering concept, help capture the explanation concisely in `docs/development/LEARNING_JOURNAL.md`; do not wait only for milestone completion. Leave the code understandable for a developer to inspect, and avoid filling the journal with routine or project-specific trivia.
 
-Codex owns and completes the core implementation as the senior engineering partner. At each milestone, explain the design, give the user time to inspect it, and offer one small focused exercise that reinforces the concept without transferring responsibility for core delivery. Follow the milestone loop and quality gates in `docs/ROADMAP.md`.
+Codex owns and completes the core implementation as the senior engineering partner. At each milestone, explain the design, give the user time to inspect it, and offer one small focused exercise that reinforces the concept without transferring responsibility for core delivery. Follow the milestone loop and quality gates in `docs/development/ROADMAP.md`.
 
 ## Collaboration style
 
-Default to **learning mode** for architecture, annotation semantics, data integrity, and important UI behavior. Work in small vertical slices: agree on observable behavior, implement with tests, run full validation, give the user a focused manual check and short reading map, answer their questions, then commit/push after acceptance. Identify the one central concept and at most a few important functions; explicitly say which styling, boilerplate, or repetitive test code can be skimmed. Also call out a small number of genuinely useful Python or software-engineering idioms present in the slice (for example factories, lazy generator expressions, closure binding, derived properties, or transactional updates), explain why they fit, and capture reusable ones in `docs/LEARNING_JOURNAL.md`. Prefer teach-back on real project code over assigning artificial coding exercises.
+Default to **learning mode** for architecture, annotation semantics, data integrity, and important UI behavior. Work in small vertical slices: agree on observable behavior, implement with tests, run full validation, give the user a focused manual check and short reading map, answer their questions, then commit/push after acceptance. Identify the one central concept and at most a few important functions; explicitly say which styling, boilerplate, or repetitive test code can be skimmed. Also call out a small number of genuinely useful Python or software-engineering idioms present in the slice (for example factories, lazy generator expressions, closure binding, derived properties, or transactional updates), explain why they fit, and capture reusable ones in `docs/development/LEARNING_JOURNAL.md`. Prefer teach-back on real project code over assigning artificial coding exercises.
 
 Use **delivery mode** when the user says the outcome matters more than studying the implementation. In that mode Codex may complete a broader coherent scope autonomously, but must still surface product decisions, data-integrity risks, validation evidence, and user-visible acceptance checks. Use deep review only when requested or when a high-risk design needs joint attention. Review effort should be risk-based: spend more time on domain mutations, validation, persistence, recovery, undo/redo, completion, and export than on layouts or mechanical code.
 
 Keep product semantics, architecture, and implementation questions distinct and resolve them in that order. Do not make a commit merely because tests pass: for user-visible slices, allow manual review first unless the user explicitly asks to commit immediately.
 
-When a substantial milestone is divided into named sub-slices, create one focused document under `docs/` that records their interaction contract, data-integrity rules, status, tests, and learning-mode reading map; link it from `ROADMAP.md` rather than overloading `AGENTS.md` with implementation detail.
+When a substantial application milestone is divided into named sub-slices, create one focused document under `docs/development/milestones/` and link it from `docs/development/ROADMAP.md`. Study plans and evidence belong under `docs/studies/`; release procedures and version evidence belong under `docs/release/`. Do not overload `AGENTS.md` with implementation detail.
 
 ## Annotation-data expectations
 
@@ -79,6 +82,6 @@ Validate data at boundaries rather than trusting UI state. At minimum, persisten
 
 Do not redesign the ontology or persisted schema casually. The six-phase ontology is provisional and phase 2 is optional; schema or ontology changes need a documented decision and migration/compatibility plan.
 
-Treat phase IDs, expected order, hotkeys, `initial_phase_id`, and `undefined_phase_id` as distinct configured concepts. See `docs/ONTOLOGY_CONFIGURATION.md`; do not reintroduce hard-coded phase metadata into UI handlers.
+Treat phase IDs, expected order, hotkeys, `initial_phase_id`, and `undefined_phase_id` as distinct configured concepts. See `docs/development/ONTOLOGY_CONFIGURATION.md`; do not reintroduce hard-coded phase metadata into UI handlers.
 
 Keep procedure/resource selection at the application composition root (`__main__.py` or a future startup/settings controller). Inject `PhaseOntology` into `MainWindow` and annotation views; reusable UI/domain components must not call appendectomy-specific loaders.

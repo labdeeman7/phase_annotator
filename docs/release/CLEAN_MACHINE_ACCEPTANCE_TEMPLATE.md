@@ -1,6 +1,6 @@
 # Clean-Machine Acceptance Template
 
-Status: **Reusable template.** Copy this file to `docs/releases/<version>/CLEAN_MACHINE_ACCEPTANCE.md` and complete that version-specific record without overwriting prior release evidence.
+Status: **Reusable template.** Copy this file to `docs/release/versions/<version>/CLEAN_MACHINE_ACCEPTANCE.md` and complete that version-specific record without overwriting prior release evidence.
 
 Test the exact GitHub Actions artifact produced from the intended release commit. A clean machine means a Windows computer or fresh VM without this repository, its virtual environments, or a developer Python installation being used by the application.
 

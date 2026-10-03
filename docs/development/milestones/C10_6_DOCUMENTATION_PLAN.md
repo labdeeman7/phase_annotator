@@ -70,4 +70,4 @@ Maintain one clear list of supported and unsupported behavior, including Windows
 4. Consolidate developer/release material already present across repository documents.
 5. Complete C10.7 against the exact documented artifact.
 
-The separate real-video evaluation and clinical training/protocol work is planned in `REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`.
+The separate real-video evaluation and clinical training/protocol work is planned under `../../studies/`.
