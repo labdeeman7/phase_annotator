@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0",
+  "created_date": "2026-10-03",
+  "dataset": {
+    "name": "Cholec80",
+    "logical_source": "authorised project DGX copy",
+    "official_information_url": "https://camma.unistra.fr/datasets/",
+    "license": "CC-BY-NC-SA-4.0",
+    "source_video_fps": 25,
+    "phase_label_frequency": "one label per source frame",
+    "local_readme_or_license_found": false
+  },
+  "eligibility": {
+    "expected_video_count": 80,
+    "matching_video_label_pairs": 80,
+    "eligible_count": 80,
+    "excluded": [],
+    "checks": [
+      "matching MP4 and phase TXT",
+      "Frame/Phase header",
+      "contiguous integer frame indices beginning at zero",
+      "known seven-phase source vocabulary"
+    ]
+  },
+  "selection": {
+    "algorithm": "Python random.Random(seed).sample(sorted_eligible_ids, 15)",
+    "seed": 20261003,
+    "assignment": "first 10 sampled cases reference; final 5 blind"
+  },
+  "cases": [
+    {
+      "case_id": "video04",
+      "cohort": "reference",
+      "labelled_frames": 38051,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video79",
+      "cohort": "reference",
+      "labelled_frames": 85351,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "CleaningCoagulation", "GallbladderPackaging", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video01",
+      "cohort": "reference",
+      "labelled_frames": 43326,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video44",
+      "cohort": "reference",
+      "labelled_frames": 78176,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video19",
+      "cohort": "reference",
+      "labelled_frames": 60601,
+      "phase_sequence": ["CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video64",
+      "cohort": "reference",
+      "labelled_frames": 59951,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "CleaningCoagulation", "GallbladderPackaging", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video37",
+      "cohort": "reference",
+      "labelled_frames": 30802,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "CleaningCoagulation", "GallbladderPackaging", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video68",
+      "cohort": "reference",
+      "labelled_frames": 49301,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video14",
+      "cohort": "reference",
+      "labelled_frames": 42701,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "GallbladderRetraction", "CleaningCoagulation"]
+    },
+    {
+      "case_id": "video50",
+      "cohort": "reference",
+      "labelled_frames": 27351,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video67",
+      "cohort": "blind",
+      "labelled_frames": 58826,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video39",
+      "cohort": "blind",
+      "labelled_frames": 41176,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video07",
+      "cohort": "blind",
+      "labelled_frames": 113926,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video03",
+      "cohort": "blind",
+      "labelled_frames": 145701,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    },
+    {
+      "case_id": "video61",
+      "cohort": "blind",
+      "labelled_frames": 110226,
+      "phase_sequence": ["Preparation", "CalotTriangleDissection", "ClippingCutting", "GallbladderDissection", "GallbladderPackaging", "CleaningCoagulation", "GallbladderRetraction"]
+    }
+  ]
+}

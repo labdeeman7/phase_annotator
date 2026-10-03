@@ -1,6 +1,6 @@
 # Post-Release Validation and Training Programme
 
-Status: **Ready to begin V1.** Phase Annotator 0.1.0 has completed C10 release engineering and clean-machine acceptance. This programme now asks how the accepted application behaves during sustained use on real cholecystectomy videos and how reviewed cases should support clinician training.
+Status: **V1 complete; V2 next.** Phase Annotator 0.1.0 has completed C10 release engineering and clean-machine acceptance. The DGX Cholec80 copy has been inventoried read-only and a reproducible 15-case cohort has been selected. This programme now asks how the accepted application behaves during sustained use on those real cholecystectomy videos and how reviewed cases should support clinician training.
 
 ## The sequence we agreed
 
@@ -37,15 +37,12 @@ Label only what is observable in the available recording. Every available millis
 - A disagreement about phase meaning goes to the clinical protocol question log rather than being treated as a software bug.
 - A severe defect can explicitly reopen application development and produce a new release candidate; minor observations can remain study findings or backlog items.
 
-## Immediate next session: V1
+## Completed V1
 
-1. Choose one authorised source copy (DGX or NAS) for read-only inventory.
-2. Locate and retain the exact dataset terms accompanying that copy.
-3. Inspect actual video and phase-label filenames and file format; do not assume the format from memory.
-4. Identify valid video/label pairs and exclusions.
-5. Sample 15 unique cases from the sorted eligible IDs using a recorded random seed.
-6. Assign 10 to reference walkthrough and 5 to blind practice, and save only the non-patient case IDs plus selection metadata in a local study manifest.
+The existing DGX copy was inspected without modifying or copying video. All 80 MP4/TXT pairs passed filename, header, contiguous-frame, and vocabulary checks. Seed `20261003` reproducibly selected 10 reference and 5 blind cases. See [`V1_INTAKE_AND_SELECTION.md`](V1_INTAKE_AND_SELECTION.md) and the machine-readable cohort manifest under `cohorts/`.
 
-Do not copy all 15 videos or write the converter until V1 establishes the real source layout and V2 defines frame/timestamp boundary semantics.
+## Immediate next session: V2
+
+Define the exact 25 FPS source-frame to half-open millisecond interval contract, final-duration handling, label-to-ontology mapping, converter provenance, and overwrite/reference separation. Write synthetic expected cases before implementing the converter. Do not copy all 15 videos until the converter and one-case V3 trial establish what local inputs are actually required.
 
 See [`REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`](REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md) for the complete contract, evidence fields, and governance boundaries.

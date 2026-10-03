@@ -151,6 +151,8 @@ Converted source labels are a reference, not automatic proof that every boundary
 
 ### V1 — Intake and reproducible selection
 
+Status: **Complete.** The authorised DGX copy contained 80 valid MP4/TXT pairs. Seed `20261003` selected the recorded 10-reference/5-blind cohort; see `V1_INTAKE_AND_SELECTION.md` and `cohorts/cholec80_15_seed_20261003.json`.
+
 - Confirm the exact local dataset terms and source layout.
 - Inventory video/label pairs without modifying the source.
 - Sample and assign 15 cases using a recorded seed.
