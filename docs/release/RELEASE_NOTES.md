@@ -13,7 +13,7 @@ This usability release is not accepted or distributed yet.
 
 ### Release gate
 
-The source checks, manual interaction checks, Windows artifact build, and clean-machine acceptance must pass before this section is marked accepted.
+Source validation and the focused development-build manual checks passed on 2026-10-03: the filename was visible, clicking the loaded video toggled Play/Pause, and attempting to edit an imported completed reference invoked the reopen safeguard. A Windows artifact build and clean-machine acceptance must still pass before this section is marked accepted.
 
 ## 0.1.0 — Accepted release candidate (2026-10-03)
 

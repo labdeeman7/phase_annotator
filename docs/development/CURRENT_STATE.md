@@ -75,4 +75,4 @@ On 2026-10-03, the 0.1.1 candidate source suite has 196 passing tests; Ruff lint
 
 ## Recommended next increment
 
-C10.1–C10.7 are complete. The exact 0.1.0 GitHub Actions artifact remains the accepted baseline. Study V1 selected the reproducible 15-case Cholec80 cohort; V2 implemented and synthetically tested the converter; V3 has structurally loaded `video04` and awaits visual boundary acceptance. The 0.1.1 usability candidate adds visible video identity, click-to-toggle playback, and protected completed reference imports; it still requires manual checks, a fresh Windows artifact, and clean-machine acceptance.
+C10.1–C10.7 are complete. The exact 0.1.0 GitHub Actions artifact remains the accepted baseline. Study V1 selected the reproducible 15-case Cholec80 cohort; V2 implemented and synthetically tested the converter; V3 has structurally loaded `video04` and awaits visual boundary acceptance. The 0.1.1 usability candidate adds visible video identity, click-to-toggle playback, and protected completed reference imports; all three interactions passed focused manual checks on 2026-10-03. A fresh Windows artifact and clean-machine acceptance remain required.
