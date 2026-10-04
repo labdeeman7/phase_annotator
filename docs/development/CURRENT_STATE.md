@@ -1,6 +1,6 @@
 # Current State and Handover
 
-Last verified on 2026-10-03 after completion of C10 and recorded 0.1.0 Windows Sandbox acceptance. Version 0.1.1 is now an unaccepted usability candidate.
+Last verified on 2026-10-04 after local acceptance of the 0.1.1 usability patch. Version 0.1.0 remains the latest artifact with recorded Windows Sandbox acceptance.
 
 ## What Phase Annotator currently does
 
@@ -53,7 +53,7 @@ Codex milestone C1 replaces hard-coded ontology construction with a validated pa
 
 - `ui/table_widget.py` is an unused near-duplicate of `ui/segment_list_widget.py`; both were added in M3, but only the latter is imported.
 - `DECISIONS.md` previously described a `QTableWidget`/`IntervalTableView`; the implementation uses custom cards in a `QListWidget`.
-- Package metadata, `phase_annotator.__version__`, and the window title report the 0.1.1 candidate; release versioning remains manual. Version 0.1.0 remains the latest accepted artifact until 0.1.1 passes its release gates.
+- Package metadata, `phase_annotator.__version__`, and the window title report 0.1.1; release versioning remains manual. The locally built patch is accepted for project use, but 0.1.0 remains the latest artifact with clean-machine evidence.
 - Historical docs described Clean Architecture/MVP and a storage/export layer more fully than implemented. There is no presenter, repository interface, or CSV adapter yet.
 - Ruff formatting/linting and scoped Mypy are configured, but the Qt UI remains outside the type-check gate and some historical cleanup remains.
 
@@ -75,4 +75,4 @@ On 2026-10-03, the 0.1.1 candidate source suite has 196 passing tests; Ruff lint
 
 ## Recommended next increment
 
-C10.1–C10.7 are complete. The exact 0.1.0 GitHub Actions artifact remains the accepted baseline. Study V1 selected the reproducible 15-case Cholec80 cohort; V2 implemented and synthetically tested the converter; V3 visually accepted every `video04` transition and the final coverage. The 0.1.1 usability candidate adds visible video identity, click-to-toggle playback, and protected completed reference imports; all three interactions passed focused manual checks on 2026-10-03. A fresh Windows artifact and clean-machine acceptance remain required before V4 packaged reference walkthroughs.
+C10.1–C10.7 are complete. The exact 0.1.0 GitHub Actions artifact remains the clean-machine baseline. Study V1 selected the reproducible 15-case Cholec80 cohort; V2 implemented and synthetically tested the converter; V3 visually accepted every `video04` transition and the final coverage. The locally built 0.1.1 patch passed source checks, packaged smoke testing, representative playback, and focused manual interaction checks. A fresh clean-machine run was explicitly waived; V4 may proceed using the locally accepted build.

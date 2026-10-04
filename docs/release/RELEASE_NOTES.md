@@ -1,8 +1,8 @@
 # Release Notes
 
-## 0.1.1 — Candidate under validation (2026-10-03)
+## 0.1.1 — Locally accepted patch (2026-10-04)
 
-This usability release is not accepted or distributed yet.
+This usability patch is accepted for local project use. It has not undergone fresh clean-machine acceptance.
 
 ### Changed
 
@@ -11,9 +11,9 @@ This usability release is not accepted or distributed yet.
 - Protect imported Cholec80 training references as Completed while retaining explicit machine-import attribution and provenance.
 - Add the tested Cholec80 conversion contract and a structured working clinical-protocol evidence log.
 
-### Release gate
+### Acceptance
 
-Source validation and the focused development-build manual checks passed on 2026-10-03: the filename was visible, clicking the loaded video toggled Play/Pause, and attempting to edit an imported completed reference invoked the reopen safeguard. A Windows artifact build and clean-machine acceptance must still pass before this section is marked accepted.
+Source validation, the standard-CPython/PyInstaller build, packaged smoke test, and focused local manual checks passed. The executable launched, loaded and played the representative video, displayed annotator/video identity, toggled playback from the video surface, and protected the completed imported reference. Fresh clean-machine acceptance was explicitly skipped for time; see `versions/0.1.1/LOCAL_ACCEPTANCE.md`.
 
 ## 0.1.0 — Accepted release candidate (2026-10-03)
 

@@ -24,6 +24,7 @@ The repository documentation is organized by audience and lifecycle. Start here 
 - [`release/RELEASE_NOTES.md`](release/RELEASE_NOTES.md): versioned product changes and limitations.
 - [`release/CLEAN_MACHINE_ACCEPTANCE_TEMPLATE.md`](release/CLEAN_MACHINE_ACCEPTANCE_TEMPLATE.md): reusable release-acceptance template.
 - [`release/versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md`](release/versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md): accepted 0.1.0 evidence.
+- [`release/versions/0.1.1/LOCAL_ACCEPTANCE.md`](release/versions/0.1.1/LOCAL_ACCEPTANCE.md): local 0.1.1 acceptance and explicit clean-machine limitation.
 
 ## Post-release studies and training
 
