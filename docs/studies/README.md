@@ -11,18 +11,24 @@ V2  Define and implement the source-label → Phase Annotator JSON converter
  ↓
 V3  Trial one converted case and verify boundary semantics visually
  ↓
-V4  Review 10 converted reference cases in the packaged application
+V4  Infer Cholec80 rules while reviewing 10 reference cases and clips
  ↓
-V5  Annotate 5 cases blindly, then compare with protected references
+V5  Build the doctor-facing protocol and indexed clip package
  ↓
-V6  Turn reviewed examples into training material and a clinical protocol
+V6  Annotate 3 Cholec80 cases blindly and score against references
+ ↓
+V7  Annotate 2 project videos and document local differences
+ ↓
+V8  Pilot first with Dr Olugbami and revise
+ ↓
+V9  Begin the 15-video clinical annotation set
 ```
 
 ## Why there are two kinds of testing
 
 The 10 **reference walkthroughs** load converted source labels. They test compatibility, long-video playback, timeline and segment-list behavior, navigation, correction, persistence, and cumulative friction on realistic annotations.
 
-The 5 **blind practice cases** begin without a canonical sidecar. They test the real annotation-from-scratch experience: learnability, speed, corrections, interruption/resume, completion confidence, and ambiguous transition decisions. Reference answers remain separate until each practice annotation is complete.
+Three of the five seeded **blind practice cases** will begin without a canonical sidecar. They test annotation-from-scratch and support offline comparison with protected Cholec80 references. The other two remain unused reserve cases. Two separate project videos then test adaptation to partial recordings, different instruments, and local workflow without pretending that Cholec80 gold labels exist for them.
 
 This first pass is an **extended self-use validation**, not yet a formal multi-participant usability study. A formal study would additionally require agreed participants, outcomes, procedures, ethics/consent considerations, and an analysis plan.
 
@@ -47,6 +53,6 @@ The exact 25 FPS source-frame to half-open millisecond interval contract, final-
 
 See [`REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`](REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md) for the complete contract, evidence fields, and governance boundaries.
 
-The evolving phase definitions and per-boundary evidence log live in [`protocol.md`](protocol.md). It is an observational working draft, not yet an approved student protocol.
+The evolving phase definitions and per-boundary evidence log live in [`INFERRED_CHOLEC80_RULES.md`](INFERRED_CHOLEC80_RULES.md). It is a reverse-engineering notebook, not yet the approved doctor-facing protocol.
 
-V4 case staging, walkthrough status, and per-case review fields are tracked in [`V4_REFERENCE_WALKTHROUGHS.md`](V4_REFERENCE_WALKTHROUGHS.md).
+V4 case staging, rule inference, clip creation, and per-case review fields are tracked in [`V4_REFERENCE_WALKTHROUGHS.md`](V4_REFERENCE_WALKTHROUGHS.md). The complete protocol/training/practice/pilot/rollout sequence is in [`TRAINING_AND_ANNOTATION_ROLLOUT.md`](TRAINING_AND_ANNOTATION_ROLLOUT.md), and known departures from Cholec80 are being collected separately in [`LOCAL_VIDEO_DIFFERENCES_DRAFT.md`](LOCAL_VIDEO_DIFFERENCES_DRAFT.md).

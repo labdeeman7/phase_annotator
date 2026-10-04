@@ -539,3 +539,9 @@ Data conversion is correct only when both systems' meanings agree. Cholec80 labe
 Provenance is also part of correctness. An imported reference should not claim that a human created it in the GUI. Deterministic conversion, explicit machine attribution, a separate provenance record, overwrite refusal, and validation through the application's existing rules make the transformation inspectable and repeatable.
 
 One implementation trap is that `dataclasses.asdict()` serializes every dataclass field, including private compatibility fields. Persistence formats are contracts, so a converter should reuse or deliberately mirror the repository's serialization policy rather than treating raw dataclass output as the schema.
+
+### Separate reference reconstruction from local adaptation
+
+When reproducing a published dataset protocol, its supplied labels are evidence of the convention being learned. The reference-review task is therefore to explain what happens before and after each supplied boundary and infer a rule consistent across cases, not to replace every boundary with the reviewer's preferred decision. Surprising examples become exceptions or questions that refine the inferred rule.
+
+Applying that convention to a different dataset is a later, explicit adaptation step. Partial recordings, absent phases, different instruments, and local workflow can require additional instructions without pretending those additions came from the reference dataset. Keeping reconstruction and adaptation separate makes the final protocol's provenance much clearer.

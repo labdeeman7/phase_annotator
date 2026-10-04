@@ -1,10 +1,10 @@
 # V4 Reference Walkthroughs
 
-Status: **In progress.** All nine remaining reference cases are staged, converted, and structurally validated; packaged-application walkthroughs remain.
+Status: **In progress.** All ten reference cases are staged and converted, and all 58 source-boundary clips are generated and indexed; rule-inference walkthroughs remain.
 
 ## Purpose
 
-V4 exercises the locally accepted 0.1.1 packaged application over realistic long annotations and gathers evidence for the working clinical protocol. It is not a blind accuracy study: each case intentionally loads the converted Cholec80 reference.
+V4 reconstructs the phase and boundary convention demonstrated by Cholec80 while also exercising the locally accepted 0.1.1 packaged application. It is not a blind accuracy study: each case intentionally loads the converted Cholec80 reference, and that supplied boundary is the reference decision to explain rather than replace.
 
 For every case:
 
@@ -13,23 +13,25 @@ For every case:
 3. convert into the protected reference-answer directory;
 4. copy the generated canonical sidecar beside the walkthrough video;
 5. open it with the packaged 0.1.1 cholecystectomy application;
-6. inspect every transition and update `protocol.md` with supporting evidence, a counterexample, or a disagreement;
+6. inspect every transition through its one-minute boundary clip and update `INFERRED_CHOLEC80_RULES.md` with before/after activity and the inferred source convention;
 7. record software defects separately from clinical interpretation questions.
+
+The watching and protocol-inference tasks happen together, one case at a time. Do not watch all ten full videos and later rewatch all ten to locate transitions again.
 
 ## Case tracker
 
-| Order | Case | Known cohort characteristic | Staged | Converted | Walkthrough | Protocol evidence |
-| ---: | --- | --- | --- | --- | --- | --- |
-| 1 | `video04` | Nominal seven-phase order; V3 trial | Yes | Yes | Complete | Initial working generalisations |
-| 2 | `video79` | Cleaning/coagulation precedes Packaging | Yes | Yes | Pending | Pending |
-| 3 | `video01` | Nominal seven-phase order | Yes | Yes | Pending | Pending |
-| 4 | `video44` | Nominal seven-phase order | Yes | Yes | Pending | Pending |
-| 5 | `video19` | Starts at P2; Preparation absent | Yes | Yes | Pending | Pending |
-| 6 | `video64` | Cleaning/coagulation precedes Packaging | Yes | Yes | Pending | Pending |
-| 7 | `video37` | Cleaning/coagulation precedes Packaging | Yes | Yes | Pending | Pending |
-| 8 | `video68` | Nominal seven-phase order | Yes | Yes | Pending | Pending |
-| 9 | `video14` | Retraction precedes Cleaning/coagulation; ends P6 | Yes | Yes | Pending | Pending |
-| 10 | `video50` | Cleaning/coagulation absent | Yes | Yes | Pending | Pending |
+| Order | Case | Known cohort characteristic | Staged | Converted | Clips | Walkthrough | Rule evidence |
+| ---: | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `video04` | Nominal seven-phase order; V3 trial | Yes | Yes | 6 | Complete | Initial working generalisations |
+| 2 | `video79` | Cleaning/coagulation precedes Packaging | Yes | Yes | 6 | Pending | Pending |
+| 3 | `video01` | Nominal seven-phase order | Yes | Yes | 6 | Pending | Pending |
+| 4 | `video44` | Nominal seven-phase order | Yes | Yes | 6 | Pending | Pending |
+| 5 | `video19` | Starts at P2; Preparation absent | Yes | Yes | 5 | Pending | Pending |
+| 6 | `video64` | Cleaning/coagulation precedes Packaging | Yes | Yes | 6 | Pending | Pending |
+| 7 | `video37` | Cleaning/coagulation precedes Packaging | Yes | Yes | 6 | Pending | Pending |
+| 8 | `video68` | Nominal seven-phase order | Yes | Yes | 6 | Pending | Pending |
+| 9 | `video14` | Retraction precedes Cleaning/coagulation; ends P6 | Yes | Yes | 6 | Pending | Pending |
+| 10 | `video50` | Cleaning/coagulation absent | Yes | Yes | 5 | Pending | Pending |
 
 ## Batch-conversion evidence
 
@@ -40,6 +42,14 @@ For every case:
 - `SessionPersistenceCoordinator.inspect()` returned `loaded` for every staged video.
 - Every imported session is `completed` with machine-import attribution and the Cholec80 reference video note.
 - `video19` and `video50` correctly contain six phase runs; the other seven cases contain seven.
+
+## Clip-generation evidence
+
+- Exactly one clip was generated for each internal source boundary: 58 clips across 10 cases.
+- Every default clip is centered on the exact Cholec80 boundary with 30 seconds before and after, except when a video edge requires clamping.
+- Clips were re-encoded with an explicitly selected offline FFmpeg binary rather than coarse keyframe copying; extraction settings and boundary metadata are stored in one ignored manifest per case.
+- The clip library is approximately 973 MB. Qt successfully opened sampled 480p and 1080p outputs as 25 FPS, 60-second MP4 videos.
+- Clip IDs and filenames identify case, boundary order, source phase, and destination phase.
 
 ## Per-case record
 
@@ -56,12 +66,12 @@ Copy this section for each walkthrough.
 - Usability friction: None recorded yet
 - Supplied boundaries accepted: Pending
 - Protocol support/counterexamples: Pending
-- Clip/image candidates: Pending
+- Additional non-boundary clip requests: Pending
 
 ## Separation rules
 
 - Do not stage or convert the five blind-practice cases as part of V4.
 - Keep protected reference answers outside blind-video directories.
 - Do not commit videos, source labels, converted sidecars, clips, or absolute dataset paths.
-- A supplied boundary disagreement is a protocol finding, not automatically a software defect.
-- Do not modify a completed reference merely to record disagreement; record the proposed boundary in `protocol.md`.
+- A surprising supplied boundary is an interpretation question, not automatically a software defect or a reason to move the reference.
+- Do not modify a completed reference while reconstructing Cholec80's convention.

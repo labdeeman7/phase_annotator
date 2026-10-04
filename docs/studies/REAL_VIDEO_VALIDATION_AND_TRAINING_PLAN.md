@@ -51,7 +51,7 @@ This track tests:
 
 These cases are useful worked demonstrations, but loading existing annotations does not test annotation-from-scratch effort.
 
-## Track B: five blind practice annotations
+## Track B: three blind Cholec80 practice annotations
 
 Keep the converted reference answers outside the videos' directories. Open each video without a canonical sidecar and annotate it from scratch.
 
@@ -64,7 +64,7 @@ This track tests:
 - completion confidence;
 - confusing phase or boundary decisions.
 
-Only after the practice annotation is complete should it be compared with the protected reference. Do not copy the reference beside a practice video beforehand: the application would load it as the live canonical annotation and expose the answer.
+Only after the practice annotation is complete should it be compared with the protected reference. Do not copy the reference beside a practice video beforehand: the application would load it as the live canonical annotation and expose the answer. Two additional seeded blind cases remain protected as reserve material.
 
 ## Conversion contract
 
@@ -100,9 +100,9 @@ For each case record:
 
 Do not call this a formal multi-user usability study unless a study design, participants, consent/ethics requirements, outcomes, and analysis plan have been agreed. The first pass is an **extended self-use validation**.
 
-## Training package after validation
+## Training package after rule inference
 
-The 10 reference cases can supply worked examples. The 5 practice cases can supply exercises and later review discussions. Package references separately from live practice sidecars.
+The 10 reference cases supply worked transition examples and inferred Cholec80 rules. Three protected cases supply scored internal rehearsal; two remain reserve. Two separate project videos test local adaptation without Cholec80 reference scores. Package references separately from live practice sidecars.
 
 Recommended structure outside this repository:
 
@@ -145,7 +145,7 @@ Develop the protocol only after reviewing real transitions. For each configured 
 - difficult examples with timestamped rationale;
 - unresolved questions and the clinical owner who decided them.
 
-Converted source labels are a reference, not automatic proof that every boundary should become the local protocol. Disagreements and uncertain examples should be reviewed with the clinical owner and versioned.
+For V4, converted Cholec80 labels are the reference convention to reconstruct rather than boundaries to redesign. Reviewers infer the visible rule demonstrated around each supplied transition and retain unusual cases as exceptions or questions. The later doctor-facing protocol must distinguish those inferred Cholec80 rules from explicit adaptations for partial project recordings, different instruments, and local workflow. Dr Olugbami is the first intended clinical reviewer.
 
 ## Execution plan
 
@@ -159,7 +159,7 @@ Status: **Complete.** The authorised DGX copy contained 80 valid MP4/TXT pairs. 
 
 ### V2 — Converter contract and synthetic tests
 
-Status: **Implemented; pending V3 real-case acceptance.** See `V2_CONVERSION_CONTRACT.md`.
+Status: **Complete.** See `V2_CONVERSION_CONTRACT.md`.
 
 - Inspect representative source annotations and video metadata.
 - Write expected conversions for boundary edge cases.
@@ -167,24 +167,45 @@ Status: **Implemented; pending V3 real-case acceptance.** See `V2_CONVERSION_CON
 
 ### V3 — One-case trial
 
+Status: **Complete.** All `video04` source transitions and final coverage were visually accepted.
+
 - Convert one reference case.
 - Validate the JSON and inspect several transitions against the source.
 - Correct the contract before batch processing.
 
 ### V4 — Ten reference walkthroughs
 
-- Convert and review the reference cohort in the packaged application.
-- Record application defects and usability findings systematically.
+- Review the reference cohort in the packaged application.
+- Create one-minute clips centered on every exact source boundary.
+- Infer and document the Cholec80 before/after transition convention while watching each case once.
+- Record application defects separately from interpretive questions.
 
-### V5 — Five blind practice cases
+### V5 — First clinician package
 
-- Annotate without adjacent reference sidecars.
-- Compare only after completion and record both UI friction and clinical disagreements.
+- Produce the doctor-facing protocol from the evidence draft.
+- Build an indexed clip library, user guidance, local-differences draft, and exercise instructions.
 
-### V6 — Protocol and training material
+### V6 — Three blind Cholec80 practice cases
 
-- Resolve transition questions with the clinical owner.
-- Produce worked examples, exercises, approved images, and the versioned protocol.
+- Annotate three cases without adjacent references.
+- Compare afterwards using an agreed reproducible scoring contract.
+- Revise training explanations where errors reveal ambiguity.
+
+### V7 — Two project-video adaptation cases
+
+- Annotate two representative local videos.
+- Document partial-procedure, absent-phase, instrument, quality, and workflow differences.
+- Do not report Cholec80 reference scores for videos without Cholec80 gold labels.
+
+### V8 — Dr Olugbami pilot
+
+- Review terminology, boundary rules, clips, local adaptations, application use, and exercises.
+- Version the package after resolving feedback.
+
+### V9 — Fifteen-video clinical annotation set
+
+- Distribute the approved application, protocol, clip library, and guidance.
+- Define assignments, support, completion, return, and quality-review procedures before work begins.
 
 ## Decisions required before V1
 
@@ -194,6 +215,6 @@ Status: **Implemented; pending V3 real-case acceptance.** See `V2_CONVERSION_CON
 4. Confirm whether five full blind annotations are feasible or whether a timed subset is more realistic.
 5. Decide whether reference comparison is initially manual; an in-application scoring mode is a separate feature and is not assumed.
 
-## First session today
+## Current next action
 
-Finish the remaining C10.6 documentation structure first. If time remains, begin V1 with read-only inspection of one chosen dataset source and create the eligible-ID inventory. Do not copy all 15 videos or implement conversion until the real label semantics and local licence file have been checked.
+V4 is active. Generate the source-boundary clip library and review each reference case once while updating `INFERRED_CHOLEC80_RULES.md`. See `TRAINING_AND_ANNOTATION_ROLLOUT.md` for the complete handoff into protocol packaging, practice, local adaptation, Dr Olugbami review, and the final 15-video annotation set.
