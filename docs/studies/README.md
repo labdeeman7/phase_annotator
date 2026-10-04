@@ -48,3 +48,5 @@ The exact 25 FPS source-frame to half-open millisecond interval contract, final-
 See [`REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`](REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md) for the complete contract, evidence fields, and governance boundaries.
 
 The evolving phase definitions and per-boundary evidence log live in [`protocol.md`](protocol.md). It is an observational working draft, not yet an approved student protocol.
+
+V4 case staging, walkthrough status, and per-case review fields are tracked in [`V4_REFERENCE_WALKTHROUGHS.md`](V4_REFERENCE_WALKTHROUGHS.md).
