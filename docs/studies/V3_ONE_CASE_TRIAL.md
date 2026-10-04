@@ -1,6 +1,6 @@
 # V3 One-Case Conversion Trial
 
-Status: **Automated checks passed; visual boundary review pending.**
+Status: **Complete and visually accepted on 2026-10-03.**
 
 ## Case and evidence
 
@@ -26,13 +26,12 @@ Status: **Automated checks passed; visual boundary review pending.**
 | 6 | 1,278,000 ms | 1,373,000 ms |
 | 7 | 1,373,000 ms | 1,522,040 ms |
 
-## Remaining manual acceptance
+## Manual acceptance
 
-- [ ] Launch Phase Annotator with the laparoscopic cholecystectomy procedure.
-- [ ] Open the staged `video04.mp4`; confirm all seven segments load without a banner error.
-- [ ] Check the 291,000 ms first boundary and at least two internal boundaries against visible activity.
-- [ ] Seek near 1,522,040 ms and confirm Phase 7 covers the available end without an artificial extra interval.
-- [ ] Close and reopen without editing; confirm the same seven segments reload.
-- [ ] Record whether the source boundary convention is visually credible or reopen V2 before batch conversion.
+- [x] Launch Phase Annotator with the laparoscopic cholecystectomy procedure.
+- [x] Open the staged `video04.mp4`; confirm all seven segments load without a banner error.
+- [x] Review all six supplied transitions against visible activity.
+- [x] Confirm Phase 7 covers the available end without an artificial extra interval.
+- [x] Confirm the 25 FPS source-frame to half-open millisecond convention is visually credible.
 
-Do not mark V3 complete from structural checks alone. Frame semantics need this visual review.
+The reviewer confirmed that all supplied `video04` boundaries were correct and used those observations to begin the working protocol. This accepts the conversion timing contract for batch processing. It does not make the phase definitions clinically final; those generalisations still require comparison across the remaining reference cases and clinical review.

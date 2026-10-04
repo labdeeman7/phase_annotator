@@ -1,6 +1,6 @@
 # Post-Release Validation and Training Programme
 
-Status: **V2 implemented; V3 one-case trial next.** Phase Annotator 0.1.0 has completed C10 release engineering and clean-machine acceptance. The DGX Cholec80 copy has been inventoried read-only, a reproducible 15-case cohort selected, and a provenance-preserving converter tested synthetically. This programme now asks how the accepted application behaves during sustained use on those real cholecystectomy videos and how reviewed cases should support clinician training.
+Status: **V3 complete; V4 reference walkthroughs next.** Phase Annotator 0.1.0 has completed C10 release engineering and clean-machine acceptance. The DGX Cholec80 copy has been inventoried read-only, a reproducible 15-case cohort selected, and the converter contract has passed synthetic and one-case visual validation. This programme now asks how the accepted application behaves during sustained use on the remaining real cholecystectomy videos and how reviewed cases should support clinician training.
 
 ## The sequence we agreed
 
@@ -41,9 +41,9 @@ Label only what is observable in the available recording. Every available millis
 
 The existing DGX copy was inspected without modifying or copying video. All 80 MP4/TXT pairs passed filename, header, contiguous-frame, and vocabulary checks. Seed `20261003` reproducibly selected 10 reference and 5 blind cases. See [`V1_INTAKE_AND_SELECTION.md`](V1_INTAKE_AND_SELECTION.md) and the machine-readable cohort manifest under `cohorts/`.
 
-## Completed V2 and immediate next session: V3
+## Completed V2–V3 and immediate next session: V4
 
-The exact 25 FPS source-frame to half-open millisecond interval contract, final-duration handling, label-to-ontology mapping, converter provenance, and overwrite/reference separation are implemented and synthetically tested. See [`V2_CONVERSION_CONTRACT.md`](V2_CONVERSION_CONTRACT.md). V3 stages only one reference case, obtains its Qt duration, converts it, and visually checks real boundaries before any batch conversion.
+The exact 25 FPS source-frame to half-open millisecond interval contract, final-duration handling, label-to-ontology mapping, converter provenance, and overwrite/reference separation are implemented and synthetically tested. See [`V2_CONVERSION_CONTRACT.md`](V2_CONVERSION_CONTRACT.md). In V3, `video04` loaded successfully and all six transitions plus final coverage were visually accepted. V4 can now convert and review the remaining nine seeded reference cases.
 
 See [`REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`](REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md) for the complete contract, evidence fields, and governance boundaries.
 

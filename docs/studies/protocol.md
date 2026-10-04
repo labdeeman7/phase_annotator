@@ -140,5 +140,5 @@ Suggested working convention: `V04-B01` identifies video 04, boundary example 01
 
 | Protocol version | Cases reviewed | Clinical owner | Status | Main unresolved issue |
 | --- | ---: | --- | --- | --- |
-| Working draft 0.1 | 1 started | To assign | Observational | Operational transition cues require visual and clinical review |
+| Working draft 0.1 | 1 completed | To assign | All `video04` source boundaries accepted | Test the working generalisations against more cases |
 
