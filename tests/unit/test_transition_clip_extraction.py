@@ -68,10 +68,12 @@ def test_extract_records_commands_and_manifest_without_absolute_paths(
     session_path = tmp_path / "video04.mp4.phase-annotations.json"
     video_path = tmp_path / "video04.mp4"
     ffmpeg_path = tmp_path / "ffmpeg.exe"
+    font_path = tmp_path / "font.ttf"
     output_dir = tmp_path / "clips"
     write_reference(session_path)
     video_path.write_bytes(b"video")
     ffmpeg_path.write_bytes(b"binary")
+    font_path.write_bytes(b"font")
     commands = []
 
     class Result:
@@ -85,6 +87,7 @@ def test_extract_records_commands_and_manifest_without_absolute_paths(
 
     clips, manifest_path = extract_transition_clips(
         ffmpeg_path=ffmpeg_path,
+        font_path=font_path,
         video_path=video_path,
         session_path=session_path,
         output_dir=output_dir,
@@ -94,9 +97,22 @@ def test_extract_records_commands_and_manifest_without_absolute_paths(
     assert commands[0][0] == [str(ffmpeg_path), "-version"]
     assert commands[1][0][commands[1][0].index("-ss") + 1] == "0.000"
     assert commands[1][0][commands[1][0].index("-t") + 1] == "50.000"
+    overlay = commands[1][0][commands[1][0].index("-vf") + 1]
+    assert "P1 | Preparation" in overlay
+    assert "P2 | Calot triangle dissection" in overlay
+    assert "fontcolor=0x3B82F6" in overlay
+    assert "fontcolor=0x10B981" in overlay
+    assert "x=w-tw-20" in overlay
+    assert "lt(t\\,20.000)" in overlay
+    assert "gte(t\\,20.000)" in overlay
+    assert "font.ttf" in overlay
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["source_video_filename"] == "video04.mp4"
     assert manifest["clips"][0]["boundary_ms"] == 20_000
+    assert manifest["clips"][0]["from_phase_color"] == "#3B82F6"
+    assert manifest["clips"][0]["to_phase_color"] == "#10B981"
+    assert "burned into every frame" in manifest["encoding"]["phase_overlay"]
+    assert manifest["encoding"]["overlay_font_filename"] == "font.ttf"
     assert str(tmp_path) not in manifest_path.read_text(encoding="utf-8")
 
 
@@ -106,10 +122,12 @@ def test_extract_refuses_existing_output_before_running_ffmpeg(
     session_path = tmp_path / "video04.mp4.phase-annotations.json"
     video_path = tmp_path / "video04.mp4"
     ffmpeg_path = tmp_path / "ffmpeg.exe"
+    font_path = tmp_path / "font.ttf"
     output_dir = tmp_path / "clips"
     write_reference(session_path)
     video_path.write_bytes(b"video")
     ffmpeg_path.write_bytes(b"binary")
+    font_path.write_bytes(b"font")
     output_dir.mkdir()
     (output_dir / "video04.transition-clips.json").write_text("{}", encoding="utf-8")
     monkeypatch.setattr(
@@ -120,6 +138,7 @@ def test_extract_refuses_existing_output_before_running_ffmpeg(
     with pytest.raises(ClipExtractionError, match="Refusing to overwrite"):
         extract_transition_clips(
             ffmpeg_path=ffmpeg_path,
+            font_path=font_path,
             video_path=video_path,
             session_path=session_path,
             output_dir=output_dir,

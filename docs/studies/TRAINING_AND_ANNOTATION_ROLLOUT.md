@@ -2,75 +2,101 @@
 
 ## Goal
 
-Reconstruct the annotation convention demonstrated by Cholec80, turn it into a lightweight clinician training package, test that package internally, adapt it explicitly to the project's partial and instrument-variable videos, review it first with Dr Olugbami, and only then begin the 15-video clinical annotation set.
+Use the convention inferred from Cholec80 to guide annotation of local laparoscopic cholecystectomy videos, test that draft directly with a clinician on two local cases, revise it with clinical feedback, and only then begin the larger annotation set.
 
-## Workstreams in order
+## Current decisions
 
-### V4 — Infer Cholec80 rules while creating clips
+- The researcher will not perform the previously planned three blind Cholec80 annotations.
+- The researcher will not pre-annotate the two local pilot videos.
+- The first clinician reviewer will annotate both local videos from scratch.
+- The pilot tests protocol transfer and application usability; it is not a Cholec80 scoring exercise.
+- Markdown is the maintained source format. Clinician-facing protocol, instructions, and user guide should be distributed as versioned PDFs.
+- HTML remains optional for a future searchable/indexed clip library. PowerPoint is not the source of truth.
 
-Review the ten converted reference cases once. For every supplied transition, use a one-minute clip containing 30 seconds before and 30 seconds after the exact Cholec80 boundary. While watching, update `INFERRED_CHOLEC80_RULES.md` with the visible before/after activity and the rule that appears to explain Cholec80's decision. Additional non-boundary clips may be requested for clear within-phase activity, exceptions, missing phases, or unusual order.
+## Workstreams
 
-Output: an evidence draft plus an indexed reference clip library. The source boundary remains authoritative for this reconstruction exercise.
+### V4 — Infer Cholec80 rules and create clips
 
-### V5 — Build the first clinician package
+Status: **Complete for the initial draft.**
 
-Create a separate doctor-facing `ANNOTATION_PROTOCOL.md` from the accumulated evidence. Package:
+Ten converted reference cases were reviewed. The study produced 58 labelled transition clips, archived case-level reasoning, and an operational clinician-review protocol. The protocol deliberately uses reproducible visible cues where the supplied Cholec80 timing was inconsistent.
 
-- Phase Annotator 0.1.1 or its approved successor;
-- the software user guide;
-- the annotation protocol with class definitions, boundary rules, Undefined use, and partial-video rules;
-- an indexed folder of short transition clips referenced by clip ID;
-- a short local-differences guide;
-- practice instructions and scoring instructions.
+### V5 — Assemble the two-video clinician pilot package
 
-The primary format should be a concise PDF/HTML document plus ordinary video files in an indexed folder. Do not embed approximately 20 clips in the primary PowerPoint: it creates a large, fragile file and makes clip replacement/versioning harder. A small presentation may be produced later for a live teaching session, but it is not the source of truth.
+Status: **In progress.**
 
-### V6 — Internal blind rehearsal on three Cholec80 cases
+Package:
 
-Use three of the five seeded blind cases, reduced from the earlier five-case plan. Keep their protected Cholec80 references inaccessible while annotating. Afterwards, compare the application JSON with the reference using a reproducible offline scoring report.
+- Phase Annotator 0.1.1 or an explicitly approved successor;
+- the Phase Annotator User Guide;
+- the draft Laparoscopic Cholecystectomy Phase Annotation Protocol;
+- the consolidated `START HERE` pilot instructions;
+- `LOCAL-01` / `20260505_221257.mp4`;
+- `LOCAL-02` / `20260519_215628.mp4`;
+- optional selected labelled Cholec80 transition clips if the clinician needs examples;
+- application/version and document-version identifiers.
 
-Use the first three cases from the reproducible blind assignment: `video67`, `video39`, and `video07`. Retain `video03` and `video61` untouched as reserve cases. This preserves a documented selection rule instead of choosing exercises after seeing their difficulty.
+Before transfer, export the three Markdown documents to PDF and check every PDF visually. Keep the editable Markdown in the repository. Do not embed videos in the PDFs.
 
-The scoring contract must be agreed before implementation. At minimum it should report duration-weighted/framewise phase agreement and transition-boundary differences with stated tolerances; a single unexplained score is insufficient. Use errors to clarify the protocol and training clips, not to rewrite the source reference.
+### V6 — Clinician annotation of two local videos
 
-Retain the other two Cholec80 blind cases as unused reserve material rather than quietly converting them into training examples.
+The first clinician reviewer:
 
-### V7 — Local adaptation on two project videos
+1. launches the application and selects **Cholecystectomy**;
+2. opens each video without an adjacent sidecar;
+3. annotates the complete available timeline using the draft protocol;
+4. uses notes for meaningful ambiguity without adding patient identifiers;
+5. reviews and marks each annotation complete;
+6. returns both canonical JSON sidecars and structured feedback.
 
-Annotate two representative project videos after the Cholec80 rehearsal. These are not Cholec80-scored because no Cholec80 gold label exists. Use them to document where project data differs:
+These videos have no Cholec80 gold labels. Do not report an accuracy score against Cholec80, and do not describe the first returned labels as final ground truth before review.
 
-- recordings may begin or end mid-procedure;
-- every expected phase may not be present;
-- instruments may differ from Cholec80 examples;
-- visual quality, camera position, or workflow may differ;
-- Undefined may be needed for unclassifiable footage.
+### V7 — Joint review and protocol revision
 
-Review these two annotations and the differences guide with Dr Olugbami. The key adaptation remains: annotate only observable footage, cover the available timeline, and never invent absent or unrecorded phases.
+Review the returned annotations and feedback with the clinician. Separate:
 
-### V8 — Dr Olugbami pilot and clinical review
+- software defects;
+- usability friction;
+- protocol ambiguity;
+- genuine clinical disagreement;
+- local differences in instruments, recording coverage, and workflow.
 
-Send the package to Dr Olugbami first. Ask for review of clinical terminology, inferred transition rules, local differences, clip usefulness, installation/usability, and exercise clarity. Record requested changes and publish a versioned protocol/package revision before wider use.
+Resolve serious application problems, revise and version the protocol, document local adaptations, and decide whether the two annotations need correction. If corrections are made, preserve the original pilot returns as evidence rather than overwriting the only copy.
 
-### V9 — Fifteen-video clinical annotation set
+### V8 — Wider clinical annotation set
 
-After the pilot is accepted, provide doctors with the application, user guide, approved protocol, clip library, local-differences guide, and any agreed practice/scoring material. The 15 project videos are the real annotation task, not additional training examples. Define assignment, completion, support, data-return, and quality-review procedures before distribution.
+Only after the pilot is reviewed:
 
-## Package layout
+- approve an application build and protocol version;
+- define video assignments, annotator identity, support, completion, return, backup, and quality-review procedures;
+- decide whether any additional calibration case or inter-annotator review is needed;
+- distribute the approved workflow for the 15-video clinical set.
+
+## Minimal pilot package layout
 
 ```text
-clinician_package/
+cholecystectomy_pilot/
 ├── application/
-├── user_guide/
-├── protocol/
-│   ├── annotation_protocol.pdf
-│   └── local_video_differences.pdf
-├── clip_library/
-│   ├── index.html
-│   └── clips/
-├── exercises/
-│   ├── instructions.pdf
-│   └── scoring_guide.pdf
-└── licence_and_attribution/
+│   ├── PhaseAnnotator.exe
+│   └── _internal/
+├── documents/
+│   ├── 01_phase_annotator_user_guide.pdf
+│   └── 02_draft_annotation_protocol.pdf
+├── videos/
+│   ├── 20260505_221257.mp4
+│   └── 20260519_215628.mp4
+└── return_annotations_here/
 ```
 
-Dataset-derived clips remain subject to Cholec80's terms. Confirm that the intended recipients and distribution method comply before sending the package.
+Send the folder as an archive or through the project's approved secure transfer route. Do not use public source control or an unapproved public file-sharing link for clinical videos.
+
+## Pilot acceptance criteria
+
+The pilot is complete when:
+
+- both videos have returned completed, loadable canonical JSON sidecars;
+- each sidecar names the Cholecystectomy ontology and matches its video;
+- the clinician's feedback has been recorded;
+- data-integrity and software problems have been triaged;
+- clinical ambiguities have been reviewed rather than silently normalised;
+- the next protocol version and wider-rollout decision are documented.

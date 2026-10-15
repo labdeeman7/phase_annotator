@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.1.2 — Portable annotation sidecars (2026-10-15)
+
+This patch allows an unchanged video and its adjacent annotation sidecar to be transferred between computers. Absolute path and filesystem modification time are now treated as relocation metadata rather than video identity, because both commonly change during a legitimate copy.
+
+Safety checks remain in place: conflicting filename, file size, duration, resolution, procedure, schema, or annotation coverage still blocks loading. The application continues to use the project's lightweight descriptor strategy and does not hash large source videos.
+
+Source validation passed with 202 tests plus Ruff formatting/linting, scoped Mypy, compilation, and diff checks. Windows artifact validation is recorded separately when the package is built and smoke-tested.
+
 ## 0.1.1 — Locally accepted patch (2026-10-04)
 
 This usability patch is accepted for local project use. It has not undergone fresh clean-machine acceptance.

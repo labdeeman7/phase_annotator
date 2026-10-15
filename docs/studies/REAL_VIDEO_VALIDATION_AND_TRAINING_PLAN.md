@@ -1,5 +1,7 @@
 # Real-Video Validation and Cholecystectomy Training Plan
 
+> **Plan revision — 4 October 2026:** The originally planned three blind Cholec80 annotations and researcher-led two-video local adaptation have been cancelled. The first clinician reviewer will instead annotate the two recorded local pilot videos directly. This pilot is not scored against Cholec80. The current execution sequence is authoritative in `TRAINING_AND_ANNOTATION_ROLLOUT.md`; earlier blind-practice sections below are retained only as historical design context.
+
 ## Why this is separate from C10
 
 Finishing the application release, exercising it over many real videos, and defining clinical annotation rules answer different questions:
@@ -51,7 +53,9 @@ This track tests:
 
 These cases are useful worked demonstrations, but loading existing annotations does not test annotation-from-scratch effort.
 
-## Track B: three blind Cholec80 practice annotations
+## Superseded Track B: three blind Cholec80 practice annotations
+
+**Superseded on 4 October 2026; do not execute.** The seeded cases remain historical cohort records and are not part of the current pilot.
 
 Keep the converted reference answers outside the videos' directories. Open each video without a canonical sidecar and annotate it from scratch.
 
@@ -102,7 +106,7 @@ Do not call this a formal multi-user usability study unless a study design, part
 
 ## Training package after rule inference
 
-The 10 reference cases supply worked transition examples and inferred Cholec80 rules. Three protected cases supply scored internal rehearsal; two remain reserve. Two separate project videos test local adaptation without Cholec80 reference scores. Package references separately from live practice sidecars.
+The 10 reference cases supplied worked transition examples and inferred Cholec80 rules. The scored internal rehearsal was cancelled. Two separate project videos now form the first clinician pilot and test local adaptation without Cholec80 reference scores.
 
 Recommended structure outside this repository:
 
@@ -185,24 +189,27 @@ Status: **Complete.** All `video04` source transitions and final coverage were v
 - Produce the doctor-facing protocol from the evidence draft.
 - Build an indexed clip library, user guidance, local-differences draft, and exercise instructions.
 
-### V6 — Three blind Cholec80 practice cases
+### Superseded V6 — Three blind Cholec80 practice cases
+
+Status: **Cancelled; retained for historical context only.**
 
 - Annotate three cases without adjacent references.
 - Compare afterwards using an agreed reproducible scoring contract.
 - Revise training explanations where errors reveal ambiguity.
 
-### V7 — Two project-video adaptation cases
+### Current V6 — Two-video clinician pilot
 
-- Annotate two representative local videos.
+- The first clinician reviewer annotates the two recorded local videos from scratch using the Cholecystectomy procedure configuration.
 - Document partial-procedure, absent-phase, instrument, quality, and workflow differences.
 - Do not report Cholec80 reference scores for videos without Cholec80 gold labels.
+- Return both canonical JSON sidecars and structured feedback.
 
-### V8 — Dr Olugbami pilot
+### Current V7 — Joint clinical review and revision
 
-- Review terminology, boundary rules, clips, local adaptations, application use, and exercises.
+- Review terminology, boundary rules, local adaptations, application use, and both returned annotations.
 - Version the package after resolving feedback.
 
-### V9 — Fifteen-video clinical annotation set
+### Current V8 — Fifteen-video clinical annotation set
 
 - Distribute the approved application, protocol, clip library, and guidance.
 - Define assignments, support, completion, return, and quality-review procedures before work begins.
@@ -217,4 +224,4 @@ Status: **Complete.** All `video04` source transitions and final coverage were v
 
 ## Current next action
 
-V4 is active. Generate the source-boundary clip library and review each reference case once while updating `INFERRED_CHOLEC80_RULES.md`. See `TRAINING_AND_ANNOTATION_ROLLOUT.md` for the complete handoff into protocol packaging, practice, local adaptation, Dr Olugbami review, and the final 15-video annotation set.
+Assemble the clinician pilot package from the approved application, PDF exports of the user guide/protocol/pilot instructions, and the two videos recorded in `LOCAL_PILOT_COHORT.md`. See `TRAINING_AND_ANNOTATION_ROLLOUT.md` for the authoritative current workflow.

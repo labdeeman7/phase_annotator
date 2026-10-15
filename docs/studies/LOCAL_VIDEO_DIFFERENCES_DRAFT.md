@@ -1,6 +1,6 @@
 # Project-Video Differences — Review Draft
 
-Status: **Known differences to verify on two project videos and review with Dr Olugbami.**
+Status: **Known differences to verify from the first clinician's annotations of `LOCAL-01` and `LOCAL-02`.**
 
 This document will become a short companion to the doctor-facing annotation protocol. The Cholec80-inferred rules remain the starting convention, while this document explains how to apply them when project recordings differ.
 
@@ -35,7 +35,7 @@ Phases may be absent, repeated, interrupted, or occur in a different order. Foll
 
 Use Undefined when smoke, occlusion, loss of view, out-of-body footage, or another limitation prevents confident assignment. Undefined is not a replacement for an absent phase and should not be used merely because an operation differs from the most common sequence.
 
-## Questions for the two local adaptation cases
+## Questions for the two local clinician-pilot cases
 
 - Which two videos best represent the range doctors will receive?
 - Do their recordings start or end mid-procedure?

@@ -36,9 +36,9 @@ Status: **Complete.**
 Status: **Complete.**
 
 - `compare_video_source()` returns an explainable `match`, `mismatch`, or `unknown` result plus per-field evidence.
-- Conflicting filename, size, modification time, duration, or dimensions produces `mismatch`. Duration allows 100 ms of backend rounding by default.
+- Conflicting filename, size, duration, or dimensions produces `mismatch`. Duration allows 100 ms of backend rounding by default.
 - A matching filename alone is insufficient and returns `unknown`; it needs at least one agreeing descriptor field.
-- A changed absolute path is reported as relocation evidence but does not by itself make otherwise matching media conflict.
+- Changed absolute path and filesystem modification time are reported as relocation evidence but do not make otherwise matching media conflict. Both commonly change during a legitimate computer-to-computer copy.
 - These results remain warning evidence, not proof that file contents are identical. C6 will use them when opening and relocating saved sessions.
 
 ## C5.4 — Honest timing UI

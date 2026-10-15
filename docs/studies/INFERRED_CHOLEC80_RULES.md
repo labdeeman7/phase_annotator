@@ -1,141 +1,174 @@
-# Inferred Cholec80 Annotation Rules — Evidence Draft
+# Laparoscopic Cholecystectomy Phase Annotation Protocol
 
-Status: **Reverse-engineering Cholec80's demonstrated boundary convention; not the doctor-facing protocol.**
+Version: **Clinical-review draft 0.2, 4 October 2026**
 
-This document records candidate rules inferred from Cholec80's supplied phase boundaries. The goal is to reproduce the annotation convention demonstrated by Cholec80 as closely as possible, then teach that convention for use on project videos. The phase descriptions below are the reviewer's first **working generalisations after watching `video04`**. They should be tested and refined against later reference cases.
+Basis: rules inferred by Tosin from the supplied phase annotations for ten Cholec80 reference videos. This document is intended to make those conventions reproducible on OAUTHC project videos. It has not yet received formal clinical approval. We would therefore appreciate clinicians noting any ambiguous or clinically inappropriate rule so it can be reviewed with Tosin.
 
-The supplied Cholec80 boundary is the reference decision. The reviewer watches the activity around it to infer why that point was chosen; the task is not to replace it with a personally preferred boundary. Surprising cases are retained as exceptions or interpretive questions. This evidence draft must not yet be presented to doctors as the final protocol.
+## Using the video examples
 
-## How knowledge is recorded
+This protocol is supplied with an offline **Example Clip Library** containing 18 one-minute clips extracted from the reviewed Cholec80 videos. Each clip is centred on a transition and normally shows 30 seconds before and 30 seconds after the supplied boundary. Open the `03_Example_Clips` folder, double-click `OPEN_CLIP_LIBRARY.html`, and select examples using the clip IDs cited below, such as `V04-B01`.
 
-Keep three levels distinct:
+While watching, pay attention to the surgical activity before and after the transition and to the coloured phase name in the **top-right corner**. The name and colour change at the supplied Cholec80 boundary. A clip shows only the transition context, not the complete phase. Use the written operational rule when OAUTHC instruments or workflow differ from an example.
 
-1. **Inferred Cholec80 rule:** the current explanation of the convention that may apply across videos.
-2. **Case evidence:** what is visibly happening immediately before and after one supplied boundary.
-3. **Reviewed teaching rule:** the explanation retained after comparing multiple Cholec80 cases and discussing local applicability with the clinical owner.
+## Annotation objective
 
-When a boundary is uncertain or appears inconsistent, record both sides explicitly:
+Assign one phase to every moment of the available recording according to the **dominant visible surgical task**. The seven phases describe tasks, not a compulsory sequence. A phase may be absent, repeated, interrupted, or occur in an unusual order.
 
-> **Source label:** In `video04`, Cholec80 changes from P1 to P2 at `00:04:51.000`.
->
-> **Reviewer observation:** Immediately before the boundary `[activity]` is occurring; immediately after it `[new activity]` is occurring.
->
-> **Inferred Cholec80 rule:** Start P2 at `[instrument entry / positioning / first purposeful tissue interaction]`.
->
-> **Support status:** Pending comparison with `[case IDs]` and later clinical review.
+### General boundary rule
 
-This format explains and tests the supplied convention without silently moving its reference boundary.
+Place a boundary at the first defensible visual evidence that the **surgical objective has changed** and the new task has begun.
 
-## Core annotation rules
+- Identify what the surgeon is trying to accomplish before using an instrument as a boundary cue.
+- Introduction of a phase-specific instrument—such as hook electrocautery, a clip applier, a specimen-retrieval bag, or suction/irrigation—supports a transition only when its purpose in the new task is visually clear.
+- If an instrument appears transiently, remains idle, leaves the field, or is used for a different purpose, do not change phase solely because it was seen.
+- Do not move a boundary backwards merely because the next task could be anticipated.
+- Do not prolong a completed phase through clear activity belonging to the next phase.
+- Brief repositioning or inspection belongs to the surrounding task unless it becomes a distinct cleaning, haemostasis, packaging, or extraction episode.
 
-1. Label only observable activity in the available recording.
-2. Cover every available millisecond, but do not invent an absent phase.
-3. Use **Undefined** when visible activity cannot be assigned confidently.
-4. A recording may begin in a later phase or end before the operation is complete.
-5. Expected order is guidance only: phases may be absent, repeated, or out of order.
-6. Place a transition at the first defensible visual evidence of the new phase. Record uncertainty instead of silently guessing.
+Cholec80's supplied boundaries vary by several seconds in visually similar situations. The rules below choose consistent, observable cues instead of attempting to reproduce that annotation noise.
 
-## Provisional cross-video phase definitions
+## Rules for partial or unclear recordings
 
-Unless stated otherwise, these are the reviewer's current generalisations from `video04`. Each definition should accumulate supporting examples, counterexamples, and revisions as more cases are watched.
+- Cover the entire available timeline, even when the recording contains only part of the operation.
+- Begin with the first phase that is confidently visible. Do not invent earlier phases; for example, a recording may begin directly with P2.
+- Let the final visible phase continue to the end when the recording stops during that task. Do not invent a later phase.
+- A short camera movement, smoke episode, or occlusion does not automatically become Undefined when the surrounding task remains clear.
+- Recognise the surgical task even when local surgeons use instruments that differ from the reference clips.
+
+## Phase definitions and boundaries
 
 ### P1 — Preparation
 
-**Working definition:** Entry and initial setup of the laparoscopic view before focused Calot triangle dissection begins.
+**Definition:** Initial laparoscopic survey, exposure and retraction of the gallbladder, and operative setup before focused dissection of the hepatocystic (Calot) triangle.
 
-**Candidate start cue:** First classifiable preparation activity in the available recording.
+**Start:** The beginning of the recording when preparation is the first classifiable activity.
 
-**Candidate end cue:** First defensible evidence that focused Calot triangle dissection has begun.
+**End / transition to P2:** Focused dissection of the hepatocystic triangle begins. Hook electrocautery or another dissecting/energy device may provide the clearest cue when it is purposefully positioned at the cystic structures and dissection begins. A transient appearance without sustained dissection does not end P1.
 
-**Questions to resolve:** Which access, camera-adjustment, exposure, or traction actions remain Preparation rather than becoming Calot triangle dissection?
+**Important:** P1 may be absent when the available recording begins after preparation. Start with the first phase that is confidently visible rather than inventing earlier activity.
+
+**Useful examples:** `V04-B01`, `V14-B01`, and `V50-B01` show the transition from preparation to focused hepatocystic-triangle dissection. `V79-B01` shows why a transient early appearance of an energy device should not automatically trigger the transition.
 
 ### P2 — Calot triangle dissection
 
-**Working definition:** Dissection to expose and identify structures in the Calot triangle.
+**Definition:** Dissection within the hepatocystic (Calot) triangle to expose and identify the cystic duct and cystic artery before their occlusion and division.
 
-**Working generalisation from `video04`:** The appearance of the hook immediately before dissection/cutting activity may be a useful transition cue.
+**Start:** The P1-to-P2 rule above, or the beginning of the recording when focused Calot triangle dissection is already underway.
 
-**Alternative to test:** Instrument appearance alone may be too early if the instrument is visible before purposeful dissection begins.
+**End / transition to P3:** Dissection gives way to occlusion of the cystic duct or cystic artery. Normally place the boundary when a clip applier, ligature, or equivalent occlusion device is purposefully introduced and positioned to secure a cystic structure.
 
-**Questions to resolve:** Should the boundary be the instrument's entry, its positioning, or its first purposeful tissue interaction?
+**Important:** Use the intended action rather than requiring a particular clipper design. Do not switch merely because dissection pauses or the structures are being held exposed.
+
+**Useful examples:** `V01-B02`, `V50-B02`, `V64-B02`, and `V68-B02` show the change from hepatocystic-triangle dissection to cystic-structure occlusion. Some supplied labels precede visible clip-applier entry by a few seconds; do not anticipate an action that is not yet visually supported when annotating new videos.
 
 ### P3 — Clipping and cutting
 
-**Working definition:** Ligation of the cystic duct and artery using clips or ties, followed by division of the secured structures.
+**Definition:** Occlusion of the cystic duct and artery with clips, ties, or an equivalent method, followed by division of the secured structures.
 
-**Candidate start cue:** First purposeful introduction or use of the clipping/ligation instrument for this task.
+**Start:** Purposeful introduction of the clipping or ligation instrument, as described above. A recording may also begin in P3 when this task is already visible.
 
-**Candidate end cue:** Completion of the final relevant cut, before gallbladder dissection from the liver bed begins.
+**End / transition to P4:** The secured cystic duct and artery have been divided and any brief confirmation of complete division has ended. Place the boundary before purposeful separation of the gallbladder from the liver bed begins. Hook electrocautery or another energy device may support the transition when it is repositioned and used for liver-bed dissection.
 
-**Questions to resolve:** How should preparation for clipping, instrument exchanges, and delays between clipping and cutting be labelled?
+**Important:** Do not use the scissors merely leaving the view as an inflexible cue: the surgeon may still inspect or perform another cut. Conversely, do not wait through clear gallbladder dissection simply because there was no long pause.
+
+**Useful examples:** `V64-B03`, `V68-B03`, and `V37-B03` show final division followed by a short confirmation interval before P4. The supplied Cholec80 timing varies between final cutting and the next instrument's arrival; task completion is the consistent rule.
 
 ### P4 — Gallbladder dissection
 
-**Working definition:** Separation of the gallbladder from the liver bed after division of the duct and artery.
+**Definition:** Separation of the gallbladder from the liver bed after the cystic duct and artery have been divided.
 
-**Candidate start cue:** First purposeful dissection separating the gallbladder from the liver bed.
+**Start:** Completion of P3 as defined above, followed by purposeful separation of the gallbladder from the liver bed.
 
-**Candidate end cue:** The gallbladder is visibly fully detached and the next task begins.
+**End:** Continue P4 until the gallbladder is detached and there is positive evidence of the next dominant task. The next phase is determined by what actually begins:
 
-**Questions to resolve:** If packaging equipment appears before the last attachment is divided, does dissection continue until full detachment?
+- transition to **P5 Packaging** when a retrieval bag is introduced, opened, or purposefully positioned for the gallbladder;
+- transition to **P6 Cleaning and coagulation** when irrigation, suction, inspection, or haemostasis becomes the dominant task;
+- do not infer the next phase solely because the camera temporarily leaves the abdomen.
+
+**Important:** Detachment alone may be followed by a pause, inspection, cleaning, or packaging. Keep P4 during a short ambiguous pause and change at the first defensible evidence of the next task. If haemostasis is only a brief part of continuing liver-bed dissection, remain in P4.
+
+**Useful examples:** `V44-B04` demonstrates movement towards packaging; `V37-B04` demonstrates movement towards cleaning/coagulation. These examples show why the observable next task is more reliable than assuming a fixed phase order.
 
 ### P5 — Gallbladder packaging
 
-**Working definition:** Placement and securing of the detached gallbladder in a retrieval bag.
+**Definition:** Introducing, opening, and using a specimen-retrieval bag (endobag) to contain and secure the detached gallbladder.
 
-**Candidate start cue:** First purposeful action to introduce, open, or position the retrieval bag for the gallbladder.
+**Start:** First purposeful introduction, opening, or positioning of the retrieval bag for the specimen. If the bag is already present when the view returns, begin P5 at the earliest visible moment when its use is clear; do not guess what occurred off camera.
 
-**Candidate end cue:** The gallbladder is contained and the bag is closed or otherwise secured, followed by another task.
+**End:** The gallbladder has been placed and secured in the bag and another task purposefully begins:
 
-**Questions to resolve:** Does bag introduction count immediately, or only once placement of the specimen begins?
+- transition to **P6** when attention turns to irrigation, suction, liver-bed inspection, or haemostasis;
+- transition to **P7** when the bag or its extraction handle is engaged and sustained withdrawal begins.
+
+**Important:** Merely touching the bag does not end P5 if packaging continues. Conversely, complete closure is not required when the surgeon clearly stops packaging and begins extraction.
+
+**Useful examples:** `V01-B05` demonstrates packaging followed by cleaning; `V14-B05` and `V50-B05` demonstrate packaging followed by extraction; `V37-B05` and `V64-B05` demonstrate cleaning/coagulation followed by packaging.
 
 ### P6 — Cleaning and coagulation
 
-**Working definition:** Irrigation, suction, inspection, cleaning, or haemostatic coagulation after or between the principal dissection tasks.
+**Definition:** A distinct episode in which liver-bed inspection, irrigation, suction, clearance of blood or fluid, or haemostasis becomes the principal activity after or between the main operative tasks.
 
-**Working generalisation from `video04`:** Cleaning begins after the gallbladder has been secured in the bag and cleaning/coagulation activity starts.
+**Start:** The first purposeful cleaning or haemostatic action when that activity becomes the dominant task. Supporting cues include introduction of an irrigator or suction device, deliberate inspection of the liver bed, or use of a coagulating instrument specifically for haemostasis.
 
-**Ordering hypothesis to test:** P6 need not always follow packaging. A case may clean before packaging, before retraction, after retraction attempts, or in repeated episodes; label the visible task rather than forcing the `video04` order.
+**End:** Continue P6 until another dominant task purposefully begins. For a transition to P7, this means the retrieval bag or extraction handle is engaged and sustained withdrawal begins. If the surgeon briefly touches or repositions the bag and returns to cleaning, remain in P6.
 
-**Questions to resolve:** How should brief haemostasis during another dominant phase be handled, and when is an activity long or distinct enough to become P6?
+**Ordering:** P6 is not tied to one fixed point in the operation. It may occur before or after P5, before or after an attempted P7, may repeat, or may be absent. Follow the visible dominant task rather than forcing P6 into one expected position.
 
-### P7 — Gallbladder retraction
+**Dominant-task rule:** Brief coagulation used as part of ongoing P2 or P4 dissection remains in that dissection phase. Create a separate P6 interval only when cleaning, inspection, or haemostasis becomes a distinct episode rather than a momentary supporting action.
 
-**Working definition:** Withdrawal/removal of the packaged gallbladder from the operative field.
+### P7 — Gallbladder retraction (specimen extraction)
 
-**Candidate start cue:** First purposeful action directed at extracting the packaged gallbladder after the preceding task ends.
+**Definition:** Retrieval or extraction of the packaged gallbladder from the operative field. The source ontology calls this phase “Gallbladder retraction”; here, **retraction means specimen extraction**, not ordinary traction on tissue during dissection.
 
-**Candidate end cue:** End of visible extraction activity or end of the available recording.
+**Start:** The extraction handle, bag neck, or packaged specimen is purposefully grasped and sustained withdrawal begins. Use the beginning of the pulling/extraction movement, not a brief touch or an idle grasp.
 
-**Questions to resolve:** The term “retraction” may be confused with ordinary tissue traction. Confirm whether “gallbladder retrieval/extraction” would be clinically clearer while retaining compatibility with the configured/source label.
+**End:** The packaged gallbladder has been removed, the recording ends during extraction, or another dominant task begins. If the surgeon abandons extraction and returns to a distinct cleaning or haemostasis episode, transition back to P6 at the first purposeful action of that task.
 
-## Evidence log
+**Important:** Ordinary gallbladder traction during P2 or P4 is not P7. Camera withdrawal alone is not sufficient unless the visible context shows that it is part of specimen extraction.
 
-Use one row per supplied boundary. Record the visible activity on both sides and the rule it appears to demonstrate. Times are source-video times, not descriptions such as “around the middle.” Keep media outside Git and refer to clips by a non-identifying local study ID.
+**Useful examples:** `V14-B05` and `V50-B05` show the transition from packaging to extraction. P7 need not be the final phase if another distinct task follows.
 
-| Case | From → To | Source boundary | Activity before/after boundary | Inferred rule | Support | Clip ID |
-| --- | --- | ---: | --- | --- | --- | --- |
-| `video04` | P1 → P2 | 00:04:51.000 | Review hook/dissection activity | Is hook appearance or purposeful dissection the operative cue? | One case | `V04-B01` |
-| `video04` | P2 → P3 | 00:14:58.000 | To document | To infer | One case | `V04-B02` |
-| `video04` | P3 → P4 | 00:16:04.000 | To document | To infer | One case | `V04-B03` |
-| `video04` | P4 → P5 | 00:20:40.000 | To document | To infer | One case | `V04-B04` |
-| `video04` | P5 → P6 | 00:21:18.000 | Review secured-bag-to-cleaning activity | Cleaning starts when cleaning/coagulation becomes the active task | One case | `V04-B05` |
-| `video04` | P6 → P7 | 00:22:53.000 | To document | To infer | One case | `V04-B06` |
+## Quick transition guide
 
-## Transition clip library
+| Transition | Preferred boundary cue |
+| --- | --- |
+| P1 → P2 | Focused dissection of the hepatocystic triangle begins |
+| P2 → P3 | Clip applier, ligature, or equivalent device is introduced to occlude a cystic structure |
+| P3 → P4 | Division of the secured cystic structures is complete; separation from the liver bed begins |
+| P4 → P5 | Specimen-retrieval bag is purposefully introduced, opened, or positioned |
+| P4 → P6 | Liver-bed cleaning, inspection, or haemostasis becomes the dominant task |
+| P5 → P6 | Packaging complete enough that cleaning/inspection/haemostasis becomes dominant |
+| P5 → P7 | Sustained extraction of the packaged specimen begins |
+| P6 → P7 | Cleaning ends and sustained extraction begins |
+| P7 → P6 | Extraction pauses/ends and a distinct cleaning or haemostasis episode begins |
 
-Short videos are the primary teaching evidence because phase segmentation depends on activity before and after a transition. Every default clip contains 30 seconds before and 30 seconds after the exact supplied Cholec80 boundary, subject only to video-edge clamping.
+Other transitions are allowed when supported by the visible task. Never insert a phase simply to preserve the nominal order.
 
-For each accepted example, prepare outside the repository:
+## Handling uncertainty
 
-- a caption explaining the before/after activity and the Cholec80 rule the clip appears to demonstrate;
-- licence/attribution information required for the dataset-derived asset.
+1. Review several seconds before and after the candidate boundary.
+2. Identify the task that has ended and the first purposeful evidence of the task that follows.
+3. Apply the preferred cue above rather than anticipating an off-screen action.
+4. If the activity remains genuinely unclassifiable, add a segment note and include the uncertainty in your feedback to Tosin.
+5. Do not place patient-identifying information in notes.
 
-Suggested working convention: `V04-B01` identifies video 04, boundary example 01. Do not embed absolute local paths or identifiable reviewer details in this document.
+## Reference material
 
-## Review record
+The full transition evidence library contains one clip for each of the 58 internal boundaries in the ten reviewed reference cases. The clinician package supplies 18 selected examples cited in this protocol. Each clip includes 30 seconds before and after the supplied boundary, subject to video-edge clamping, and displays the active source phase in its configured colour on every frame.
 
-| Protocol version | Cases reviewed | Clinical owner | Status | Main unresolved issue |
-| --- | ---: | --- | --- | --- |
-| Working draft 0.1 | 1 completed | To assign | All `video04` source boundaries accepted | Test the working generalisations against more cases |
+The supplied examples include transitions into dissection, clipping/cutting, packaging, cleaning/coagulation, and extraction, including examples where cleaning/coagulation and packaging occur in different orders. Use the clip IDs cited under each phase rather than looking for complete source videos.
 
+## Clinical review points
+
+The following points should be confirmed during the first clinical review without delaying initial use of this draft:
+
+- whether “Gallbladder extraction” should replace “Gallbladder retraction” in a future ontology version;
+- whether introduction of the retrieval bag is the preferred P5 start cue across local techniques;
+- when brief haemostasis during dissection is substantial enough to become a distinct P6 episode;
+- whether local instruments require additional task-based examples.
+
+Until those decisions are approved, use the operational rules in this document consistently and record difficult cases in segment notes.
+
+## Cholec80 reference
+
+Twinanda AP, Shehata S, Mutter D, Marescaux J, de Mathelin M, Padoy N. *EndoNet: A Deep Architecture for Recognition Tasks on Laparoscopic Videos.* IEEE Transactions on Medical Imaging. 2017;36(1):86–97. DOI: `10.1109/TMI.2016.2593957`.

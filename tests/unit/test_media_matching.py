@@ -51,7 +51,6 @@ def test_matching_descriptor_returns_explainable_match(tmp_path: Path):
     [
         ({}, {"source_path": "different.mp4"}, "filename"),
         ({}, {"file_size_bytes": 999}, "file_size_bytes"),
-        ({}, {"file_modified_ns": 999}, "file_modified_ns"),
         ({}, {"duration_ms": 10_101}, "duration_ms"),
         ({}, {"width": 1280}, "width"),
         ({}, {"height": 720}, "height"),
@@ -83,6 +82,35 @@ def test_changed_path_alone_is_a_relocation_not_a_mismatch(tmp_path: Path):
     )
     assert path_evidence.status is EvidenceStatus.MISMATCH
     assert "source_path" in comparison.mismatched_fields
+    assert comparison.conflicting_identity_fields == ()
+
+
+def test_copied_video_path_and_timestamp_are_relocation_evidence(tmp_path: Path):
+    copied = actual_video(
+        tmp_path,
+        source_path=str((tmp_path / "other-computer" / "case.mp4").resolve()),
+        file_modified_ns=9_999,
+    )
+
+    comparison = compare_video_source(expected_video(tmp_path), copied)
+
+    assert comparison.status is SourceMatchStatus.MATCH
+    assert comparison.mismatched_fields == ("source_path", "file_modified_ns")
+    assert comparison.conflicting_identity_fields == ()
+
+
+def test_relocation_does_not_hide_a_content_descriptor_conflict(tmp_path: Path):
+    copied_but_different = actual_video(
+        tmp_path,
+        source_path=str((tmp_path / "other-computer" / "case.mp4").resolve()),
+        file_modified_ns=9_999,
+        file_size_bytes=999,
+    )
+
+    comparison = compare_video_source(expected_video(tmp_path), copied_but_different)
+
+    assert comparison.status is SourceMatchStatus.MISMATCH
+    assert comparison.conflicting_identity_fields == ("file_size_bytes",)
 
 
 def test_filename_only_agreement_is_unknown(tmp_path: Path):

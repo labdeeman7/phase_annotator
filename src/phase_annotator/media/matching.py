@@ -42,6 +42,21 @@ class SourceComparison:
             if item.status is EvidenceStatus.MISMATCH
         )
 
+    @property
+    def conflicting_identity_fields(self) -> tuple[str, ...]:
+        """Return mismatches that can block attaching a sidecar to a video.
+
+        A path says where a file is, while its modification time describes one
+        filesystem copy. Both commonly change during a legitimate transfer.
+        """
+        relocation_fields = {"source_path", "file_modified_ns"}
+        return tuple(
+            item.field
+            for item in self.evidence
+            if item.status is EvidenceStatus.MISMATCH
+            and item.field not in relocation_fields
+        )
+
 
 def compare_video_source(
     expected: VideoInfo,
@@ -70,7 +85,12 @@ def compare_video_source(
         _exact_evidence("height", expected.height, actual.height),
     ]
 
-    discriminating = [item for item in evidence if item.field != "source_path"]
+    # Copying an unchanged video to another computer normally changes both its
+    # absolute path and filesystem modification time. Neither is content
+    # identity, so retain them as explainable relocation evidence but never let
+    # them block otherwise corroborated annotations.
+    relocation_fields = {"source_path", "file_modified_ns"}
+    discriminating = [item for item in evidence if item.field not in relocation_fields]
     if any(item.status is EvidenceStatus.MISMATCH for item in discriminating):
         status = SourceMatchStatus.MISMATCH
     else:

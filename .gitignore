@@ -41,6 +41,15 @@ htmlcov/
 # Project files
 *.session.json.tmp
 *.bak
+.clinician-package-pdf-build/
+
+# Local clinical media and live annotation data
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.phase-annotations.json
+*.phase-annotations-history/
 
 # Keep the local test-media directory in Git without committing its contents.
 test_dataset/*

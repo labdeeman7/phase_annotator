@@ -1,29 +1,36 @@
-# Ignored Local Study Workspace
+# Ignored Local Media Workspace
 
-The real and derived media workspace is ignored by Git. Its logical structure is:
+The real and derived media workspace is ignored by Git. It is organised by purpose rather than by temporary study stage:
 
 ```text
-test_dataset/cholec80_protocol_study/
-├── reference_cases/
-│   ├── videos/              # 10 MP4s plus protected live sidecars
-│   ├── source_labels/       # original Cholec80 frame TXT files
-│   ├── reference_answers/   # converted sidecars and provenance manifests
-│   └── transition_clips/    # generated one-minute boundary clips and manifests
-├── self_practice/
-│   ├── cholec80_blind_3/    # no adjacent answer sidecars
-│   ├── protected_answers/   # inaccessible until each exercise is completed
-│   └── scoring/             # offline comparison reports
-├── local_adaptation/
-│   ├── practice_videos_2/   # two representative project videos
-│   └── review/              # local-differences observations and reviewed labels
-└── clinician_package/
-    ├── application/
-    ├── user_guide/
-    ├── protocol/
-    ├── clip_library/
-    └── exercises/
+test_dataset/
+├── application_smoke_test/
+│   ├── 20250922_121504.mp4
+│   └── 20250922_121504.mp4.phase-annotations.json
+├── clinician_pilot/
+│   ├── Phase_Annotator_Cholecystectomy_0.1_Pilot/
+│   └── Phase_Annotator_Cholecystectomy_0.1_Pilot.zip
+└── reference_cases/
+    ├── videos/              # 10 Cholec80 MP4s plus protected live sidecars
+    ├── source_labels/       # original Cholec80 frame-label TXT files
+    ├── reference_answers/   # converted sidecars and provenance manifests
+    └── transition_clips/    # generated labelled boundary clips and manifests
 ```
 
-The earlier `cholec80_v3/` and `cholec80_v4/` staging folders were consolidated into this structure after their files were verified. No media, source labels, converted answers, clips, scoring reports, or machine-specific paths belong in Git.
+## Directory roles
 
-The folder layout separates reference evidence, blind work, local adaptation, and distributable material. In particular, never copy `protected_answers/` beside a blind-practice video before that exercise is complete.
+- `application_smoke_test/` is disposable application-development media. It is not clinician study material.
+- `clinician_pilot/` contains exactly what was prepared for the Nigerian clinician pilot. Keep the unpacked package and its transfer ZIP together. Returned annotation sidecars may remain adjacent to their corresponding videos inside the unpacked package.
+- `reference_cases/` contains the ten selected Cholec80 cases and all evidence derived from them. It is research/protocol-development material, not part of the clinician handout except for the selected clips copied into the package.
+
+The obsolete staging, self-practice, preview-render, and duplicate local-video directories were removed on 15 October 2026 after the final pilot package and reference corpus were verified.
+
+No media, source labels, converted answers, clips, returned annotations, feedback, or machine-specific paths belong in Git.
+
+## Clinician-pilot handling
+
+- The local study videos are `20260505_221257.mp4` and `20260519_215628.mp4`.
+- Preserve each returned sidecar before making any reviewed correction.
+- Keep each sidecar beside the video with the exact name `<video filename>.phase-annotations.json`.
+- Phase Annotator 0.1.2 or later is required when opening annotations copied from another computer.
+- Keep transfer locations and absolute paths outside committed documentation.

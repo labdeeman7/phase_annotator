@@ -545,3 +545,9 @@ One implementation trap is that `dataclasses.asdict()` serializes every dataclas
 When reproducing a published dataset protocol, its supplied labels are evidence of the convention being learned. The reference-review task is therefore to explain what happens before and after each supplied boundary and infer a rule consistent across cases, not to replace every boundary with the reviewer's preferred decision. Surprising examples become exceptions or questions that refine the inferred rule.
 
 Applying that convention to a different dataset is a later, explicit adaptation step. Partial recordings, absent phases, different instruments, and local workflow can require additional instructions without pretending those additions came from the reference dataset. Keeping reconstruction and adaptation separate makes the final protocol's provenance much clearer.
+
+### Separate file identity from filesystem-copy metadata
+
+An absolute path and a modification timestamp describe one filesystem copy, not the underlying video. Both can legitimately change when a video and its sidecar are transferred to another computer. Treating either as hard identity made valid annotations non-portable.
+
+The lightweight matcher therefore retains path and modification-time differences as useful diagnostic evidence but bases blocking decisions on filename, byte size, duration, and dimensions. This is a deliberate tradeoff rather than proof of identity: without hashing, two different files can theoretically share those descriptors. The important design lesson is to classify metadata by meaning before combining it into an identity decision.

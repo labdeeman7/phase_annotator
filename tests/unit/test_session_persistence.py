@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -81,6 +82,33 @@ def test_save_and_inspect_matching_sidecar_round_trip(tmp_path: Path):
     assert result.status is LoadStatus.LOADED
     assert result.session is not None
     assert result.session.intervals == [AnnotationInterval(0, 10_000, 1)]
+
+
+def test_inspect_accepts_sidecar_after_video_is_copied_to_another_computer(
+    tmp_path: Path,
+):
+    original_path = tmp_path / "original" / "case.mp4"
+    original_path.parent.mkdir()
+    original_path.write_bytes(b"video")
+    session = make_session(original_path)
+
+    copied_path = tmp_path / "other-computer" / "case.mp4"
+    copied_path.parent.mkdir()
+    copied_path.write_bytes(original_path.read_bytes())
+    copied_modified_ns = original_path.stat().st_mtime_ns + 1_000_000_000
+    os.utime(copied_path, ns=(copied_modified_ns, copied_modified_ns))
+    sidecar = SessionPersistenceCoordinator.sidecar_path_for(copied_path)
+    JsonSessionRepository().save(session, sidecar)
+
+    result = SessionPersistenceCoordinator(load_default_ontology()).inspect(
+        copied_path, actual_metadata(copied_path)
+    )
+
+    assert result.status is LoadStatus.LOADED
+    assert result.session is not None
+    assert result.source_comparison is not None
+    assert "source_path" in result.source_comparison.mismatched_fields
+    assert "file_modified_ns" in result.source_comparison.mismatched_fields
 
 
 def test_filename_only_legacy_evidence_requires_confirmation(tmp_path: Path):

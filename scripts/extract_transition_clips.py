@@ -30,13 +30,53 @@ class TransitionClip:
     clip_end_ms: int
     from_phase_id: int
     from_phase_name: str
+    from_phase_color: str
     to_phase_id: int
     to_phase_name: str
+    to_phase_color: str
 
 
 def _slug(value: str) -> str:
     normalized = re.sub(r"[^a-z0-9]+", "-", value.casefold()).strip("-")
     return normalized or "phase"
+
+
+def _escape_drawtext(value: str) -> str:
+    """Escape text embedded in FFmpeg's drawtext filter expression."""
+    return (
+        value.replace("\\", r"\\")
+        .replace("'", r"\'")
+        .replace(":", r"\:")
+        .replace("%", r"\%")
+    )
+
+
+def _escape_filter_path(path: Path) -> str:
+    return (
+        str(path.resolve()).replace("\\", "/").replace(":", r"\:").replace("'", r"\'")
+    )
+
+
+def _phase_overlay_filter(clip: TransitionClip, *, font_path: Path) -> str:
+    """Label every output frame with the phase active at that source time."""
+    boundary_seconds = (clip.boundary_ms - clip.clip_start_ms) / 1_000
+
+    def style(color_hex: str) -> str:
+        ffmpeg_color = color_hex.replace("#", "0x")
+        return (
+            f"fontfile='{_escape_filter_path(font_path)}':"
+            f"x=w-tw-20:y=20:fontsize=h/18:fontcolor={ffmpeg_color}:box=1:"
+            "boxcolor=black@0.78:boxborderw=8"
+        )
+
+    before = _escape_drawtext(f"P{clip.from_phase_id} | {clip.from_phase_name}")
+    after = _escape_drawtext(f"P{clip.to_phase_id} | {clip.to_phase_name}")
+    return (
+        f"drawtext=text='{before}':{style(clip.from_phase_color)}:"
+        f"enable='lt(t\\,{boundary_seconds:.3f})',"
+        f"drawtext=text='{after}':{style(clip.to_phase_color)}:"
+        f"enable='gte(t\\,{boundary_seconds:.3f})'"
+    )
 
 
 def plan_transition_clips(
@@ -89,8 +129,10 @@ def plan_transition_clips(
                 ),
                 from_phase_id=left.phase_id,
                 from_phase_name=from_phase.name,
+                from_phase_color=from_phase.color_hex,
                 to_phase_id=right.phase_id,
                 to_phase_name=to_phase.name,
+                to_phase_color=to_phase.color_hex,
             )
         )
     return clips
@@ -99,6 +141,7 @@ def plan_transition_clips(
 def extract_transition_clips(
     *,
     ffmpeg_path: Path,
+    font_path: Path,
     video_path: Path,
     session_path: Path,
     output_dir: Path,
@@ -108,6 +151,8 @@ def extract_transition_clips(
     """Extract planned clips with an explicitly selected offline FFmpeg binary."""
     if not ffmpeg_path.is_file():
         raise ClipExtractionError(f"FFmpeg executable not found: {ffmpeg_path}")
+    if not font_path.is_file():
+        raise ClipExtractionError(f"Overlay font not found: {font_path}")
     if not video_path.is_file():
         raise ClipExtractionError(f"Video not found: {video_path}")
     clips = plan_transition_clips(session_path, context_ms=context_ms)
@@ -146,6 +191,8 @@ def extract_transition_clips(
             "-map",
             "0:v:0",
             "-an",
+            "-vf",
+            _phase_overlay_filter(clip, font_path=font_path),
             "-c:v",
             "libx264",
             "-preset",
@@ -174,6 +221,10 @@ def extract_transition_clips(
             "preset": "veryfast",
             "crf": 22,
             "audio": "omitted",
+            "phase_overlay": (
+                "burned into every frame; switches at the exact source boundary"
+            ),
+            "overlay_font_filename": font_path.name,
         },
         "clips": [asdict(clip) for clip in clips],
     }
@@ -194,12 +245,14 @@ def main() -> int:
     parser.add_argument("session", type=Path)
     parser.add_argument("output_dir", type=Path)
     parser.add_argument("--ffmpeg-path", type=Path, required=True)
+    parser.add_argument("--font-path", type=Path, required=True)
     parser.add_argument("--context-seconds", type=int, default=30)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     try:
         clips, manifest = extract_transition_clips(
             ffmpeg_path=args.ffmpeg_path,
+            font_path=args.font_path,
             video_path=args.video,
             session_path=args.session,
             output_dir=args.output_dir,

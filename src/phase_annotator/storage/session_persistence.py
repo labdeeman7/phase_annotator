@@ -127,7 +127,7 @@ class SessionPersistenceCoordinator:
 
         comparison = compare_video_source(session.video_info, actual)
         if comparison.status is SourceMatchStatus.MISMATCH:
-            fields = ", ".join(comparison.mismatched_fields)
+            fields = ", ".join(comparison.conflicting_identity_fields)
             return LoadResult(
                 LoadStatus.BLOCKED,
                 sidecar_path,
