@@ -13,7 +13,7 @@ For every case:
 3. convert into the protected reference-answer directory;
 4. copy the generated canonical sidecar beside the walkthrough video;
 5. open it with the packaged 0.1.1 cholecystectomy application;
-6. inspect every transition through its one-minute boundary clip and update `INFERRED_CHOLEC80_RULES.md` with before/after activity and the inferred source convention;
+6. inspect every transition through its one-minute boundary clip and update `CHOLEC80_DERIVED_TRAINING_MANUAL.md` with before/after activity and the inferred source convention;
 7. record software defects separately from clinical interpretation questions.
 
 The watching and protocol-inference tasks happen together, one case at a time. Do not watch all ten full videos and later rewatch all ten to locate transitions again.

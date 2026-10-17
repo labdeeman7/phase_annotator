@@ -79,10 +79,28 @@ def _phase_overlay_filter(clip: TransitionClip, *, font_path: Path) -> str:
     )
 
 
+def phase_label_overlay_filter(
+    phase_id: int, phase_name: str, phase_color: str, *, font_path: Path
+) -> str:
+    """Return a constant top-right phase overlay for an in-phase example."""
+    color = phase_color.replace("#", "0x")
+    label = _escape_drawtext(f"P{phase_id} | {phase_name}")
+    return (
+        f"drawtext=text='{label}':"
+        f"fontfile='{_escape_filter_path(font_path)}':"
+        f"x=w-tw-20:y=20:fontsize=h/18:fontcolor={color}:box=1:"
+        "boxcolor=black@0.78:boxborderw=8"
+    )
+
+
 def plan_transition_clips(
-    session_path: Path, *, context_ms: int = 30_000
+    session_path: Path,
+    *,
+    context_ms: int = 30_000,
+    allow_draft: bool = False,
+    case_id: str | None = None,
 ) -> list[TransitionClip]:
-    """Plan one clip around every internal boundary in a reference session."""
+    """Plan one clip around every internal boundary in an annotation session."""
     if context_ms <= 0:
         raise ClipExtractionError("context_ms must be positive.")
     session = JsonSessionRepository().load(session_path)
@@ -91,17 +109,22 @@ def plan_transition_clips(
         raise ClipExtractionError(
             "Session is not a Cholec80 cholecystectomy reference."
         )
-    if session.status != "completed":
+    if session.status != "completed" and not allow_draft:
         raise ClipExtractionError(
             "Reference session must be completed before clipping."
         )
     if len(session.intervals) < 2:
         return []
 
-    match = re.fullmatch(r"video(\d+)\.mp4", session.video_info.video_id)
-    case_token = (
-        f"V{int(match.group(1)):02d}" if match else _slug(session.video_info.video_id)
-    )
+    if case_id is not None:
+        case_token = _slug(case_id).upper()
+    else:
+        match = re.fullmatch(r"video(\d+)\.mp4", session.video_info.video_id)
+        case_token = (
+            f"V{int(match.group(1)):02d}"
+            if match
+            else _slug(Path(session.video_info.video_id).stem)
+        )
     clips: list[TransitionClip] = []
     for boundary_index, (left, right) in enumerate(
         zip(session.intervals, session.intervals[1:], strict=False), start=1
@@ -147,6 +170,10 @@ def extract_transition_clips(
     output_dir: Path,
     context_ms: int = 30_000,
     overwrite: bool = False,
+    allow_draft: bool = False,
+    case_id: str | None = None,
+    manifest_purpose: str = "Cholec80 source-boundary rule inference",
+    boundary_indices: set[int] | None = None,
 ) -> tuple[list[TransitionClip], Path]:
     """Extract planned clips with an explicitly selected offline FFmpeg binary."""
     if not ffmpeg_path.is_file():
@@ -155,9 +182,16 @@ def extract_transition_clips(
         raise ClipExtractionError(f"Overlay font not found: {font_path}")
     if not video_path.is_file():
         raise ClipExtractionError(f"Video not found: {video_path}")
-    clips = plan_transition_clips(session_path, context_ms=context_ms)
+    clips = plan_transition_clips(
+        session_path,
+        context_ms=context_ms,
+        allow_draft=allow_draft,
+        case_id=case_id,
+    )
+    if boundary_indices is not None:
+        clips = [clip for clip in clips if clip.boundary_index in boundary_indices]
     if not clips:
-        raise ClipExtractionError("Reference session contains no internal boundaries.")
+        raise ClipExtractionError("No requested internal boundaries were found.")
 
     output_dir.mkdir(parents=True, exist_ok=True)
     manifest_path = output_dir / f"{video_path.stem}.transition-clips.json"
@@ -210,9 +244,11 @@ def extract_transition_clips(
 
     manifest = {
         "schema_version": CLIP_MANIFEST_SCHEMA_VERSION,
-        "purpose": "Cholec80 source-boundary rule inference",
+        "purpose": manifest_purpose,
         "source_video_filename": video_path.name,
         "reference_session_filename": session_path.name,
+        "source_session_status": JsonSessionRepository().load(session_path).status,
+        "draft_explicitly_accepted": allow_draft,
         "context_before_ms": context_ms,
         "context_after_ms": context_ms,
         "ffmpeg_version": version,
@@ -247,6 +283,9 @@ def main() -> int:
     parser.add_argument("--ffmpeg-path", type=Path, required=True)
     parser.add_argument("--font-path", type=Path, required=True)
     parser.add_argument("--context-seconds", type=int, default=30)
+    parser.add_argument("--allow-draft", action="store_true")
+    parser.add_argument("--case-id")
+    parser.add_argument("--purpose", default="Cholec80 source-boundary rule inference")
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args()
     try:
@@ -258,6 +297,9 @@ def main() -> int:
             output_dir=args.output_dir,
             context_ms=args.context_seconds * 1_000,
             overwrite=args.overwrite,
+            allow_draft=args.allow_draft,
+            case_id=args.case_id,
+            manifest_purpose=args.purpose,
         )
     except (ClipExtractionError, OSError, subprocess.SubprocessError) as exc:
         parser.exit(2, f"Clip extraction failed: {exc}\n")

@@ -328,7 +328,10 @@ def build_package(
             documents_dir / "01_Phase_Annotator_User_Guide.pdf",
         ),
         (
-            repository / "docs" / "studies" / "INFERRED_CHOLEC80_RULES.md",
+            repository
+            / "docs"
+            / "studies"
+            / "OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md",
             documents_dir / "02_Draft_Annotation_Protocol.pdf",
         ),
     )

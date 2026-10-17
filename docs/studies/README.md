@@ -1,6 +1,6 @@
 # Post-Release Validation and Training Programme
 
-Status: **V4 rule inference complete; two-video clinician pilot preparation active.** Ten Cholec80 reference cases produced 58 labelled transition clips and an initial clinician-review protocol. The researcher will not perform the former blind/self-annotation stages; the first clinician reviewer will annotate two local videos directly.
+Status: **Two finished clinician pilot annotations returned; V7 boundary review ready.** Ten Cholec80 reference cases produced 58 labelled transition clips and an initial clinician-review protocol. Both local pilot sidecars pass automated validation in Phase Annotator 0.1.2. They remain technically marked Draft because the separate completion action was missed; the project lead confirms the annotation work was finished. Structured clinician feedback is still pending.
 
 ## Current sequence
 
@@ -13,11 +13,11 @@ V3  Validate one converted case visually                               Complete
  ↓
 V4  Infer rules from 10 reference cases and create labelled clips      Complete
  ↓
-V5  Assemble application, user guide, draft protocol, and pilot files  Active
+V5  Assemble application, user guide, draft protocol, and pilot files  Complete
  ↓
-V6  First clinician annotates 2 local videos and returns feedback
+V6  Clinician returns 2 annotations; completion/feedback pending        Partial
  ↓
-V7  Jointly review annotations and revise protocol/application
+V7  Intake, jointly review annotations, and revise protocol/application Active
  ↓
 V8  Approve and begin the 15-video clinical annotation set
 ```
@@ -53,12 +53,14 @@ Label only what is observable in the available recording. Every available millis
 
 ## Documents and evidence
 
-- [`INFERRED_CHOLEC80_RULES.md`](INFERRED_CHOLEC80_RULES.md): operational clinician-review draft derived from ten reference cases.
+- [`CHOLEC80_DERIVED_TRAINING_MANUAL.md`](CHOLEC80_DERIVED_TRAINING_MANUAL.md): preserved operational convention inferred from ten Cholec80 reference cases.
+- [`OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md`](OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md): current OAUTHC clinical adaptation and primary instruction for the next review stage.
 - [`evidence/ROUGH_CHOLEC80_REVIEW_NOTES_2026-10-04.md`](evidence/ROUGH_CHOLEC80_REVIEW_NOTES_2026-10-04.md): archived case-by-case reasoning and uncertainty; not annotation instructions.
 - [`V4_REFERENCE_WALKTHROUGHS.md`](V4_REFERENCE_WALKTHROUGHS.md): conversion, clip, and walkthrough evidence.
 - [`LOCAL_PILOT_COHORT.md`](LOCAL_PILOT_COHORT.md): stable record of the two local pilot videos.
 - [`CLINICIAN_PACKAGE_START_HERE.md`](CLINICIAN_PACKAGE_START_HERE.md): consolidated pilot purpose, package guide, annotation steps, feedback, return, and support instructions.
 - [`LOCAL_VIDEO_DIFFERENCES_DRAFT.md`](LOCAL_VIDEO_DIFFERENCES_DRAFT.md): local differences to revise from pilot evidence.
+- [`V7_CLINICIAN_PILOT_REVIEW.md`](V7_CLINICIAN_PILOT_REVIEW.md): controlled intake, joint-review questions, outputs, and rollout gate for the returned pilot annotations.
 - [`TRAINING_AND_ANNOTATION_ROLLOUT.md`](TRAINING_AND_ANNOTATION_ROLLOUT.md): current packaging, pilot, review, and wider-rollout workflow.
 - [`REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md`](REAL_VIDEO_VALIDATION_AND_TRAINING_PLAN.md): detailed historical study contract; superseded sections are identified within it.
 

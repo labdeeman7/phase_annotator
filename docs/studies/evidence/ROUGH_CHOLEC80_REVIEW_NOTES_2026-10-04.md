@@ -4,7 +4,7 @@ Status: **Archived working notes. Not a doctor-facing protocol.**
 
 These notes preserve the reviewer's original case-by-case reasoning, uncertainty, reactions, and candidate rules from the ten-case Cholec80 walkthrough. They are retained because the polished protocol necessarily compresses the evidence and may later need to be challenged or revised.
 
-The operational clinician-review draft derived from these notes is [`../INFERRED_CHOLEC80_RULES.md`](../INFERRED_CHOLEC80_RULES.md). When the two documents differ, the polished protocol is the current working instruction; this archive explains how those decisions arose.
+The preserved reference manual derived from these notes is [`../CHOLEC80_DERIVED_TRAINING_MANUAL.md`](../CHOLEC80_DERIVED_TRAINING_MANUAL.md). The later [`../OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md`](../OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md) records the explicit OAUTHC adaptation. This archive explains how the original Cholec80-derived decisions arose.
 
 Minor spelling and punctuation have been repaired only where needed for readability. The substance, doubts, outliers, and preferred examples have been preserved.
 

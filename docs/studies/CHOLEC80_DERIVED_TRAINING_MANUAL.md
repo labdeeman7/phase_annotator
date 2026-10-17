@@ -1,6 +1,8 @@
-# Laparoscopic Cholecystectomy Phase Annotation Protocol
+# Cholec80-Derived Cholecystectomy Training Manual
 
-Version: **Clinical-review draft 0.2, 4 October 2026**
+Version: **Archived reference convention 0.2, 4 October 2026**
+
+> This document preserves the convention inferred from ten supplied Cholec80 annotations. It remains useful for understanding Cholec80 and for model-comparison work. It is not the current primary instruction for annotating OAUTHC videos; use `OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md` for that purpose. The OAUTHC adaptation is a response to differences in case difficulty and operational boundary definition, not a claim that the Cholec80 annotations were incorrect.
 
 Basis: rules inferred by Tosin from the supplied phase annotations for ten Cholec80 reference videos. This document is intended to make those conventions reproducible on OAUTHC project videos. It has not yet received formal clinical approval. We would therefore appreciate clinicians noting any ambiguous or clinically inappropriate rule so it can be reviewed with Tosin.
 

@@ -1,6 +1,6 @@
 # Real-Video Validation and Cholecystectomy Training Plan
 
-> **Plan revision — 4 October 2026:** The originally planned three blind Cholec80 annotations and researcher-led two-video local adaptation have been cancelled. The first clinician reviewer will instead annotate the two recorded local pilot videos directly. This pilot is not scored against Cholec80. The current execution sequence is authoritative in `TRAINING_AND_ANNOTATION_ROLLOUT.md`; earlier blind-practice sections below are retained only as historical design context.
+> **Plan revisions:** On 4 October 2026, the planned blind Cholec80 rehearsal and researcher-led OAUTHC annotation were replaced by direct clinician annotation of two OAUTHC videos. On 15 October 2026, review of those annotations established an OAUTHC task-based P1-to-P2 boundary: hook appearance alone does not begin Calot triangle dissection when the hook is still being used for adhesiolysis or general exposure. The Cholec80-derived convention remains preserved for transparent comparison; the OAUTHC clinical manual is primary for subsequent OAUTHC annotation. Training examples are organised by phase, with two per phase: OAUTHC evidence is preferred and Cholec80 fallbacks are explicitly labelled.
 
 ## Why this is separate from C10
 
@@ -224,4 +224,4 @@ Status: **Cancelled; retained for historical context only.**
 
 ## Current next action
 
-Assemble the clinician pilot package from the approved application, PDF exports of the user guide/protocol/pilot instructions, and the two videos recorded in `LOCAL_PILOT_COHORT.md`. See `TRAINING_AND_ANNOTATION_ROLLOUT.md` for the authoritative current workflow.
+Complete joint clinical review of the two returned OAUTHC annotations and use the phase-organised 0.4 material to calibrate the wider annotation workflow. The older nine-boundary extraction remains internal evidence rather than the current doctor-facing library. See `TRAINING_AND_ANNOTATION_ROLLOUT.md` for the authoritative current workflow.

@@ -13,6 +13,7 @@ from phase_annotator.storage import JsonSessionRepository
 from scripts.extract_transition_clips import (
     ClipExtractionError,
     extract_transition_clips,
+    phase_label_overlay_filter,
     plan_transition_clips,
 )
 
@@ -62,6 +63,36 @@ def test_plan_rejects_draft_reference(tmp_path: Path):
         plan_transition_clips(session_path)
 
 
+def test_plan_accepts_administratively_confirmed_draft_when_explicit(
+    tmp_path: Path,
+):
+    session_path = tmp_path / "local.json"
+    write_reference(session_path, status="draft")
+
+    clips = plan_transition_clips(
+        session_path,
+        context_ms=15_000,
+        allow_draft=True,
+        case_id="LOCAL-01",
+    )
+
+    assert clips[0].clip_id == "LOCAL-01-B01"
+    assert clips[0].clip_start_ms == 5_000
+    assert clips[0].clip_end_ms == 35_000
+
+
+def test_constant_phase_overlay_uses_configured_label_color_and_position(
+    tmp_path: Path,
+):
+    overlay = phase_label_overlay_filter(
+        1, "Preparation", "#3B82F6", font_path=tmp_path / "font.ttf"
+    )
+
+    assert "P1 | Preparation" in overlay
+    assert "fontcolor=0x3B82F6" in overlay
+    assert "x=w-tw-20:y=20" in overlay
+
+
 def test_extract_records_commands_and_manifest_without_absolute_paths(
     tmp_path: Path, monkeypatch
 ):
@@ -108,6 +139,8 @@ def test_extract_records_commands_and_manifest_without_absolute_paths(
     assert "font.ttf" in overlay
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     assert manifest["source_video_filename"] == "video04.mp4"
+    assert manifest["source_session_status"] == "completed"
+    assert not manifest["draft_explicitly_accepted"]
     assert manifest["clips"][0]["boundary_ms"] == 20_000
     assert manifest["clips"][0]["from_phase_color"] == "#3B82F6"
     assert manifest["clips"][0]["to_phase_color"] == "#10B981"

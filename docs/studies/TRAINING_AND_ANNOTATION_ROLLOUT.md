@@ -2,7 +2,7 @@
 
 ## Goal
 
-Use the convention inferred from Cholec80 to guide annotation of local laparoscopic cholecystectomy videos, test that draft directly with a clinician on two local cases, revise it with clinical feedback, and only then begin the larger annotation set.
+Preserve the convention inferred from Cholec80, adapt it transparently using clinician annotation of two local laparoscopic cholecystectomy cases, and use the resulting task-based local manual before beginning the larger annotation set.
 
 ## Current decisions
 
@@ -10,6 +10,10 @@ Use the convention inferred from Cholec80 to guide annotation of local laparosco
 - The researcher will not pre-annotate the two local pilot videos.
 - The first clinician reviewer will annotate both local videos from scratch.
 - The pilot tests protocol transfer and application usability; it is not a Cholec80 scoring exercise.
+- The clinician's P1-to-P2 boundaries are retained: local P2 begins with sustained hepatocystic-triangle dissection, not hook appearance alone.
+- The Cholec80-derived manual remains available for source-convention and model-comparison work; this adaptation does not imply that CAMMA annotated its dataset incorrectly.
+- The phase-organised OAUTHC representative-example library is retained as internal evidence but withdrawn from current annotator distribution: representative in-phase excerpts were not an adequate substitute for transition-centred examples. The shared-five package therefore restores the original Cholec80-derived protocol and transition clip library used in the first clinician review.
+- The earlier nine-boundary OAUTHC extraction is retained as internal review evidence, not as the current doctor-facing library.
 - Markdown is the maintained source format. Clinician-facing protocol, instructions, and user guide should be distributed as versioned PDFs.
 - HTML remains optional for a future searchable/indexed clip library. PowerPoint is not the source of truth.
 
@@ -23,7 +27,7 @@ Ten converted reference cases were reviewed. The study produced 58 labelled tran
 
 ### V5 — Assemble the two-video clinician pilot package
 
-Status: **In progress.**
+Status: **Complete.**
 
 Package:
 
@@ -53,6 +57,8 @@ These videos have no Cholec80 gold labels. Do not report an accuracy score again
 
 ### V7 — Joint review and protocol revision
 
+Status: **Active.** The returned annotations passed automated intake. The completion action was missed but the project lead confirms both annotations were finished. The first review decision adopts the clinician's task-based P1-to-P2 boundary and separates the preserved Cholec80-derived manual from the new OAUTHC clinical manual.
+
 Review the returned annotations and feedback with the clinician. Separate:
 
 - software defects;
@@ -65,7 +71,13 @@ Resolve serious application problems, revise and version the protocol, document 
 
 ### V8 — Wider clinical annotation set
 
-Only after the pilot is reviewed:
+Status: **Shared-five calibration package in preparation.** The wider local collection now contains 26 cholecystectomy videos.
+
+The rollout begins with five common cases annotated independently by both annotators. These cases measure inter-rater variability and expose remaining protocol ambiguity before later work is divided. After review of the shared five, distribute the remaining cases in manageable batches and check returned annotations between batches rather than waiting for the entire collection.
+
+The shared-study package replaces the earlier pilot wording for current distribution. The two-video pilot and its returned files remain preserved as development and protocol-revision evidence.
+
+Before wider distribution:
 
 - approve an application build and protocol version;
 - define video assignments, annotator identity, support, completion, return, backup, and quality-review procedures;

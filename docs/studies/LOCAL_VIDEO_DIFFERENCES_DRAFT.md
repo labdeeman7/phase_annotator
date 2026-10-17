@@ -2,7 +2,15 @@
 
 Status: **Known differences to verify from the first clinician's annotations of `LOCAL-01` and `LOCAL-02`.**
 
-This document will become a short companion to the doctor-facing annotation protocol. The Cholec80-inferred rules remain the starting convention, while this document explains how to apply them when project recordings differ.
+This document records why the Cholec80-derived convention was adapted for the doctor-facing OAUTHC protocol. The source convention remains preserved in `CHOLEC80_DERIVED_TRAINING_MANUAL.md`; the current OAUTHC instruction is `OAUTHC_CHOLECYSTECTOMY_TRAINING_MANUAL.md`.
+
+## Confirmed adaptation: Preparation to Calot triangle dissection
+
+The supplied Cholec80 labels often place P1-to-P2 near hook-electrocautery appearance. This is a reasonable reproducible convention in those reference cases and is not treated as an annotation error.
+
+In the two OAUTHC pilot cases, inflammation, adhesions, and obscuring fat required hook use for general exposure before focused hepatocystic-triangle dissection. The Nigerian clinician retained this work in P1 and began P2 only when sustained dissection aimed at exposing or identifying the cystic duct/artery became visible.
+
+The local project adopts the clinician's task-based boundary. Instrument appearance remains supporting evidence, not the definition. This creates a known annotation-policy difference from some Cholec80 boundaries and must be reported alongside the visual domain shift when evaluating Cholec80-trained models.
 
 ## Known differences
 

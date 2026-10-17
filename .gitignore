@@ -37,6 +37,7 @@ htmlcov/
 .vscode/
 *.swp
 *.swo
+~$*.pptx
 
 # Project files
 *.session.json.tmp

@@ -551,3 +551,9 @@ Applying that convention to a different dataset is a later, explicit adaptation 
 An absolute path and a modification timestamp describe one filesystem copy, not the underlying video. Both can legitimately change when a video and its sidecar are transferred to another computer. Treating either as hard identity made valid annotations non-portable.
 
 The lightweight matcher therefore retains path and modification-time differences as useful diagnostic evidence but bases blocking decisions on filename, byte size, duration, and dimensions. This is a deliberate tradeoff rather than proof of identity: without hashing, two different files can theoretically share those descriptors. The important design lesson is to classify metadata by meaning before combining it into an identity decision.
+
+### Domain shift and annotation-policy shift are different
+
+A model can disagree with local annotations for at least two independent reasons. **Visual domain shift** changes what the input looks like—for example, greater inflammation, adhesions, obscuring fat, or different instruments. **Annotation-policy shift** changes how humans define the target—for example, labelling P2 at hook appearance versus at the start of sustained hepatocystic-triangle dissection.
+
+Forcing local clinical labels to imitate a source dataset may improve superficial agreement while making the target less clinically meaningful. A better design preserves the source convention, states the local adaptation explicitly, and, when needed, uses a small separate convention-bridge analysis to estimate how much disagreement comes from policy rather than appearance. One canonical label set should not silently serve two incompatible definitions.
