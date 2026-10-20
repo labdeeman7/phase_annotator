@@ -222,7 +222,7 @@ class SessionPersistenceCoordinator:
             errors.append(f"unsupported schema version {session.schema_version!r}")
         if session.ontology_id != self._ontology.ontology_id:
             errors.append("ontology ID does not match the active configuration")
-        if session.ontology_version != self._ontology.ontology_version:
+        if not self._ontology.accepts_version(session.ontology_version):
             errors.append("ontology version does not match the active configuration")
         if session.status == "completed":
             if session.completed_at is None:

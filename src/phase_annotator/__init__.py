@@ -1,3 +1,3 @@
 """Configurable temporal phase annotation application."""
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"

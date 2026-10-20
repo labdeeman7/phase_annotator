@@ -21,6 +21,7 @@ class ShortcutsHelpDialog(QDialog):
         self.setWindowTitle("Shortcuts and controls")
         self.setModal(True)
         self.setMinimumWidth(620)
+        other_name = ontology.get_phase_by_id(ontology.undefined_phase_id).name
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 18, 20, 16)
@@ -52,7 +53,7 @@ class ShortcutsHelpDialog(QDialog):
                 [
                     ("Ctrl+Z", "Undo annotation change"),
                     ("Ctrl+Shift+Z", "Redo annotation change"),
-                    ("Delete", "Selected segment → Undefined"),
+                    ("Delete", f"Selected segment → {other_name}"),
                     ("Right-click", "Open segment corrections"),
                     ("Drag", "Move a timeline boundary"),
                 ],

@@ -31,7 +31,11 @@ from phase_annotator import __version__
 from phase_annotator.config import procedure_name_for_ontology_id
 from phase_annotator.domain.annotation_editor import AnnotationEditor
 from phase_annotator.domain.annotation_history import AnnotationHistory
-from phase_annotator.domain.completion import summarize_completion
+from phase_annotator.domain.completion import (
+    CompletionSummary,
+    summarize_completion,
+    with_privacy_check,
+)
 from phase_annotator.domain.models import (
     CURRENT_SESSION_SCHEMA_VERSION,
     AnnotationSession,
@@ -46,7 +50,9 @@ from phase_annotator.storage import (
     SessionPersistenceCoordinator,
     SessionPersistenceError,
 )
+from phase_annotator.ui.completion_dialog import CompletionDialog
 from phase_annotator.ui.notification_banner import NotificationBanner
+from phase_annotator.ui.other_details_dialog import OtherDetailsDialog
 from phase_annotator.ui.phase_palette_widget import PhasePaletteWidget
 from phase_annotator.ui.player_widget import VideoPlayerWidget
 from phase_annotator.ui.segment_list_widget import SegmentListWidget
@@ -477,6 +483,8 @@ class MainWindow(QMainWindow):
                 f"Assigned {phase.name} at {format_timecode(position_ms)}",
                 3000,
             )
+            if phase_id == self._ontology.undefined_phase_id:
+                self._describe_other_at(position_ms)
         else:
             phase = self._ontology.get_phase_by_id(phase_id)
             self.statusBar().showMessage(
@@ -601,6 +609,9 @@ class MainWindow(QMainWindow):
         self._session = session
         self._loaded_existing_session = True
         self._session.schema_version = CURRENT_SESSION_SCHEMA_VERSION
+        # Validation accepted this version, so its phase IDs mean the same; the file
+        # records the current rules from its next save.
+        self._session.ontology_version = self._ontology.ontology_version
         self._session.video_info = replace(
             self._session.video_info,
             source_path=source_metadata.source_path,
@@ -701,6 +712,13 @@ class MainWindow(QMainWindow):
             self._session,
             undefined_phase_id=self._ontology.undefined_phase_id,
         )
+        if self._ontology.completion_requires_privacy_check:
+            if not self._confirm_completion_with_privacy(summary):
+                return False
+            self._session.session_notes = with_privacy_check(
+                self._session.session_notes
+            )
+            return self._declare_complete()
         answer = QMessageBox.question(
             self,
             "Mark annotation complete?",
@@ -715,7 +733,19 @@ class MainWindow(QMainWindow):
         )
         if answer != QMessageBox.StandardButton.Yes:
             return False
+        return self._declare_complete()
 
+    def _confirm_completion_with_privacy(self, summary: CompletionSummary) -> bool:
+        """Modal review with the required privacy tick box; True if confirmed."""
+        other_name = self._ontology.get_phase_by_id(
+            self._ontology.undefined_phase_id
+        ).name
+        dialog = CompletionDialog(summary, other_name, self)
+        return dialog.exec() == QDialog.DialogCode.Accepted and dialog.privacy_checked
+
+    def _declare_complete(self) -> bool:
+        if self._session is None:
+            return False
         self._session.status = "completed"
         self._session.completed_at = time.time()
         self._session.completed_by = self._active_annotator_id
@@ -1065,7 +1095,16 @@ class MainWindow(QMainWindow):
         """Edit one segment note without exposing a persistent UI draft."""
         if not self._session or not 0 <= index < len(self._session.intervals):
             return
-        dialog = SegmentNoteDialog(self._session.intervals[index].notes, self)
+        interval = self._session.intervals[index]
+        if (
+            interval.phase_id == self._ontology.undefined_phase_id
+            and self._ontology.other_subtypes
+        ):
+            notes = self._ask_other_notes(interval.notes)
+            if notes is not None:
+                self._save_segment_note(index, notes)
+            return
+        dialog = SegmentNoteDialog(interval.notes, self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             self._save_segment_note(index, dialog.notes)
 
@@ -1115,7 +1154,41 @@ class MainWindow(QMainWindow):
         self._refresh_annotation_views()
         self._update_active_phase(self._player_widget.position_ms)
         self.statusBar().showMessage(f"Segment changed to {phase.name}", 3000)
+        if phase_id == self._ontology.undefined_phase_id:
+            self._describe_other_at(anchor_ms)
         return True
+
+    def _describe_other_at(self, position_ms: int) -> None:
+        """Ask what kind of Other the segment at ``position_ms`` is.
+
+        Called right after the edit that applied Other; cancelling undoes that edit,
+        so the timeline is as if Other had not been pressed.
+        """
+        if not self._session or not self._ontology.other_subtypes:
+            return
+        index = next(
+            (
+                i
+                for i, interval in enumerate(self._session.intervals)
+                if interval.start_ms <= position_ms < interval.end_ms
+            ),
+            None,
+        )
+        if index is None:
+            return
+        notes = self._ask_other_notes(self._session.intervals[index].notes)
+        if notes is None:
+            self._undo_annotation()
+            self.statusBar().showMessage("Cancelled: Other was not applied", 3000)
+            return
+        self._save_segment_note(index, notes)
+
+    def _ask_other_notes(self, notes: str) -> Optional[str]:
+        """Modal Other-type picker; returns the composed note, or None if cancelled."""
+        dialog = OtherDetailsDialog(notes, self._ontology.other_subtypes, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            return dialog.notes
+        return None
 
     def _select_interval_containing(self, position_ms: int) -> None:
         """Relocate selection after an edit may have coalesced intervals."""

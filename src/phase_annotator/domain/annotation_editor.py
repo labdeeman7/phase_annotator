@@ -5,6 +5,7 @@ from dataclasses import dataclass, replace
 from typing import Iterable, List
 
 from phase_annotator.domain.models import AnnotationInterval, AnnotationSession
+from phase_annotator.domain.other_types import split_tag
 from phase_annotator.domain.validation import validate_contiguous_coverage
 
 
@@ -67,6 +68,8 @@ class AnnotationEditor:
         Later segments remain intact. A transition inside a segment splits it;
         a transition at an existing boundary relabels the segment beginning at
         that boundary. Adjacent segments with equal labels are coalesced.
+        Other inside a typed Other starts a new, untyped Other at the playhead, so
+        two different Other activities can follow each other.
         """
         if phase_id not in self.valid_phase_ids:
             raise ValueError(f"Phase ID {phase_id} is not valid for this annotation.")
@@ -91,7 +94,9 @@ class AnnotationEditor:
             raise ValueError(f"No interval contains transition position {position_ms}.")
 
         containing = session.intervals[containing_index]
-        if containing.phase_id == phase_id:
+        if containing.phase_id == phase_id and (
+            phase_id != self.undefined_phase_id or position_ms == containing.start_ms
+        ):
             return False
 
         # Build and validate a replacement before touching the session, so an
@@ -116,6 +121,8 @@ class AnnotationEditor:
         )
         candidate.extend(session.intervals[containing_index + 1 :])
         candidate = self._coalesce_adjacent(candidate)
+        if candidate == session.intervals:
+            return False  # e.g. Other inside an untyped Other merges straight back
 
         self._require_valid_coverage(candidate, duration_ms)
         self._commit(session, candidate)
@@ -140,6 +147,8 @@ class AnnotationEditor:
 
         candidate = list(session.intervals)
         candidate[interval_index] = replace(candidate[interval_index], notes=notes)
+        # Giving an Other the same type as its neighbour makes them one activity.
+        candidate = self._coalesce_adjacent(candidate)
         self._require_valid_coverage(candidate, duration_ms)
         self._commit(session, candidate)
         return True
@@ -251,28 +260,41 @@ class AnnotationEditor:
         if not 0 <= neighbour_index < len(session.intervals):
             raise ValueError(f"Interval {interval_index} cannot merge {direction}.")
 
-        neighbour_phase_id = session.intervals[neighbour_index].phase_id
-        candidate = list(session.intervals)
-        candidate[interval_index] = replace(
-            candidate[interval_index], phase_id=neighbour_phase_id
+        neighbour = session.intervals[neighbour_index]
+        own = session.intervals[interval_index]
+        left, right = (neighbour, own) if offset < 0 else (own, neighbour)
+        # A typed Other keeps its tag at the start of the merged note.
+        first, second = (
+            (neighbour, own)
+            if neighbour.phase_id == self.undefined_phase_id
+            else (left, right)
         )
+        merged = AnnotationInterval(
+            start_ms=left.start_ms,
+            end_ms=right.end_ms,
+            phase_id=neighbour.phase_id,
+            notes="\n".join(note for note in (first.notes, second.notes) if note),
+        )
+        low = min(interval_index, neighbour_index)
+        candidate = list(session.intervals)
+        candidate[low : low + 2] = [merged]
         candidate = self._coalesce_adjacent(candidate)
         self._require_valid_coverage(candidate, duration_ms)
         self._commit(session, candidate)
         return True
 
-    @staticmethod
     def _coalesce_adjacent(
-        intervals: List[AnnotationInterval],
+        self, intervals: List[AnnotationInterval]
     ) -> List[AnnotationInterval]:
         coalesced: List[AnnotationInterval] = []
         for interval in intervals:
-            if coalesced and coalesced[-1].phase_id == interval.phase_id:
+            if coalesced and self._same_label(coalesced[-1], interval):
                 previous = coalesced[-1]
+                tag, text = split_tag(interval.notes)
+                # The shared Other type is written once, at the start.
+                second = text.strip() if tag is not None else interval.notes
                 # Coalescing must not silently discard notes from either side.
-                notes = "\n".join(
-                    note for note in (previous.notes, interval.notes) if note
-                )
+                notes = "\n".join(note for note in (previous.notes, second) if note)
                 coalesced[-1] = AnnotationInterval(
                     start_ms=previous.start_ms,
                     end_ms=interval.end_ms,
@@ -282,6 +304,14 @@ class AnnotationEditor:
             else:
                 coalesced.append(interval)
         return coalesced
+
+    def _same_label(self, left: AnnotationInterval, right: AnnotationInterval) -> bool:
+        """Equal phases merge, except Other segments of different types."""
+        if left.phase_id != right.phase_id:
+            return False
+        if left.phase_id != self.undefined_phase_id:
+            return True
+        return split_tag(left.notes)[0] == split_tag(right.notes)[0]
 
     def _require_valid_coverage(
         self, intervals: List[AnnotationInterval], duration_ms: int

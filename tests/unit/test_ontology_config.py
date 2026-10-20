@@ -128,7 +128,7 @@ def test_packaged_cholec80_config_has_supplied_seven_phases():
         "Gallbladder packaging",
         "Cleaning and coagulation",
         "Gallbladder retraction",
-        "Undefined",
+        "Other",
     ]
     assert [phase.hotkey for phase in ontology.ordered_phases] == [
         "1",
@@ -138,8 +138,26 @@ def test_packaged_cholec80_config_has_supplied_seven_phases():
         "5",
         "6",
         "7",
-        "U",
+        "0",
     ]
+
+
+def test_packaged_cholec80_round_two_rules():
+    ontology = load_procedure_ontology("cholecystectomy")
+
+    assert ontology.ontology_version == "1.1"
+    assert ontology.accepts_version("1.0") and ontology.accepts_version("1.1")
+    assert not ontology.accepts_version("0.9")
+    assert [subtype.tag for subtype in ontology.other_subtypes] == [
+        "GALLBLADDER_DRAINAGE",
+        "DRAIN_INSERTION",
+        "LIVER_BIOPSY",
+        "DEIDENTIFY",
+    ]
+    assert ontology.completion_requires_privacy_check
+    appendectomy = load_procedure_ontology("appendectomy")
+    assert appendectomy.other_subtypes == ()
+    assert not appendectomy.completion_requires_privacy_check
 
 
 def test_packaged_procedure_registry_loads_every_resource():

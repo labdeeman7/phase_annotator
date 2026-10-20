@@ -1,6 +1,8 @@
 import re
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Mapping
+from typing import Any, Dict, List, Mapping, Tuple
+
+from phase_annotator.domain.other_types import TAG_PATTERN
 
 SUPPORTED_ONTOLOGY_SCHEMA_VERSION = "1.0"
 COLOR_HEX_PATTERN = re.compile(r"^#[0-9A-Fa-f]{6}$")
@@ -23,6 +25,14 @@ class Phase:
     order: int = 0
 
 
+@dataclass(frozen=True)
+class OtherSubtype:
+    """One choice offered when a segment is labelled as the ontology's Other phase."""
+
+    tag: str
+    label: str
+
+
 @dataclass
 class PhaseOntology:
     """Collection of phase definitions for a surgical procedure."""
@@ -34,6 +44,19 @@ class PhaseOntology:
     initial_phase_id: int
     undefined_phase_id: int
     phases: Dict[int, Phase] = field(default_factory=dict)
+    # Types offered for the Other (undefined_phase_id) phase; empty keeps the old behaviour.
+    other_subtypes: Tuple[OtherSubtype, ...] = ()
+    # Earlier versions with identical phase IDs whose sessions still load (and are
+    # restamped with ontology_version when next saved).
+    compatible_ontology_versions: Tuple[str, ...] = ()
+    # Marking complete requires the annotator's privacy declaration.
+    completion_requires_privacy_check: bool = False
+
+    def accepts_version(self, version: str) -> bool:
+        """Whether a session stamped with ``version`` can be opened by this ontology."""
+        return version == self.ontology_version or (
+            version in self.compatible_ontology_versions
+        )
 
     def get_phase_by_id(self, phase_id: int) -> Phase:
         """Looks up a Phase by its integer ID. Raises KeyError if not found."""
@@ -147,7 +170,55 @@ class PhaseOntology:
             initial_phase_id=initial_phase_id,
             undefined_phase_id=undefined_phase_id,
             phases=phases,
+            other_subtypes=cls._other_subtypes(config),
+            compatible_ontology_versions=cls._compatible_versions(
+                config, ontology_version
+            ),
+            completion_requires_privacy_check=cls._optional_bool(
+                config, "completion_requires_privacy_check"
+            ),
         )
+
+    @staticmethod
+    def _optional_bool(config: Mapping[str, Any], key: str) -> bool:
+        value = config.get(key, False)
+        if not isinstance(value, bool):
+            raise OntologyConfigError(f"'{key}' must be a Boolean.")
+        return value
+
+    @staticmethod
+    def _other_subtypes(config: Mapping[str, Any]) -> Tuple[OtherSubtype, ...]:
+        items = config.get("other_subtypes", [])
+        if not isinstance(items, list):
+            raise OntologyConfigError("'other_subtypes' must be a JSON array.")
+        subtypes: List[OtherSubtype] = []
+        for index, item in enumerate(items):
+            context = f"other_subtypes[{index}]"
+            if not isinstance(item, Mapping):
+                raise OntologyConfigError(f"{context} must be an object.")
+            tag = PhaseOntology._required_string(item, "tag", context=context)
+            if not TAG_PATTERN.fullmatch(f"[{tag}]"):
+                raise OntologyConfigError(
+                    f"{context}.tag must be capital letters, digits or underscores."
+                )
+            if any(existing.tag == tag for existing in subtypes):
+                raise OntologyConfigError(f"Duplicate other subtype tag '{tag}'.")
+            label = PhaseOntology._required_string(item, "label", context=context)
+            subtypes.append(OtherSubtype(tag=tag, label=label))
+        return tuple(subtypes)
+
+    @staticmethod
+    def _compatible_versions(
+        config: Mapping[str, Any], ontology_version: str
+    ) -> Tuple[str, ...]:
+        items = config.get("compatible_ontology_versions", [])
+        if not isinstance(items, list) or not all(
+            isinstance(item, str) and item.strip() for item in items
+        ):
+            raise OntologyConfigError(
+                "'compatible_ontology_versions' must be an array of strings."
+            )
+        return tuple(item.strip() for item in items if item.strip() != ontology_version)
 
     @staticmethod
     def _required_string(

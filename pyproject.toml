@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "phase-annotator"
-version = "0.1.2"
+version = "0.2.0"
 description = "A lightweight temporal phase annotation tool for surgical videos"
 readme = "README.md"
 requires-python = ">=3.10"
