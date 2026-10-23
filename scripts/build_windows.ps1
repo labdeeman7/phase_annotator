@@ -49,8 +49,13 @@ try {
 }
 
 $applicationRoot = Join-Path $distPath "PhaseAnnotator"
+$licenseSource = Join-Path $projectRoot "LICENSE"
+$licenseDestination = Join-Path $applicationRoot "LICENSE.txt"
+Copy-Item -LiteralPath $licenseSource -Destination $licenseDestination -Force
+
 $requiredFiles = @(
     (Join-Path $applicationRoot "PhaseAnnotator.exe"),
+    $licenseDestination,
     (Join-Path $applicationRoot "_internal\phase_annotator\config\default_appendectomy.json"),
     (Join-Path $applicationRoot "_internal\phase_annotator\config\cholec80_cholecystectomy.json")
 )
@@ -67,4 +72,4 @@ Write-Output "Built: $applicationRoot"
 Write-Output "Base Python: $basePrefix"
 Write-Output ("Files: {0}" -f $artifactFiles.Count)
 Write-Output ("Size: {0:N1} MiB" -f ($artifactBytes / 1MB))
-Write-Output "Verified: executable and both packaged procedure resources"
+Write-Output "Verified: executable, MIT license, and both packaged procedure resources"

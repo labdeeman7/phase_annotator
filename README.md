@@ -77,3 +77,9 @@ Current entry points:
 * [Current State](docs/development/CURRENT_STATE.md)
 * [0.1.0 Release Evidence](docs/release/versions/0.1.0/CLEAN_MACHINE_ACCEPTANCE.md)
 * [Post-Release Validation and Training](docs/studies/README.md)
+
+## License
+
+Phase Annotator source code and project-authored documentation are available under the [MIT License](LICENSE). The license permits private, academic, institutional, and commercial use, including modification and redistribution, provided the copyright and license notice are retained.
+
+The MIT License does not grant rights to clinical videos, datasets, patient data, research papers, fonts, FFmpeg, Qt/PySide6, or other third-party material. Those remain subject to their own permissions, licences, privacy requirements, and institutional governance. This software is a research annotation tool and is not certified as a medical device.

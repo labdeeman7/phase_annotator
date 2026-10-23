@@ -49,7 +49,7 @@ GitHub's artifact is the preferred release-candidate input because it was recons
 ## Prepare the distributable ZIP
 
 1. Extract the GitHub artifact.
-2. Confirm the top-level application folder contains `PhaseAnnotator.exe` and `_internal`.
+2. Confirm the top-level application folder contains `PhaseAnnotator.exe`, `LICENSE.txt`, and `_internal`.
 3. Add only the approved user guide, release notes, and any required notices outside the generated application folder.
 4. Name the ZIP with product, version, platform, and architecture, for example `PhaseAnnotator-0.1.0-windows-x64.zip`.
 5. Do not add videos, sidecars, histories, annotator names, local paths, or build directories.
