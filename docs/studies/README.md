@@ -1,5 +1,7 @@
 # Post-Release Validation and Training Programme
 
+> **Repository handover in preparation:** clinical protocol, dataset registry, study coordination, conversion, clip generation, and clinician-package responsibilities are moving to the dataset-curation repository. Follow [`DATA_CURATOR_HANDOVER.md`](DATA_CURATOR_HANDOVER.md). Copy and verify material there before removing anything from this repository.
+
 Status: **Two finished clinician pilot annotations returned; V7 boundary review ready.** Ten Cholec80 reference cases produced 58 labelled transition clips and an initial clinician-review protocol. Both local pilot sidecars pass automated validation in Phase Annotator 0.1.2. They remain technically marked Draft because the separate completion action was missed; the project lead confirms the annotation work was finished. Structured clinician feedback is still pending.
 
 ## Current sequence

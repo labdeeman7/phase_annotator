@@ -16,6 +16,8 @@ While watching, pay attention to the surgical activity before and after the tran
 
 Assign one phase to every moment of the available recording according to the **dominant visible surgical task**. The seven phases describe tasks, not a compulsory sequence. A phase may be absent, repeated, interrupted, or occur in an unusual order.
 
+Complex cases may revisit an earlier task after a later phase has begun. Record the repeated phase whenever its task again becomes dominant; for example, `P1 → P2 → P1 → P2` is valid if focused Calot dissection gives way to renewed adhesiolysis or general exposure and later resumes. Do not smooth, merge, or relabel a genuine recurrence merely to make the sequence look like the usual order.
+
 ### General boundary rule
 
 Place a boundary at the first defensible visual evidence that the **surgical objective has changed** and the new task has begun.
@@ -42,6 +44,10 @@ Cholec80's supplied boundaries vary by several seconds in visually similar situa
 ### P1 — Preparation
 
 **Definition:** Initial laparoscopic survey, exposure and retraction of the gallbladder, and operative setup before focused dissection of the hepatocystic (Calot) triangle.
+
+**Interim gallbladder-drainage rule:** An inflamed or tense gallbladder may be intentionally punctured to release pus, bile, or other contents. Kirtac et al. treated this as an additional real-world phase absent from Cholec80. Until its frequency and boundaries in the OAUTHC cases have been reviewed, label the complete drainage episode **Undefined** and add the exact note `Gallbladder drainage — candidate phase`. Resume the appropriate seven-class phase when drainage ends.
+
+This is an intentional study convention, not a statement that the clinical activity is unknown. Do not apply it to an incidental puncture or leakage that is not a purposeful drainage episode, and do not create an eighth phase in the current ontology yet.
 
 **Start:** The beginning of the recording when preparation is the first classifiable activity.
 
@@ -157,6 +163,8 @@ Other transitions are allowed when supported by the visible task. Never insert a
 ## Reference material
 
 The full transition evidence library contains one clip for each of the 58 internal boundaries in the ten reviewed reference cases. The clinician package supplies 18 selected examples cited in this protocol. Each clip includes 30 seconds before and after the supplied boundary, subject to video-edge clamping, and displays the active source phase in its configured colour on every frame.
+
+Kirtac K, Aydin N, Lavanchy JL, et al. *Surgical Phase Recognition: From Public Datasets to Real-World Data*. Applied Sciences. 2022;12(17):8746. https://doi.org/10.3390/app12178746. This real-world study introduced gallbladder drainage and other activities absent from Cholec80 as additional phases; it motivates the prospective OAUTHC review above.
 
 The supplied examples include transitions into dissection, clipping/cutting, packaging, cleaning/coagulation, and extraction, including examples where cleaning/coagulation and packaging occur in different orders. Use the clip IDs cited under each phase rather than looking for complete source videos.
 

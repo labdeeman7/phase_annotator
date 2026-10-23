@@ -50,12 +50,17 @@ Assign the phase according to the **dominant visible surgical objective**, not t
 - Change phase when the objective of the visible work changes and the new task is sustained.
 - Do not anticipate an off-screen task.
 - Do not force the nominal phase order when the visible workflow differs.
+- Record genuine phase recurrence. Complex cases may return to an earlier task, including `P1 → P2 → P1 → P2`, and may contain repeated P4 or P6 episodes. Do not merge separate occurrences merely to make the timeline appear linear.
 - Cover the entire available recording, including partial procedures.
-- Use Undefined only when the visible activity cannot be assigned confidently.
+- Use Undefined when the visible activity cannot be assigned confidently, plus the explicitly documented interim gallbladder-drainage exception below.
 
 ## P1 — Preparation
 
 P1 includes initial survey, gallbladder exposure and retraction, adhesiolysis, and removal or division of tissue whose immediate purpose is to expose the gallbladder or establish access to the operative target.
+
+An inflamed or tense gallbladder may be intentionally punctured to release pus, bile, or other contents. Kirtac et al. identified purposeful gallbladder drainage as an additional real-world phase absent from Cholec80. For the present OAUTHC study, label the complete purposeful drainage episode **Undefined** and add the exact note `Gallbladder drainage — candidate phase`. Resume the appropriate seven-class phase when drainage ends.
+
+This interim rule preserves the event for later measurement without prematurely changing the seven-class ontology. It does not mean that the clinical action is unknown. Do not use it for incidental puncture or leakage, and do not create a new phase until the team has reviewed its frequency, duration, boundary reliability, and intended model use.
 
 The presence of hook electrocautery does **not** by itself end P1. Remain in P1 when the hook or another energy device is being used primarily to release adhesions, clear fat or inflammatory tissue for general exposure, mobilise tissue outside the hepatocystic triangle, or expose the gallbladder before focused identification of the cystic structures.
 
@@ -95,7 +100,11 @@ P7 was not present as a separate interval in the two returned OAUTHC pilot annot
 
 ## Undefined
 
-Use Undefined when smoke, occlusion, an out-of-body view, corrupted footage, or loss of task context prevents confident assignment. Do not use Undefined merely because a phase is difficult, unusually long, repeated, or performed with unfamiliar instruments.
+Use Undefined when smoke, occlusion, an out-of-body view, corrupted footage, or loss of task context prevents confident assignment. Also use it for purposeful gallbladder drainage under the explicit interim rule above, always with the standard note. Do not use Undefined merely because a phase is difficult, unusually long, repeated, or performed with unfamiliar instruments.
+
+## Relevant real-world evidence
+
+Kirtac K, Aydin N, Lavanchy JL, et al. *Surgical Phase Recognition: From Public Datasets to Real-World Data*. Applied Sciences. 2022;12(17):8746. https://doi.org/10.3390/app12178746. In 384 real-world cholecystectomy videos, the authors found longer procedures, more complex transitions, and activities absent from Cholec80. They annotated gallbladder drainage as an additional phase, providing direct precedent for reviewing it prospectively in OAUTHC data.
 
 ## Domain-shift and model-evaluation note
 

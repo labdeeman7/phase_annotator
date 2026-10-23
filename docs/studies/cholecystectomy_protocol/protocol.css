@@ -1,0 +1,30 @@
+:root { --navy:#102538; --cyan:#19b6dc; --blue:#3b82f6; --green:#10b981;
+  --amber:#f59e0b; --red:#ef4444; --purple:#8b5cf6; --pink:#ec4899;
+  --grey:#64748b; --paper:#f4f7f9; --ink:#1a2a36; --muted:#5d7381; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:"Segoe UI",Arial,sans-serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+header { background:var(--navy); color:white; padding:26px max(22px,5vw) 18px; }
+header h1 { margin:0; font-size:clamp(1.55rem,3vw,2.35rem); }
+header p { max-width:920px; color:#c9d8e2; margin:8px 0 0; }
+nav { display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+nav a { color:white; text-decoration:none; border:1px solid #496478; border-radius:7px; padding:7px 11px; font-size:.92rem; }
+nav a.active, nav a:hover { background:var(--cyan); border-color:var(--cyan); color:#062131; }
+main { max-width:1050px; margin:24px auto 48px; padding:0 20px; }
+.banner,.card,.phase,.video-card { background:white; border:1px solid #cddae1; border-radius:11px; padding:18px 20px; margin:16px 0; box-shadow:0 2px 8px #0c1b2a0b; }
+.banner { border-left:6px solid var(--cyan); }
+.warning { background:#fff7df; border-left-color:var(--amber); }
+.decision { background:#eaf8f3; border-left-color:var(--green); }
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+h2 { color:#174b6b; margin-top:28px; } h3 { color:#245f7d; }
+.phase { border-left:7px solid var(--phase); }
+.phase strong,.badge { color:var(--phase); }
+.badge { font-weight:700; text-transform:uppercase; letter-spacing:.04em; font-size:.78rem; }
+table { width:100%; border-collapse:collapse; background:white; }
+th,td { border:1px solid #bdcbd3; padding:9px; text-align:left; vertical-align:top; } th { background:#deedf4; }
+video { display:block; width:100%; max-height:520px; background:black; margin:12px 0 5px; }
+.video-card h3 { margin-bottom:4px; }
+.clip-link { font-weight:600; color:#075f87; }
+.rule { font-size:1.12rem; font-weight:650; color:var(--navy); }
+footer { max-width:1050px; margin:0 auto 30px; padding:0 20px; color:var(--muted); font-size:.86rem; }
+code { background:#e7edf1; padding:2px 4px; border-radius:3px; }
+@media print { nav,video,.clip-link { display:none; } body { background:white; } .card,.phase,.banner { box-shadow:none; break-inside:avoid; } }

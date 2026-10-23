@@ -1,0 +1,324 @@
+{
+    "schema_version":  2,
+    "package_id":  "OAUTHC-CHO-PHASE-BATCH-03",
+    "package_name":  "annotation_batch_03_cholecystectomy",
+    "purpose":  "Third phase-annotation delivery: ten distinct cholecystectomy surgical cases after the 2-case clinician pilot and 5-case shared study.",
+    "procedure":  "Cholecystectomy",
+    "case_count":  10,
+    "created_at_utc":  "2026-10-17T14:27:50.1819800Z",
+    "contents_policy":  "Only deidentified videos and this mapping manifest are included; originals and intermediate deidentification artifacts are excluded.",
+    "local_packaging":  {
+                            "video_file_mode":  "Seven NTFS hard links to FFmpeg renders plus three independent copies of legacy LosslessCut renders from E:.",
+                            "portability":  "All ten paths behave as normal video files; copying the folder to another drive copies all video bytes normally.",
+                            "caution":  "Do not edit video bytes in place; annotation software should treat videos as read-only inputs."
+                        },
+    "preceding_annotation_stages":  [
+                                        {
+                                            "name":  "clinician_pilot",
+                                            "case_count":  2
+                                        },
+                                        {
+                                            "name":  "shared_study",
+                                            "case_count":  5
+                                        }
+                                    ],
+    "cases":  [
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-001",
+                      "deidentification_case_id":  "CASE-BATCH-003",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "20250915_102730.mp4",
+                      "rendered_output_file_name":  "20250915_102730.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/20250915_102730.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-003/render-fast/20250915_102730.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-003/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-003/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  2723.57,
+                                               "output_duration_seconds":  2701.968,
+                                               "output_frame_count":  67546,
+                                               "effective_removal_count":  2,
+                                               "continuity_segment_count":  3,
+                                               "output_sha256":  "604E6518BF7DDAC1C76DEB7FF654EDE9F8B979A6F6C954686AAD8C33AFF538EB",
+                                               "output_size_bytes":  590544967,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-002",
+                      "deidentification_case_id":  null,
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "20260309_095521.mp4",
+                      "rendered_output_file_name":  "20260309_095521-cut-merged-1786975728791.mp4",
+                      "delivered_video_file":  "videos/20260309_095521.mp4",
+                      "connection":  {
+                                         "losslesscut_output_external_path":  "E:/For Tosin/deidentified/videos_4/20260309_095521-cut-merged-1786975728791.mp4",
+                                         "losslesscut_project_external_path":  "E:/For Tosin/deidentified/videos_4/20260309_095521-proj.llc",
+                                         "original_catalogue_path":  "videos_4/20260309_095521.mp4"
+                                     },
+                      "deidentification":  {
+                                               "method":  "legacy manual LosslessCut deidentification",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  2919.42,
+                                               "output_duration_seconds":  2642.164,
+                                               "output_frame_count":  66051,
+                                               "reviewed_interval_count":  8,
+                                               "output_sha256":  "63DFCD4F892C75EAE6A8A8B190AA452DE153CE0E941734DCB79D19BA5164F52F",
+                                               "output_size_bytes":  577625628,
+                                               "technical_validation":  "passed: readable and copied hash matches source artifact",
+                                               "human_output_review":  "legacy manual output; batch delivery review pending"
+                                           },
+                      "phase_annotation_status":  "not_started",
+                      "replacement_history":  {
+                                                  "replaced_file_name":  "20260505_221257.mp4",
+                                                  "reason":  "Removed cross-stage surgical-case repetition from annotation batch 03",
+                                                  "decision_date":  "2026-10-17"
+                                              }
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-003",
+                      "deidentification_case_id":  null,
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "20260316_091729.mp4",
+                      "rendered_output_file_name":  "20260316_091729-cut-merged-1786979970302.mp4",
+                      "delivered_video_file":  "videos/20260316_091729.mp4",
+                      "connection":  {
+                                         "losslesscut_output_external_path":  "E:/For Tosin/deidentified/videos_4/20260316_091729-cut-merged-1786979970302.mp4",
+                                         "losslesscut_project_external_path":  "E:/For Tosin/deidentified/videos_4/20260316_091729-proj.llc",
+                                         "original_catalogue_path":  "videos_4/20260316_091729.mp4"
+                                     },
+                      "deidentification":  {
+                                               "method":  "legacy manual LosslessCut deidentification",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  2963.623,
+                                               "output_duration_seconds":  2900.34,
+                                               "output_frame_count":  72463,
+                                               "reviewed_interval_count":  4,
+                                               "output_sha256":  "4AA57A59D856250AAF02CA40CD33828D0616B89698758D3ACBF545C512442D61",
+                                               "output_size_bytes":  633582165,
+                                               "technical_validation":  "passed: readable and copied hash matches source artifact",
+                                               "human_output_review":  "legacy manual output; batch delivery review pending"
+                                           },
+                      "phase_annotation_status":  "not_started",
+                      "replacement_history":  {
+                                                  "replaced_file_name":  "20260509_004627.mp4",
+                                                  "reason":  "Removed cross-stage surgical-case repetition from annotation batch 03",
+                                                  "decision_date":  "2026-10-17"
+                                              }
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-004",
+                      "deidentification_case_id":  null,
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "20260302_093157.mp4",
+                      "rendered_output_file_name":  "20260302_093157-cut-merged-1786973875662.mp4",
+                      "delivered_video_file":  "videos/20260302_093157.mp4",
+                      "connection":  {
+                                         "losslesscut_output_external_path":  "E:/For Tosin/deidentified/videos_4/20260302_093157-cut-merged-1786973875662.mp4",
+                                         "losslesscut_project_external_path":  "E:/For Tosin/deidentified/videos_4/20260302_093157-proj.llc",
+                                         "original_catalogue_path":  "videos_4/20260302_093157.mp4"
+                                     },
+                      "deidentification":  {
+                                               "method":  "legacy manual LosslessCut deidentification",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  3426.324,
+                                               "output_duration_seconds":  3320.359,
+                                               "output_frame_count":  82981,
+                                               "reviewed_interval_count":  5,
+                                               "output_sha256":  "B9A1C0E81D2B8174B6CF79734D5D1DF655B9C1D5BD5B823B26EDC035138731A6",
+                                               "output_size_bytes":  725578901,
+                                               "technical_validation":  "passed: readable and copied hash matches source artifact",
+                                               "human_output_review":  "legacy manual output; batch delivery review pending"
+                                           },
+                      "phase_annotation_status":  "not_started",
+                      "replacement_history":  {
+                                                  "replaced_file_name":  "20260519_215628.mp4",
+                                                  "reason":  "Removed cross-stage surgical-case repetition from annotation batch 03",
+                                                  "decision_date":  "2026-10-17"
+                                              }
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-005",
+                      "deidentification_case_id":  "CASE-BATCH-010",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "20260526_222940.mp4",
+                      "rendered_output_file_name":  "20260526_222940.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/20260526_222940.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-010/render-fast/20260526_222940.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-010/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-010/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  1566.475,
+                                               "output_duration_seconds":  1507.272,
+                                               "output_frame_count":  37680,
+                                               "effective_removal_count":  4,
+                                               "continuity_segment_count":  4,
+                                               "output_sha256":  "F1B513C0E6D17DD78A6B5463C6BB3374DE880BE642E2991BBCA49F13B12C731F",
+                                               "output_size_bytes":  329426288,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-006",
+                      "deidentification_case_id":  "CASE-BATCH-013",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "Acute cholecystitis.mp4",
+                      "rendered_output_file_name":  "Acute cholecystitis.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/Acute cholecystitis.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-013/render-fast/Acute cholecystitis.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-013/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-013/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  2586.686567,
+                                               "output_duration_seconds":  2518.181333,
+                                               "output_frame_count":  150543,
+                                               "effective_removal_count":  5,
+                                               "continuity_segment_count":  5,
+                                               "output_sha256":  "98A6CE357910411651D85CB80ED8A87BB393D7EB5118BAA93D776C8E3EB41304",
+                                               "output_size_bytes":  1652821643,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-007",
+                      "deidentification_case_id":  "CASE-BATCH-018",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "Lap chole 08092025.mp4",
+                      "rendered_output_file_name":  "Lap chole 08092025.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/Lap chole 08092025.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-018/render-fast/Lap chole 08092025.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-018/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-018/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  2502.2,
+                                               "output_duration_seconds":  2330.513,
+                                               "output_frame_count":  58260,
+                                               "effective_removal_count":  13,
+                                               "continuity_segment_count":  12,
+                                               "output_sha256":  "A415432F089972E04F914C050885BA7E6EDE99B40B1CAA8D05C43307716AF7D4",
+                                               "output_size_bytes":  509399301,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-008",
+                      "deidentification_case_id":  "CASE-BATCH-023",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "WIN_20260504_09_55_57_Pro.mp4",
+                      "rendered_output_file_name":  "WIN_20260504_09_55_57_Pro.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/WIN_20260504_09_55_57_Pro.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-023/render-fast/WIN_20260504_09_55_57_Pro.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-023/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-023/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  3066.7716,
+                                               "output_duration_seconds":  2965.409267,
+                                               "output_frame_count":  177720,
+                                               "effective_removal_count":  4,
+                                               "continuity_segment_count":  4,
+                                               "output_sha256":  "6E5288335AB38E9722DBA89A448962ADA2E2126A907C594D466FDEB625DA4E6C",
+                                               "output_size_bytes":  1951525674,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-009",
+                      "deidentification_case_id":  "CASE-BATCH-026",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "WIN_20260518_09_29_51_Pro.mp4",
+                      "rendered_output_file_name":  "WIN_20260518_09_29_51_Pro.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/WIN_20260518_09_29_51_Pro.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-026/render-fast/WIN_20260518_09_29_51_Pro.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-026/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-026/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  3563.833133,
+                                               "output_duration_seconds":  3541.305133,
+                                               "output_frame_count":  212248,
+                                               "effective_removal_count":  1,
+                                               "continuity_segment_count":  2,
+                                               "output_sha256":  "C266F64B257F5CED2E7054D40C55075774796DE009CB875DCCBAE77F5A257F32",
+                                               "output_size_bytes":  2330622959,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  },
+                  {
+                      "annotation_case_id":  "OAUTHC-CHO-B03-010",
+                      "deidentification_case_id":  "CASE-BATCH-027",
+                      "procedure":  "Cholecystectomy",
+                      "original_file_name":  "WIN_20260525_10_01_51_Pro.mp4",
+                      "rendered_output_file_name":  "WIN_20260525_10_01_51_Pro.render-candidate.fast.mp4",
+                      "delivered_video_file":  "videos/WIN_20260525_10_01_51_Pro.mp4",
+                      "connection":  {
+                                         "rendered_output_relative_path":  "output/CASE-BATCH-027/render-fast/WIN_20260525_10_01_51_Pro.render-candidate.fast.mp4",
+                                         "render_manifest_relative_path":  "output/CASE-BATCH-027/render-fast/RENDER_MANIFEST.json",
+                                         "timeline_map_relative_path":  "output/CASE-BATCH-027/render-fast/timeline_map.json"
+                                     },
+                      "deidentification":  {
+                                               "method":  "reviewed out-of-body intervals; FFmpeg keyframe-aligned stream-copy render",
+                                               "audio_included":  false,
+                                               "source_duration_seconds":  1245.3325,
+                                               "output_duration_seconds":  1202.292167,
+                                               "output_frame_count":  72058,
+                                               "effective_removal_count":  2,
+                                               "continuity_segment_count":  3,
+                                               "output_sha256":  "00B9895B9532E877490037BA0FEF8D15F7644B4C1288E4205E3EACA1569EA5A7",
+                                               "output_size_bytes":  791274552,
+                                               "technical_validation":  "passed",
+                                               "human_output_review":  "pending"
+                                           },
+                      "phase_annotation_status":  "not_started"
+                  }
+              ],
+    "amendment":  {
+                      "date":  "2026-10-17",
+                      "reason":  "Removed three surgical cases already used in earlier annotation stages",
+                      "removed":  [
+                                      "20260505_221257.mp4",
+                                      "20260509_004627.mp4",
+                                      "20260519_215628.mp4"
+                                  ],
+                      "added":  [
+                                    "20260309_095521.mp4",
+                                    "20260316_091729.mp4",
+                                    "20260302_093157.mp4"
+                                ],
+                      "unused_valid_fallback":  "20260316_114514.mp4"
+                  }
+}
